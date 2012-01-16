@@ -3,6 +3,12 @@ You need atleast django (1.3) and PypeR (and R) in your PYTHONPATH.
 Django:
 https://docs.djangoproject.com/en/1.3/
 
+Download and setup django from the instructions on the site.
+You may need to run django-admin with --user argument if you don't have root 
+permissions. This will setup django into $HOME/.local/bin and then you need 
+to add following line into $HOME/.bashrc:
+export PATH=$PATH:$HOME/.local/bin
+
 PypeR:
 http://sourceforge.net/projects/rinpy/
 
