@@ -6,8 +6,8 @@ from django.conf.urls.defaults import patterns, include, url
 
 urlpatterns = patterns('',
     # Examples:
-    # url(r'^$', 'stemweb.views.home', name='home'),
-    # url(r'^stemweb/', include('stemweb.foo.urls')),
+    # url(r'^$', 'Stemweb.views.home', name='home'),
+    # url(r'^Stemweb/', include('Stemweb.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
