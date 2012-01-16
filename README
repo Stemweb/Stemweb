@@ -23,9 +23,11 @@ but it still needs pyper to be able to run the R code.
 To get GIT working follow these instructions:
 http://help.github.com/linux-set-up-git/
 
+Useful information about GIT commands: http://gitref.org/
+
 When you have GIT and have been added as collaborator
 to GITHUB project run command:
-> git clone git://github.com/assamite/Stemweb.git
+> git clone git://github.com/Stemweb/Stemweb.git
 
 This will clone master repository from github.com into /Stemweb/ folder.
 So if you want it to be in /foo/Stemweb, then run command in /foo. 
