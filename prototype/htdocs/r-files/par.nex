@@ -1,0 +1,12 @@
+begin data;
+	dimensions ntax = 7 nchar = 7;
+	format symbols = "ABCDEFGHIJKLMNOPQ" labels = left;
+	matrix
+p1	AAAAAB?
+p2	ABAAAA?
+p3	ABAAACA
+p4	AAAAAB?
+p5	ABAAAA?
+p6	ABABAA?
+p7	ABAAAC?;
+end;
