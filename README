@@ -9,3 +9,22 @@ http://sourceforge.net/projects/rinpy/
 Prototype folder contains very early prototype with no django, 
 but it still needs pyper to be able to run the R code.
  
+
+GIT workflow:
+
+-- Start working, get latest version from master (ie. from github.com) --
+> git pull
+
+-- Do your work
+
+-- Stop working, commit your work to your local repository, either --
+> git add 'files_you_have_been_working_with' 			# Commits only named files 
+> git commit -m 'commit_message_which_makes_some_sense'
+
+-- OR --
+> git commit -a -m 'message'    				# This commits all files.   
+
+-- HOX! Commit only commits to your local repository. So you need to push it to master
+-- repository (to github.com). Also remember to add some meaningful commit message. 
+-- Don't use -m "another commit".
+> git push 
