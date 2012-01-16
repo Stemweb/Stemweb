@@ -10,6 +10,22 @@ Prototype folder contains very early prototype with no django,
 but it still needs pyper to be able to run the R code.
  
 
+#############################################################
+##################### GIT INSTRUCTIONS ######################
+#############################################################
+
+To get GIT working follow these instructions:
+http://help.github.com/linux-set-up-git/
+
+When you have GIT and have been added as collaborator
+to GITHUB project run command:
+> git clone git://github.com/assamite/Stemweb.git
+
+This will clone master repository from github.com into /Stemweb/ folder.
+So if you want it to be in /foo/Stemweb, then run command in /foo. 
+Stemweb-folder will be created automatically. After this you are ready to
+start working with the project.
+
 GIT workflow:
 
 -- Start working, get latest version from master (ie. from github.com) --
