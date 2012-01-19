@@ -1,19 +1,41 @@
 #!/usr/bin/env python
 
+# The python scripts will return the string for print out in files
+# It does not creating files
+# It use the results from R program
+
+# The parameters it gets from R program include:
+# 'iterationrunres' : the result when iteration stops
+# 'itertime' : a vector store time for each iteration, for caculating average time per iter
+# 'bestruntmp': the run id with the best result when stop
+# 'bestlastruntmp': the run id with the best last result when stop
+# 'iter': The iteration id when stopping
+
+# treetonet(treedic): generate string for net file
+# treetomatrix(treedic): generate string for matrix file
+# treetodot(treedic): generate string for dot file (for plotting pdf)
+# writelog(iternow, itertime, iterationrunres, bestruntmp, bestlastruntmp): 
+# generate string for log file
+
 from pyper import *
 myR = R()
+# run R scripts
 myR.run('source("funf81.r")')
 myR.run('source("runf81.r")')
+# get results to python
 iterationrunres = myR.get('iterationrunres')
 itertime = myR.get('itertime')
 bestruntmp = myR.get('bestruntmp')
+bestlastruntmp = myR.get('bestlastruntmp')
+iternow = myR.get('iter')
+# pull out the values that are needed
 bestres = iterationrunres['bestres'][bestruntmp-1]
 besttree = bestres['MTreef81res']
-bestlastruntmp = myR.get('bestlastruntmp')
 bestlastres = iterationrunres['runres'][bestlastruntmp-1]
 bestlasttree = bestlastres['MTreef81res']
-iternow = myR.get('iter')
 
+
+# _______________the useful functions______________________________________________
 
 ######################################################################
 
@@ -29,8 +51,8 @@ def treetonet(treedic):
 	outstr = outstr.strip()
 	return (outstr)
 
-print (treetonet(treedic=besttree))
-print (treetonet(treedic=bestlasttree))
+#print (treetonet(treedic=besttree))
+#print (treetonet(treedic=bestlasttree))
 
 		
 #####################################################################
@@ -55,8 +77,8 @@ def treetomatrix(treedic):
 		outstr = outstr + '\n' + outstrtmp		
 	return (outstr)
 
-print (treetomatrix(treedic=besttree))
-print (treetomatrix(treedic=bestlasttree))
+#print (treetomatrix(treedic=besttree))
+#print (treetomatrix(treedic=bestlasttree))
 
 ###################################################################
 def treetodot(treedic):
@@ -114,7 +136,7 @@ def writelog(iternow, itertime, iterationrunres, bestruntmp, bestlastruntmp):
 		outstr = outstr + '\n\n'
 	return (outstr)
 
-print (writelog(iternow=iternow, itertime=itertime, iterationrunres=iterationrunres, bestruntmp=bestruntmp, bestlastruntmp=bestlastruntmp))
+#print (writelog(iternow=iternow, itertime=itertime, iterationrunres=iterationrunres, bestruntmp=bestruntmp, bestlastruntmp=bestlastruntmp))
 
 
 
