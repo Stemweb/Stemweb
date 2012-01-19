@@ -1,0 +1,54 @@
+You need atleast django (1.3) and PypeR (and R) in your PYTHONPATH.
+
+Django:
+https://docs.djangoproject.com/en/1.3/
+
+Download and setup django from the instructions on the site.
+You may need to run django-admin with --user argument if you don't have root 
+permissions. This will setup django into $HOME/.local/bin and then you need 
+to add following line into $HOME/.bashrc:
+export PATH=$PATH:$HOME/.local/bin
+
+PypeR:
+http://sourceforge.net/projects/rinpy/
+
+Prototype folder contains very early prototype with no django, 
+but it still needs pyper to be able to run the R code.
+ 
+
+#############################################################
+##################### GIT INSTRUCTIONS ######################
+#############################################################
+
+To get GIT working follow these instructions:
+http://help.github.com/linux-set-up-git/
+
+Useful information about GIT commands: http://gitref.org/
+
+When you have GIT and have been added as collaborator
+to GITHUB project run command:
+> git clone git://github.com/Stemweb/Stemweb.git
+
+This will clone master repository from github.com into /Stemweb/ folder.
+So if you want it to be in /foo/Stemweb, then run command in /foo. 
+Stemweb-folder will be created automatically. After this you are ready to
+start working with the project.
+
+GIT workflow:
+
+-- Start working, get latest version from master (ie. from github.com) --
+> git pull
+
+-- Do your work
+
+-- Stop working, commit your work to your local repository, either --
+> git add 'files_you_have_been_working_with'		# Commits only named files 
+> git commit -m 'commit_message_which_makes_some_sense'
+
+-- OR --
+> git commit -a -m 'message'   				# This commits all files.   
+
+-- HOX! Commit only commits to your local repository. So you need to push it to 
+-- master repository (to github.com). Also remember to add some meaningful commit 
+-- message. Don't use -m "another commit".
+> git push 
