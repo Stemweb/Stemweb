@@ -11,9 +11,9 @@ def checknex(infile):
 
 	isnex = 1
 
-	file = open(infile,'r')
-	nexin = file.read()
-	file.close()
+	f = open(infile,'r')
+	nexin = f.read()
+	f.close()
 	
 	nexin = nexin.strip()
 	nexin = nexin.split('\n')

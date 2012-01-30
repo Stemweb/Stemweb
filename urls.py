@@ -1,4 +1,5 @@
 from django.conf.urls.defaults import patterns, include, url
+import django_proto.views
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
@@ -6,7 +7,9 @@ from django.conf.urls.defaults import patterns, include, url
 
 urlpatterns = patterns('',
     # Examples:
-    # url(r'^$', 'Stemweb.views.home', name='home'),
+    url(r'^$', 'django_proto.views.home', name='home'),
+    # url(r'^django_proto/', include())
+    # url(r'^$', 'Stemweb.views.home', name='home')
     # url(r'^Stemweb/', include('Stemweb.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:

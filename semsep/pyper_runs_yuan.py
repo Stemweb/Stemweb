@@ -16,30 +16,30 @@ import os
 #
 def runsemf81(run_args = None):
   
-  if run_args is None:							# Stupid. Use properly.
-	print 'No arguments given for pyper_runs.runsemf81'
-	return
-	
-  # Probably could check that all running arguments are in there.
-  
-  r = R()										# Make instance of R.
-  
-  r.assign("irunmax", run_args['runmax'])		
-  r("irunmax = as.numeric(irunmax)")			# Change into numeric in R
-  print r("irunmax")
-  
-  r.assign("iitermax", run_args['itermax'])
-  r("iitermax = as.numeric(iitermax)")		# Change into numeric in R
-  print r("iitermax")
-  
-  r.assign("iinfile", run_args['infile'])		# Assign absolute path to infile
-  print r("iinfile")
+    if run_args is None:							# Stupid. Use properly.
+        print 'No arguments given for pyper_runs_yuan.runsemf81'
+        return
 
-  r("source('/home/slinkola/htdocs/r-files/allf81.r')")
+    # Probably could check that all running arguments are in there.
   
-  print r("runf81res <- runsemf81(iinfile, iitermax, irunmax)")	# Run runsemf81 function
-	
-  return
+    r = R()										# Make instance of R.
+  
+    r.assign("irunmax", run_args['runmax'])		
+    r("irunmax = as.numeric(irunmax)")			# Change into numeric in R
+    print r("irunmax")
+  
+    r.assign("iitermax", run_args['itermax'])
+    r("iitermax = as.numeric(iitermax)")		# Change into numeric in R
+    print r("iitermax")
+  
+    r.assign("iinfile", run_args['infile'])		# Assign absolute path to infile
+    print r("iinfile")
+
+    r("source('/home/slinkola/htdocs/r-files/allf81.r')")
+  
+    print r("runf81res <- runsemf81(iinfile, iitermax, irunmax)")	# Run runsemf81 function
+    
+    return
   
   
 	
