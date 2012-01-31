@@ -120,7 +120,9 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     
     # Own apps
-    'django_proto'
+    'django_proto',
+    'local',
+    'semsep'
 )
 
 # A sample logging configuration. The only tangible logging

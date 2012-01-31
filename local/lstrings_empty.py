@@ -26,23 +26,33 @@ db_engine = 'django.db.backends.'
 # Name of your db. In sqlite3 this is absolute path for
 # your database-file.
 db_name = ''
-
-# Your db user. Not needed in sqlite3
-db_user = ''
-
-# Your db password. Not needed in sqlite3
-db_pwd = ''
-
-# Host, leave blank if db is on local computer.
-db_host = ''
-
-# Port to your db. Can be left blank
-db_port = ''
+db_user = ''            # Your db user. Not needed in sqlite3
+db_pwd = ''             # Your db password. Not needed in sqlite3
+db_host = ''            # Host, leave blank if db is on local computer.
+db_port = ''            # Port to your db. Can be left blank
 
 # name of your ROOT_URLCONF. Needs to be in here, because
 # of some inconsisties in package naming on linux vs. mac.
 # This is most likely stemweb.urls or Stemweb.urls.
 root_urls = ''
 
+# Change prefixes to match your own folder structure.
+template_dirs = ( 
+    "/'prefix'/Stemweb/django_proto/templates"
+)
+
 # Veeerry secret key.
 secret_key = ''
+
+###################################################################
+#                STEMWEB'S OWN LOCAL STRINGS                      #
+###################################################################
+
+# Absolute path for default upload folder. Most likely
+# some where out of the Stemweb-folder. Folder structure
+# in this folder's childs' is: 
+#    /'input_filename'/Input_files.id/
+#    /'input_filename'/Input_files.id/'file'
+#    /'input_filename'/Input_files.id/R_runs.id
+#    /'input_filename'/Input_files.id/R_runs.id/'runs results'
+default_upload_path = r'/Stemweb/uploads/'

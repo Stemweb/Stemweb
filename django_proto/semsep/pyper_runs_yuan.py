@@ -16,28 +16,22 @@ from pyper import R		# Import PypeR -- Python based R-script interpreter
 #
 def runsemf81(run_args = None):
   
-    if run_args is None:							# Stupid. Use properly.
+    if run_args is None:						# Stupid. Use properly.
         print 'No arguments given for pyper_runs_yuan.runsemf81'
         return
 
     # Probably could check that all running arguments are in there.
   
     r = R()										# Make instance of R.
-  
+    r.assign("iinfile", run_args['infile'])     # Assign all arguments
     r.assign("irunmax", run_args['runmax'])		
-    r("irunmax = as.numeric(irunmax)")			# Change into numeric in R
-    r("irunmax")
-  
     r.assign("iitermax", run_args['itermax'])
-    r("iitermax = as.numeric(iitermax)")		# Change into numeric in R
-    r("iitermax")
-  
-    r.assign("iinfile", run_args['infile'])		# Assign absolute path to infile
-    r("iinfile")
-
+    r("irunmax = as.numeric(irunmax)")          # Change integers into numeric
+    r("iitermax = as.numeric(iitermax)")		
+    
     r("source('/Users/slinkola/STAM/Stemweb/django_proto/semsep/allf81.r')")
   
-    print r("/results <- runf81(iinfile, iitermax, irunmax)")	# Run runsemf81 function
+    print r("%s <- runf81(iinfile, iitermax, irunmax)", run_args['outfolder'])	# Run runsemf81 function
     
     return 
   

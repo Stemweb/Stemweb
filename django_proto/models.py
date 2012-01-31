@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# All database models (ie. tables). Django creates
+# these tables with "python manage.py syncdb" -command.
+
 from django.db import models
-from django.contrib.auth.models import User
+#from django.contrib.auth.models import User
 from django.utils.encoding import smart_str
 
-#
+# Basic table for all input files to any of the scripts.   
 class Input_files(models.Model):
       
     #user = models.ForeignKey(User)                  # User who uploaded the file
@@ -16,7 +19,9 @@ class Input_files(models.Model):
     
     def __str__(self):
         return smart_str('%s %s', self.name, self.time)
-    
+  
+# Basic table to manage different runs of the R-scripts 
+# with different input files.  
 class R_runs(models.Model):
     
     #time = models.DateTimeField(auto_now = True)    # Starting time of the run

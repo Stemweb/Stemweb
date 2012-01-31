@@ -7,8 +7,10 @@
 import os
 import string
 import random
+from Stemweb import local
 
-default_upload_path = r'/Users/slinkola/STAM/upload/'
+# Locally relevant default path for uploaded files. 
+default_upload_path = local.lstrings.default_upload_path
 
 # 	Semiunique ID generator -- copypaste code.
 #
@@ -33,8 +35,8 @@ def id_generator(size=8, chars=string.ascii_uppercase + string.digits):
 #
 #	params:
 #		upfile - Uploaded file. This is NOT a default python file object.
-#				 Instead it's djangos 'file'. That has different 
-#				 properties as upfile.name, etc.
+#				 Instead it's djangos 'UploadedFileInMemory'-object.
+#      file_id - ID of the db-table Input_files' entry
 #
 #	Returns path to upfile after it has been uploaded to it's builded
 #	unique path. This is absolute path to file in harddrive.
@@ -54,9 +56,8 @@ def build_filepath(upfile, file_id):
         except:
             print 'Couldn\'t create dir %s' % (uniquepath)
             return -1
-      
-    
-    uniquepath = os.path.join(uniquepath, '%s' % (file_id))    # Build unique dir.          
+        
+    uniquepath = os.path.join(uniquepath, '%s' % (file_id))          
     if not os.path.exists(uniquepath):                # Create dir if it doesn't exist.
         try:                                          # (It really shouldn't)
             os.mkdir(uniquepath)                                    
@@ -67,12 +68,12 @@ def build_filepath(upfile, file_id):
     return uniquepath
 
 #    Builds unique path for run's result folder.
-#    
-#    Builds unique path for input file's run.
 #
 #    params:
-#       runfile - Absolute path to file to run.
-#
+#       runfile - Absolute path to file to use as input_file
+#                 for a run.
+#        run_id - ID of the R_runs db-table's entry
+# 
 #    Returns path to run's storage folder if it has been
 #    succesfully created. Otherwise returns -1
 def build_runpath(runfile, run_id): 
@@ -97,8 +98,8 @@ def dir_size(dir_path):
     folder = dir_path
     folder_size = 0
     for (path, dirs, files) in os.walk(folder):
-        for file in files:
-            filename = os.path.join(path, file)
+        for f in files:
+            filename = os.path.join(path, f)
             folder_size += os.path.getsize(filename)
   
     return (folder_size/(1024*1024.0))

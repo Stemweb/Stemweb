@@ -21,7 +21,14 @@
 				<input type="submit" value="Upload" />
 			</form>
 		</div>
-		
-		
+		<p>
+		Already uploaded files:
+			<div class="files">
+				{% for f in files %}
+					<a href="/runparams/{{ f.id }}/">{{ f.time }} {{ f.name }}</a><br>
+				{% endfor %}
+			</div>
+		</p>
+				
 	</body>
 </html>

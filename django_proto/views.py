@@ -14,8 +14,9 @@ from semsep import pyper_runs_yuan
 # Default view of the prototype.
 def home(request): 
            
+    files = models.Input_files.objects.all()
     form = Upload_file()
-    c = RequestContext(request, {'form': form})
+    c = RequestContext(request, {'form': form, 'files': files})
     t = loader.get_template('home.html')  
     return HttpResponse(t.render(c))
     
@@ -70,7 +71,7 @@ def run(request, file_id):
                 run_args = dict({'itermaxin' : r_run.itermax, 
                                  'runmax'    : r_run.runmax, 
                                  'infile'    : r_run.input_file.path, 
-                                 'out_folder': r_run.res_folder})
+                                 'outfolder' : r_run.res_folder})
                 pyper_runs_yuan.runsemf81(run_args)
                 return HttpResponseRedirect('/results/%s/%s' % (r_run.input_file.id, r_run.id))
             else:
