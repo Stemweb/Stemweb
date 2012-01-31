@@ -1,0 +1,27 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+	<head>
+    	<title> Stemweb - home </title>
+    	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  	</head>
+	
+	<body>
+		<!-- Some introductory text or banner !-->
+		<div class="intro">
+			This is the home page of django prototype for STAM's web project <br>
+			Stemweb. Feel free to try uploading your .nex files and run them <br>
+			or run already uploaded files. <br>
+			<br>
+		</div>
+		
+		<div class="upload">
+			<form action="/upload" enctype="multipart/form-data" method="post">
+				{% csrf_token %}
+				{{ form.as_p }}
+				<input type="submit" value="Upload" />
+			</form>
+		</div>
+		
+		
+	</body>
+</html>

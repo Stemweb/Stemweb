@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from pyper import *		# Import PypeR -- Python based R-script interpreter 
-import os
+from pyper import R		# Import PypeR -- Python based R-script interpreter 
+#import os
 
 #	Execute runsemf81.r with given arguments
 #
@@ -35,14 +35,11 @@ def runsemf81(run_args = None):
     r.assign("iinfile", run_args['infile'])		# Assign absolute path to infile
     r("iinfile")
 
-    r("source('/Users/slinkola/STAM/Stemweb/semsep/allf81.r')")
+    r("source('/Users/slinkola/STAM/Stemweb/django_proto/semsep/allf81.r')")
   
-    r("%s <- runsemf81(iinfile, iitermax, irunmax)" % (run_args['out_folder']))	# Run runsemf81 function
+    print r("/results <- runf81(iinfile, iitermax, irunmax)")	# Run runsemf81 function
     
     return 
   
   
-
-  
-	
   

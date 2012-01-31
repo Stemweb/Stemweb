@@ -1,5 +1,6 @@
 from django.conf.urls.defaults import patterns, include, url
-import django_proto.views
+#from django.views.generic.simple import direct_to_template
+#import django_proto.views
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
@@ -7,7 +8,13 @@ import django_proto.views
 
 urlpatterns = patterns('',
     # Examples:
-    url(r'^$', 'django_proto.views.home', name='home'),
+    url(r'^home', 'django_proto.views.home'),
+    url(r'^upload', 'django_proto.views.upload'),
+    url(r'^runparams/(?P<file_id>\d+)/$', 'django_proto.views.runparams'),
+    url(r'^run/(?P<file_id>\d+)/$', 'django_proto.views.run'),
+    url(r'^results/(?P<file_id>\d+)/(?P<run_id>\d+)/$', 'django_proto.views.results'),
+    url(r'^server_error', 'django_proto.views.server_error')
+    #url(r'^run/(?P<id>\d+)/$', direct_to_template, {'template': 'run.html'}),
     # url(r'^django_proto/', include())
     # url(r'^$', 'Stemweb.views.home', name='home')
     # url(r'^Stemweb/', include('Stemweb.foo.urls')),

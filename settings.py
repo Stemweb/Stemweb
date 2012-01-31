@@ -1,5 +1,5 @@
 # Import locally configured settings 
-import lstrings
+from local import lstrings
 
 # Django settings for stemweb project.
 
@@ -105,11 +105,7 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = lstrings.root_urls
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
+TEMPLATE_DIRS = lstrings.template_dirs
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -122,6 +118,9 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    
+    # Own apps
+    'django_proto'
 )
 
 # A sample logging configuration. The only tangible logging
