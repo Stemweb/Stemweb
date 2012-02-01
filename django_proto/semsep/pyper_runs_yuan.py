@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from pyper import R		# Import PypeR -- Python based R-script interpreter 
+from Stemweb.local import lstrings
 #import os
 
 #	Execute runsemf81.r with given arguments
@@ -29,9 +30,9 @@ def runsemf81(run_args = None):
     r("irunmax = as.numeric(irunmax)")          # Change integers into numeric
     r("iitermax = as.numeric(iitermax)")		
     
-    r("source('/Users/slinkola/STAM/Stemweb/django_proto/semsep/allf81.r')")
+    r("source('%s/django_proto/semsep/allf81.r')" % (lstrings.project_path))
   
-    print r("%s <- runf81(iinfile, iitermax, irunmax)", run_args['outfolder'])	# Run runsemf81 function
+    print r("%s <- runf81(iinfile, iitermax, irunmax)" % (run_args['outfolder']))	# Run runsemf81 function
     
     return 
   

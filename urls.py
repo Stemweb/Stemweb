@@ -7,7 +7,7 @@ from django.conf.urls.defaults import patterns, include, url
 # admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Examples:
+    url(r'^', 'django_proto.views.home'),
     url(r'^home', 'django_proto.views.home'),
     url(r'^upload', 'django_proto.views.upload'),
     url(r'^runparams/(?P<file_id>\d+)/$', 'django_proto.views.runparams'),

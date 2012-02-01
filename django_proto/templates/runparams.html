@@ -1,26 +1,18 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-	<head>
-    	<title> Stemweb - run {{input_file.name}}  </title>
-    	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  	</head>
-	
-	<body>
-		<!-- Some introductory text or banner !-->
-		<div class="intro">
-			Run {{ input_file.name }} / {{ input_file.id }} with given parameters. 
-			<br>
-			Absolute path to file: {{ input_file.path }}
-			<br>
-		</div>
+{% extends "home.html" %}
+
+{% block title %} 
+	Stemweb - run {{input_file.name}}  
+{% endblock %}
+  
+{% block intro %}
+	Run file {{ input_file.name }} with id {{ input_file.id }} in Input_files with given parameters. <br>
+	Absolute path to file: {{ input_file.path }} <br>
+{% endblock %}
 		
-		<div class="parameters">
-			<form action="/run/{{input_file.id}}/" enctype="multipart/form-data" method="post">
-				{% csrf_token %}
-				{{ form.as_p }}
-				<input type="submit" value="Run" />
-			</form>
-		</div>
-		
-	</body>
-</html>
+{% block form %}
+	<form action="/run/{{input_file.id}}/" enctype="multipart/form-data" method="post">
+		{% csrf_token %}
+		{{ form.as_p }}
+		<input type="submit" value="Run" />
+	</form>
+{% endblock %}

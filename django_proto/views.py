@@ -45,7 +45,7 @@ def upload(request):
 # Handles running of one file.
 def runparams(request, file_id):
                  
-    #last_runs = models.R_runs.objects.get(input_file = file_id)
+    #last_runs = models.Script_runs.objects.get(input_file = file_id)
     form = Run_file()
     input_file = models.Input_files.objects.get(id = file_id)
     context = dict({'input_file': input_file, 'form': form})
@@ -60,20 +60,20 @@ def run(request, file_id):
             imax = form.cleaned_data['itermaxin']
             rmax = form.cleaned_data['runmax']
             ifile = models.Input_files.objects.get(id = file_id)
-            r_run = models.R_runs(input_file = ifile, itermax = imax, runmax = rmax, res_folder = '', res_pic = '')
-            r_run.save()
-            fpath = r_run.input_file.path
-            run_id = r_run.id
+            srun = models.Script_runs(input_file = ifile, itermax = imax, runmax = rmax, res_folder = '', res_pic = '')
+            srun.save()
+            fpath = srun.input_file.path
+            run_id = srun.id
             fpath = file_operations.build_runpath(fpath, run_id)
             if (fpath is not -1): 
-                r_run.res_folder = fpath
-                r_run.save()
-                run_args = dict({'itermaxin' : r_run.itermax, 
-                                 'runmax'    : r_run.runmax, 
-                                 'infile'    : r_run.input_file.path, 
-                                 'outfolder' : r_run.res_folder})
+                srun.res_folder = fpath
+                srun.save()
+                run_args = dict({'itermaxin' : srun.itermax, 
+                                 'runmax'    : srun.runmax, 
+                                 'infile'    : srun.input_file.path, 
+                                 'outfolder' : srun.res_folder})
                 pyper_runs_yuan.runsemf81(run_args)
-                return HttpResponseRedirect('/results/%s/%s' % (r_run.input_file.id, r_run.id))
+                return HttpResponseRedirect('/results/%s/%s' % (srun.input_file.id, srun.id))
             else:
                 return HttpResponseRedirect('/server_error')
         else: 
@@ -83,7 +83,7 @@ def run(request, file_id):
     
 def results(request, file_id, run_id):
     input_file = models.Input_files.objects.get(id = file_id)
-    r_run = models.R_runs.objects.get(id = run_id)
+    r_run = models.Script_runs.objects.get(id = run_id)
     context = dict({'input_file': input_file, 'r_run': r_run})
     c = RequestContext(request, context)
     return render_to_response('results.html', c)

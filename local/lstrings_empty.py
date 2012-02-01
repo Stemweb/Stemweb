@@ -36,9 +36,12 @@ db_port = ''            # Port to your db. Can be left blank
 # This is most likely stemweb.urls or Stemweb.urls.
 root_urls = ''
 
+# Absolute path to your local project folder. 
+project_path = r''
+
 # Change prefixes to match your own folder structure.
 template_dirs = ( 
-    "/'prefix'/Stemweb/django_proto/templates"
+    "%s/django_proto/templates" % (project_path)
 )
 
 # Veeerry secret key.
@@ -55,4 +58,4 @@ secret_key = ''
 #    /'input_filename'/Input_files.id/'file'
 #    /'input_filename'/Input_files.id/R_runs.id
 #    /'input_filename'/Input_files.id/R_runs.id/'runs results'
-default_upload_path = r'/Stemweb/uploads/'
+default_upload_path = r'/STAM/Stemweb/uploads'
