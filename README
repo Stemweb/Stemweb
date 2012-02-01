@@ -6,11 +6,13 @@ Project's aim is to make a web application for running stemmatology
 scripts on server and showing results for user immeadiately or emailing
 them after the scripts have ran on server.
 
-If you want to know more about this project please contact STAM.
+If you want to know more about this project please contact STAM:
+
+http://cosco.hiit.fi/Projects/STAM/
 
 For setting up project to run locally look for project's wikipage:
 
 https://github.com/Stemweb/Stemweb/wiki/Setting-up-development-environment-for-Stemweb
 
-We don't advise to open the project for internet community yet, since 
+We don't advise to open the project for internet, since
 no security concerns are taken into account yet.
