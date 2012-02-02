@@ -743,7 +743,7 @@ runf81 <- function(filein, runmax, itermax, approximation=0)
 
 
 
-runf81res = runf81(filein = "test.nex", itermax = 20, runmax = 2)
+#runf81res = runf81(filein = "test.nex", itermax = 20, runmax = 2)
 
 
 

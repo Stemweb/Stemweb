@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-from pyper import *
-import os
+
 
 # The python scripts will return the string for print out in files
 # It does not creating files
@@ -183,16 +182,6 @@ def writefile(Rres, outfolder):
 	os.system('chmod 755 ' + outfolder+'/besttree.dot')
 	os.system('chmod 755 ' + outfolder+'/bestlasttree.dot')
 	os.system('chmod 755 ' + outfolder)
-
-
-# run R scripts
-runR = R()
-runR.run('source("allf81.r")')
-# get results to python
-f81res = runR.get('runf81res')
-# write file
-writefile(Rres=f81res, outfolder = '/f81res')
-
 
 
 

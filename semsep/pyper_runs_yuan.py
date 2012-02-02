@@ -3,6 +3,7 @@
 
 from pyper import *		# Import PypeR -- Python based R-script interpreter 
 import os
+import saveres.py
 
 #	Execute runsemf81.r with given arguments
 #
@@ -15,7 +16,7 @@ import os
 #					'outfolder' - path to desirable output folder 
 #
 def runsemf81(run_args = None):
-  
+
     if run_args is None:							# Stupid. Use properly.
         print 'No arguments given for pyper_runs_yuan.runsemf81'
         return
@@ -28,17 +29,21 @@ def runsemf81(run_args = None):
     r("irunmax = as.numeric(irunmax)")			# Change into numeric in R
     r("irunmax")
   
-    r.assign("iitermax", run_args['itermax'])
+    r.assign("iitermax", run_args['itermaxin'])
     r("iitermax = as.numeric(iitermax)")		# Change into numeric in R
     r("iitermax")
   
     r.assign("iinfile", run_args['infile'])		# Assign absolute path to infile
     r("iinfile")
 
-    r("source('/Users/slinkola/STAM/Stemweb/semsep/allf81.r')")
-  
-    r("%s <- runsemf81(iinfile, iitermax, irunmax)" % (run_args['out_folder']))	# Run runsemf81 function
-    
+    r("source('/Stemweb/semsep/allf81.r')")
+
+
+    r("%s <- runsemf81(iinfile, iitermax, irunmax)")	# Run runsemf81 function
+    #get results to python
+    f81res = r.get('runf81res')
+    writefile(Rres=f81res, outfolder = run_args['outfolder'])
+
     return 
   
   
