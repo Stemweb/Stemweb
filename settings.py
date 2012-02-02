@@ -122,7 +122,7 @@ INSTALLED_APPS = (
     # Own apps
     'django_proto',
     'local',
-    'semsep'
+    #'semsep'
 )
 
 # A sample logging configuration. The only tangible logging

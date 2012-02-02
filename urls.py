@@ -1,13 +1,12 @@
 from django.conf.urls.defaults import patterns, include, url
 #from django.views.generic.simple import direct_to_template
-#import django_proto.views
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
 # admin.autodiscover()
 
 urlpatterns = patterns('',
-    url(r'^', 'django_proto.views.home'),
+    #url(r'^', 'django_proto.views.home'),
     url(r'^home', 'django_proto.views.home'),
     url(r'^upload', 'django_proto.views.upload'),
     url(r'^runparams/(?P<file_id>\d+)/$', 'django_proto.views.runparams'),

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-
 # The python scripts will return the string for print out in files
 # It does not creating files
 # It use the results from R program
@@ -140,13 +139,13 @@ def writefile(Rres, outfolder):
 	# net file
 	outfolder = outfolder.strip('/')
 	if not os.path.exists(outfolder):
-    		os.makedirs(outfolder)
+		os.makedirs(outfolder)
 		os.system('chmod 777 ' + outfolder)
 
 	def writestr(outfolder, filename, outstr):
-		file = open(outfolder+filename,'w')
-		file.write(outstr)
-		file.close()		
+		f = open(outfolder+filename,'w')
+		f.write(outstr)
+		f.close()		
 
 	# net file
 	bestnet = treetonet(treedic=besttree)

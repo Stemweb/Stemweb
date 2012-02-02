@@ -42,11 +42,11 @@ def id_generator(size=8, chars=string.ascii_uppercase + string.digits):
 #	unique path. This is absolute path to file in harddrive.
 def build_filepath(upfile, file_id): 
     
-    if os.path.exists(default_upload_path):		# Debug code to keep foldersize relevantly low 
-        dir_mb = dir_size(default_upload_path)	# while developing software.
-        print '%s size %s mb' % (default_upload_path, dir_mb)
-        if dir_mb > 100:		  
-            os.rmdir(default_upload_path, 0o777)		
+#    if os.path.exists(default_upload_path):		# Debug code to keep foldersize relevantly low 
+#        dir_mb = dir_size(default_upload_path)	# while developing software.
+#        print '%s size %s mb' % (default_upload_path, dir_mb)
+#        if dir_mb > 100:		  
+#            os.rmdir(default_upload_path, 0o777)		
       
     fname = os.path.basename(upfile)			# Strip possible other information from filename.    
     uniquepath = os.path.join(default_upload_path, fname)         

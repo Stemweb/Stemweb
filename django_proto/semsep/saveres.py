@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-from pyper import *
-import os
+
 
 # The python scripts will return the string for print out in files
 # It does not creating files
@@ -125,6 +124,7 @@ def writelog(iternow, itertime, iterationrunres, bestruntmp, bestlastruntmp):
 
 
 def writefile(Rres, outfolder):
+	import os
 	iterationrunres = Rres['iterationrunres']
 	itertime = Rres['itertime']
 	bestruntmp = Rres['bestruntmp']
@@ -141,7 +141,7 @@ def writefile(Rres, outfolder):
 	# net file
 	outfolder = outfolder.strip('/')
 	if not os.path.exists(outfolder):
-    		os.makedirs(outfolder)
+		os.makedirs(outfolder)
 		os.system('chmod 777 ' + outfolder)
 
 	def writestr(outfolder, filename, outstr):
@@ -183,16 +183,6 @@ def writefile(Rres, outfolder):
 	os.system('chmod 755 ' + outfolder+'/besttree.dot')
 	os.system('chmod 755 ' + outfolder+'/bestlasttree.dot')
 	os.system('chmod 755 ' + outfolder)
-
-
-# run R scripts
-runR = R()
-runR.run('source("allf81.r")')
-# get results to python
-f81res = runR.get('runf81res')
-# write file
-writefile(Rres=f81res, outfolder = '/f81res')
-
 
 
 

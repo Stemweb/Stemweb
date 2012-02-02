@@ -11,6 +11,7 @@ import models
 import file_operations
 from semsep import pyper_runs_yuan
 
+
 # Default view of the prototype.
 def home(request): 
            
@@ -34,9 +35,9 @@ def upload(request):
                 input_file.path = fpath
                 fpath = file_operations.handle_uploaded_file(f, fpath)      # Upload the file created path
                 input_file.save()
-                return HttpResponseRedirect('runparams/%s' % (input_file.id))    # And redirect to run that file
+                return HttpResponseRedirect('/runparams/%s' % (input_file.id))    # And redirect to run that file
             else:
-                return HttpResponseRedirect('server_error')
+                return HttpResponseRedirect('/server_error')
                 
     else:
         form = Upload_file()
@@ -72,7 +73,7 @@ def run(request, file_id):
                                  'runmax'    : srun.runmax, 
                                  'infile'    : srun.input_file.path, 
                                  'outfolder' : srun.res_folder})
-                pyper_runs_yuan.runsemf81(run_args)
+                #pyper_runs_yuan.runsemf81(run_args)
                 return HttpResponseRedirect('/results/%s/%s' % (srun.input_file.id, srun.id))
             else:
                 return HttpResponseRedirect('/server_error')

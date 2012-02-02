@@ -1,4 +1,4 @@
-rm(list=ls())
+#rm(list=ls())
 
 runf81 <- function(filein, runmax, itermax, approximation=0)
 {
