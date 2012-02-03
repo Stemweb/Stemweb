@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+
 # The python scripts will return the string for print out in files
 # It does not creating files
 # It use the results from R program
@@ -46,7 +47,7 @@ def treetomatrix(treedic):
 	nodelist = treedic['NodeList']
 
 	nodenumber = len(nodelist)
-	nodelist.sort(reverse=True)
+	nodelist.sort()
 	outstr = str(nodenumber)
 	for nodei in nodelist:
 		outstr = outstr + '\n' + nodei
@@ -123,6 +124,7 @@ def writelog(iternow, itertime, iterationrunres, bestruntmp, bestlastruntmp):
 
 
 def writefile(Rres, outfolder):
+	import os
 	iterationrunres = Rres['iterationrunres']
 	itertime = Rres['itertime']
 	bestruntmp = Rres['bestruntmp']
@@ -143,9 +145,9 @@ def writefile(Rres, outfolder):
 		os.system('chmod 777 ' + outfolder)
 
 	def writestr(outfolder, filename, outstr):
-		f = open(outfolder+filename,'w')
-		f.write(outstr)
-		f.close()		
+		file = open(outfolder+filename,'w')
+		file.write(outstr)
+		file.close()		
 
 	# net file
 	bestnet = treetonet(treedic=besttree)

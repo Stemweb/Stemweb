@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from pyper import *		# Import PypeR -- Python based R-script interpreter 
-import os
-import saveres.py
+from pyper import R		# Import PypeR -- Python based R-script interpreter 
+
+import saveres
+#from Stemweb import local
+
+project_path = r'/home/fs/zou/Stemweb/django_proto'
 
 #	Execute runsemf81.r with given arguments
 #
@@ -27,27 +30,32 @@ def runsemf81(run_args = None):
   
     r.assign("irunmax", run_args['runmax'])		
     r("irunmax = as.numeric(irunmax)")			# Change into numeric in R
-    r("irunmax")
+    print r("irunmax")
   
     r.assign("iitermax", run_args['itermaxin'])
     r("iitermax = as.numeric(iitermax)")		# Change into numeric in R
-    r("iitermax")
+    print r("iitermax")
   
     r.assign("iinfile", run_args['infile'])		# Assign absolute path to infile
-    r("iinfile")
+    print r("iinfile")
 
-    r("source('/Stemweb/semsep/allf81.r')")
+    print r("source('%s/semsep/allf81.r')" % (project_path))
 
 
-    r("%s <- runsemf81(iinfile, iitermax, irunmax)")	# Run runsemf81 function
+    print r("runf81res <- runf81(iinfile, irunmax, iitermax)")	# Run runsemf81 function
     #get results to python
     f81res = r.get('runf81res')
-    writefile(Rres=f81res, outfolder = run_args['outfolder'])
+    saveres.writefile(Rres=f81res, outfolder = run_args['outfolder'])
 
     return 
-  
-  
 
-  
-	
+
+
+# Small main program to test code
+run_args = dict({'itermaxin' : 10, 
+                 'runmax'    : 2, 
+                 'infile'    : 'test.nex', 
+                 'outfolder' : '/temp'})
+runsemf81(run_args)
+
   
