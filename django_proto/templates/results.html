@@ -5,12 +5,15 @@
 {% endblock %}
 
 {% block intro %}
-	Results for file {{ input_file.name }} / {{ input_file.id }} with parameters. 
+	Results for file {{ srun.input_file.name }} / {{ srun.input_file.id }} <br>
+	Iterations: {{ srun.itermax }} <br>
+	Simultaneous runs: {{ srun.runmax }} <br>
 	<br>
-	Absolute path to file: {{ input_file.path }}
+	Local absolute path to input file: {{ srun.input_file.path }}
 	<br><br>
 {% endblock %}
 		
 {% block content %}
-	<img src="{{ script_runs.res_pic }}">
+	Resulting graph for this run was:<br>
+	<img src="{{ srun.res_pic }}">
 {% endblock %}			

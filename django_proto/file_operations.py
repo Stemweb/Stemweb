@@ -65,7 +65,7 @@ def build_filepath(upfile, file_id):
             print 'Couldn\'t create dir %s' % (uniquepath)
             return -1
 
-    return uniquepath
+    return os.path.join(uniquepath, fname)
 
 #    Builds unique path for run's result folder.
 #
@@ -76,8 +76,8 @@ def build_filepath(upfile, file_id):
 # 
 #    Returns path to run's storage folder if it has been
 #    succesfully created. Otherwise returns -1
-def build_runpath(runfile, run_id): 
-    path = os.path.dirname(runfile)           
+def build_runpath(runfile, run_id):  
+    path = os.path.dirname(runfile)          
     uniquepath = os.path.join(path, '%s' % (run_id))                  
     if not os.path.exists(uniquepath):                # Create dir if it doesn't exist.
         try:                                          # (It really shouldn't)
@@ -105,7 +105,7 @@ def dir_size(dir_path):
     return (folder_size/(1024*1024.0))
   
 def handle_uploaded_file(f, fpath):
-    destination = open('%s/%s' % (fpath, f.name), 'wb+')
+    destination = open(fpath, 'w')
     for chunk in f.chunks():
         destination.write(chunk)
     destination.close()

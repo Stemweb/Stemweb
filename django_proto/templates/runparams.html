@@ -16,3 +16,10 @@
 		<input type="submit" value="Run" />
 	</form>
 {% endblock %}
+
+{% block files %}
+	All runs with this file:<br><br>
+	{% for run in all_runs %}
+		<a href="/results/{{ run.input_file.id }}/{{ run.id }}">{{ run.time }} iterations: {{ run.itermax }} simultaneous runs: {{ run.runmax }}</a><br>
+	{% endfor %}
+{% endblock %}

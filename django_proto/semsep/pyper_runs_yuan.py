@@ -4,9 +4,12 @@
 from pyper import R		# Import PypeR -- Python based R-script interpreter 
 
 import saveres
-#from Stemweb import local
+from Stemweb import local
 
-project_path = r'/Users/slinkola/STAM/Stemweb'
+# If you want to use this from command line without
+# django's PYTHONPATH uncomment this and change folder 
+# to your local project's path.
+#project_path = r'/Users/slinkola/STAM/Stemweb/'
 
 #	Execute runsemf81.r with given arguments
 #
@@ -30,16 +33,16 @@ def runsemf81(run_args = None):
   
     r.assign("irunmax", run_args['runmax'])		
     r("irunmax = as.numeric(irunmax)")			# Change into numeric in R
-    print r("irunmax")
+    #print r("irunmax")
   
     r.assign("iitermax", run_args['itermaxin'])
     r("iitermax = as.numeric(iitermax)")		# Change into numeric in R
-    print r("iitermax")
+    #print r("iitermax")
   
     r.assign("iinfile", run_args['infile'])		# Assign absolute path to infile
-    print r("iinfile")
+    #print r("iinfile")
 
-    print r("source('%s/semsep/allf81.r')" % (project_path))
+    #print r("source('%s/semsep/allf81.r')" % (local.lstrings.project_path))
 
 
     print r("runf81res <- runf81(iinfile, irunmax, iitermax)")	# Run runsemf81 function
@@ -55,7 +58,7 @@ def runsemf81(run_args = None):
 run_args = dict({'itermaxin' : 10, 
                  'runmax'    : 2, 
                  'infile'    : 'test.nex', 
-                 'outfolder' : '/Users/slinkola/STAM/upload/'})
+                 'outfolder' : '/temp'})
 runsemf81(run_args)
 
   

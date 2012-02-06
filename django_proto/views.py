@@ -9,8 +9,8 @@ from forms import Upload_file
 from forms import Run_file
 import models
 import file_operations
-from semsep import pyper_runs_yuan
-
+import os
+import pyper_runs_yuan
 
 # Default view of the prototype.
 def home(request): 
@@ -49,7 +49,8 @@ def runparams(request, file_id):
     #last_runs = models.Script_runs.objects.get(input_file = file_id)
     form = Run_file()
     input_file = models.Input_files.objects.get(id = file_id)
-    context = dict({'input_file': input_file, 'form': form})
+    all_runs = models.Script_runs.objects.filter(input_file__exact = input_file)
+    context = dict({'input_file': input_file, 'form': form, 'all_runs': all_runs})
     c = RequestContext(request, context)
     return render_to_response('runparams.html', c)
 
@@ -66,15 +67,31 @@ def run(request, file_id):
             fpath = srun.input_file.path
             run_id = srun.id
             fpath = file_operations.build_runpath(fpath, run_id)
+            logpath = os.path.join(fpath, 'run_log.txt')
+            log_file = open(logpath, 'w')
+            log_file.writelines(['Input file path: ', srun.input_file.path, '\n', 
+                                 'Iteration max: ', srun.itermax, '\n',
+                                 'Simultaneous runs: ', srun.runmax, '\n',
+                                 'Run path: ', fpath, '\n'])
+            log_file.close()
             if (fpath is not -1): 
                 srun.res_folder = fpath
                 srun.save()
-                run_args = dict({'itermaxin' : srun.itermax, 
-                                 'runmax'    : srun.runmax, 
+                run_args = dict({'itermaxin' : int(srun.itermax), 
+                                 'runmax'    : int(srun.runmax), 
                                  'infile'    : srun.input_file.path, 
                                  'outfolder' : srun.res_folder})
-                #pyper_runs_yuan.runsemf81(run_args)
-                return HttpResponseRedirect('/results/%s/%s' % (srun.input_file.id, srun.id))
+                ret_val = pyper_runs_yuan.runsemf81(run_args)
+                log_file = open(logpath, 'a')
+                log_file.write('runsemf81 return value was: %d' % (ret_val))
+                log_file.close()
+                if ret_val == -1:
+                    srun.delete();
+                    HttpResponseRedirect('/script_failure') 
+                else:    
+                    srun.res_pic = os.path.join(srun.res_folder, 'besttree.png')
+                    srun.save()
+                    return HttpResponseRedirect('/results/%s/%s' % (srun.input_file.id, srun.id))
             else:
                 return HttpResponseRedirect('/server_error')
         else: 
@@ -84,11 +101,13 @@ def run(request, file_id):
     
 def results(request, file_id, run_id):
     input_file = models.Input_files.objects.get(id = file_id)
-    r_run = models.Script_runs.objects.get(id = run_id)
-    context = dict({'input_file': input_file, 'r_run': r_run})
+    srun = models.Script_runs.objects.get(id = run_id)
+    context = dict({'input_file': input_file, 'srun': srun})
     c = RequestContext(request, context)
     return render_to_response('results.html', c)
 
 def server_error(request):
     return HttpResponse('Internal Server Error: We are sorry, but we could not handle your request.')
     
+def script_failure(request):
+    return HttpResponse('Script\'s run was failure for unknown reason.')    

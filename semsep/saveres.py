@@ -145,9 +145,9 @@ def writefile(Rres, outfolder):
 		os.system('chmod 777 ' + outfolder)
 
 	def writestr(outfolder, filename, outstr):
-		file = open(outfolder+filename,'w')
-		file.write(outstr)
-		file.close()		
+		f = open(outfolder+filename,'w')
+		f.write(outstr)
+		f.close()		
 
 	# net file
 	bestnet = treetonet(treedic=besttree)

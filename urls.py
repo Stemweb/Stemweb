@@ -12,7 +12,8 @@ urlpatterns = patterns('',
     url(r'^runparams/(?P<file_id>\d+)/$', 'django_proto.views.runparams'),
     url(r'^run/(?P<file_id>\d+)/$', 'django_proto.views.run'),
     url(r'^results/(?P<file_id>\d+)/(?P<run_id>\d+)/$', 'django_proto.views.results'),
-    url(r'^server_error', 'django_proto.views.server_error')
+    url(r'^server_error', 'django_proto.views.server_error'),
+    url(r'^script_failure', 'django_proto.views.script_failure'),
     #url(r'^run/(?P<id>\d+)/$', direct_to_template, {'template': 'run.html'}),
     # url(r'^django_proto/', include())
     # url(r'^$', 'Stemweb.views.home', name='home')
