@@ -1,20 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from pyper import *		# Import PypeR -- Python based R-script interpreter 
+#from pyper import *		# Import PypeR -- Python based R-script interpreter 
 from rpy2 import robjects
-
 import saveres
+import os
+import time
 
-if __name__ == "__main__":
-    # If you want to use this from command line without
-    # django's PYTHONPATH then change this to your local 
-    # project's path.
-    project_path = r'/Users/slinkola/STAM/Stemweb/'
-    #.main()
-else:
-    from Stemweb import local
-    project_path = local.lstrings.project_path
+
 
 
 
@@ -73,12 +66,22 @@ def runsemf81(run_args = None):
     return 1
 
 # Small main program to test code
-os.mkdir('temp')
-run_args = dict({'itermaxin' : 10, 
+def main():
+    os.mkdir('temp')
+    run_args = dict({'itermaxin' : 10, 
                      'runmax'    : 2, 
                      'infile'    : 'test.nex', 
                      'outfolder' : './temp'})
-runsemf81(run_args)
+    runsemf81(run_args)
 
+if __name__ == "__main__":
+    # If you want to use this from command line without
+    # django's PYTHONPATH then change this to your local 
+    # project's path.
+    project_path = r'/Users/slinkola/STAM/Stemweb/'
+    main()
+else:
+    from Stemweb import local
+    project_path = local.lstrings.project_path
 
   
