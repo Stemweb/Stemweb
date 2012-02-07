@@ -52,7 +52,10 @@ def runsemf81(run_args = None):
     #get results to python
     run_log = open(log_path, 'a')    
     run_log.writelines('***** f81res in python format ***** \n')
-    f81resPython = robjects.default_ri2py(f81res)
+    #f81resPython = robjects.default_ri2py(f81res)
+    f81resPython = f81res
+    print ('*********')
+    print (type(f81resPython))
     log_entry = '%s' % (f81resPython)
     run_log.writelines([log_entry, '\n'])    
     run_log.close()
@@ -61,14 +64,14 @@ def runsemf81(run_args = None):
     # the same. 
     
     # This doesn't work atm.
-    saveres.writefile(Rres=f81resPython, outfolder = run_args['outfolder'])
+    saveres.writefile(Rres=f81res, outfolder = run_args['outfolder'])
 
     return 1
 
 # Small main program to test code
 def main():
     os.mkdir('temp')
-    run_args = dict({'itermaxin' : 10, 
+    run_args = dict({'itermaxin' : 5, 
                      'runmax'    : 2, 
                      'infile'    : 'test.nex', 
                      'outfolder' : './temp'})
@@ -78,7 +81,7 @@ if __name__ == "__main__":
     # If you want to use this from command line without
     # django's PYTHONPATH then change this to your local 
     # project's path.
-    project_path = r'/Users/slinkola/STAM/Stemweb/'
+    project_path = r'/home/fs/zou/Stemweb/'
     main()
 else:
     from Stemweb import local

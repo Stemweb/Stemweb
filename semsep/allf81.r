@@ -553,12 +553,14 @@ runf81 <- function(filein, runmax, itermax, approximation=0)
 				qscorevectortmp = runrestmp[[run]][["qscorevector"]]
 				if (which.max(qscorevectortmp)==length(qscorevectortmp))
 				{
+
 					bestrestmp = list()
 					bestrestmp[["iter"]] = iter
 
 					bestrestmp[["qscore"]] = runrestmp[[run]][["qscorevector"]][[iter]]
 					bestrestmp[["MTreef81res"]] = runrestmp[[run]][["MTreef81res"]]
 					bestres[[run]] = bestrestmp
+
 				}
 				
 				# record time for each iteration		
@@ -649,6 +651,7 @@ runf81 <- function(filein, runmax, itermax, approximation=0)
 			bestscoretmp = c(bestscoretmp, bestrestmp[[run]][["qscore"]])
 		}
 		bestruntmp = which.max(bestscoretmp)
+
 		invisible (bestruntmp)
 	}
 
@@ -677,6 +680,7 @@ runf81 <- function(filein, runmax, itermax, approximation=0)
 			qscorevectortmp = iterationrunres[["runres"]][[run]][["qscorevector"]]
 			qscorevectortmp = c(qscorevectortmp, bestrestmp[[bestruntmp]] [["qscore"]])
 			iterationrunres[["runres"]][[run]][["qscorevector"]] = qscorevectortmp
+
 			#### update "runres"--"qscorevector"
 		}
 		invisible (iterationrunres)
@@ -691,7 +695,7 @@ runf81 <- function(filein, runmax, itermax, approximation=0)
 	# 1 initiation
 	initiationrunres <- initiationrun(runmax=runmax, itermax=itermax,
 	filein=filein, approximation=approximation)
-
+	
 	#_________________________________________________________________________
 	# 2 The first stages for all runs
 	iterationrunres = initiationrunres
@@ -717,8 +721,8 @@ runf81 <- function(filein, runmax, itermax, approximation=0)
 	bestruntmp <- findbestrun(iterationrunres=iterationrunres, runmax=runmax)	
 	iterationrunres <- updateres(runmax=runmax, bestruntmp=bestruntmp, iterationrunres=iterationrunres)
 
-	# start from iter+1
-	itertmp = iter+1
+	# start from iter+2
+	itertmp = iter+2
 	for (iter in c(itertmp:itermax))
 	{
 		iterationrunres <- iterationrun(runmax=runmax, approximation=approximation, 
@@ -737,7 +741,7 @@ runf81 <- function(filein, runmax, itermax, approximation=0)
 
 	runf81res = list("iterationrunres"=iterationrunres, "bestruntmp"=bestruntmp,
 	"bestlastruntmp"=bestlastruntmp, "iter"=iter, 'itertime'=itertime)
-	
+
 	invisible (runf81res)
 }
 
