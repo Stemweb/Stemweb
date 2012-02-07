@@ -70,7 +70,9 @@ def runsemf81(run_args = None):
 
 # Small main program to test code
 def main():
-    os.mkdir('temp')
+    if not os.path.exists('temp'):
+        os.mkdir('temp')
+        
     run_args = dict({'itermaxin' : 5, 
                      'runmax'    : 2, 
                      'infile'    : 'test.nex', 
@@ -81,7 +83,7 @@ if __name__ == "__main__":
     # If you want to use this from command line without
     # django's PYTHONPATH then change this to your local 
     # project's path.
-    project_path = r'/home/fs/zou/Stemweb/'
+    project_path = r'/Users/slinkola/STAM/Stemweb/'
     main()
 else:
     from Stemweb import local

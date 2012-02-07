@@ -10,10 +10,13 @@
 	Simultaneous runs: {{ srun.runmax }} <br>
 	<br>
 	Local absolute path to input file: {{ srun.input_file.path }}
-	<br><br>
+	<br>
+	<br>
 {% endblock %}
 		
 {% block content %}
+	Resulting graphs url: {{ MEDIA_URL }}{{ srun.input_file.name }}/{{srun.input_file.id}}/{{ srun.id }}/{{srun.res_pic}} <br>
 	Resulting graph for this run was:<br>
-	<img src="{{ srun.res_pic }}">
+	<img src="{{ MEDIA_URL }}{{ srun.input_file.name }}/{{srun.input_file.id}}/{{ srun.id }}/{{srun.res_pic}}" 
+		 alt="{{ MEDIA_URL }}{{ srun.input_file.name }}/{{srun.input_file.id}}/{{ srun.id }}/{{srun.res_pic}}" />
 {% endblock %}			

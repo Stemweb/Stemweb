@@ -83,13 +83,14 @@ def run(request, file_id):
                                  'outfolder' : srun.res_folder})
                 ret_val = pyper_runs_yuan.runsemf81(run_args)
                 log_file = open(logpath, 'a')
-                log_file.write('runsemf81 return value was: %d' % (ret_val))
+                log_file.write('Output folder is: %s \n' % (srun.res_folder))
+                log_file.write('runsemf81 return value was: %d \n' % (ret_val))
                 log_file.close()
                 if ret_val == -1:
                     srun.delete();
                     HttpResponseRedirect('/script_failure') 
                 else:    
-                    srun.res_pic = os.path.join(srun.res_folder, 'besttree.png')
+                    srun.res_pic = 'besttree.png'
                     srun.save()
                     return HttpResponseRedirect('/results/%s/%s' % (srun.input_file.id, srun.id))
             else:
@@ -111,3 +112,5 @@ def server_error(request):
     
 def script_failure(request):
     return HttpResponse('Script\'s run was failure for unknown reason.')    
+    
+    

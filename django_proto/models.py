@@ -50,7 +50,7 @@ class Script_runs(models.Model):
     itermax = models.IntegerField(blank = True)     # Iteration max of the run
     runmax = models.IntegerField(blank = True)      # How many simultaneous runs
     res_folder = models.CharField(max_length = 300) # Absolute path to result folder
-    res_pic = models.CharField(max_length = 300)    # Absolute path to resulting .png
+    res_pic = models.CharField(max_length = 300)    # name of the resulting .png
     
     def __str__(self):
         return smart_str('%s %s i=%s r=%s', self.input_file.name, self.time, self.itermax, self.runmax)

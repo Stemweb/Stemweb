@@ -156,52 +156,73 @@ def writefile(Rres, outfolder):
 
 	# save results
 	# net file
-	outfolder = outfolder.strip('/')
+	#outfolder = outfolder.strip('/')
 	if not os.path.exists(outfolder):
 		os.makedirs(outfolder)
-		os.system('chmod 777 ' + outfolder)
+		os.chmod(outfolder, 0777)
 
 	def writestr(outfolder, filename, outstr):
-		f = open(outfolder+filename,'w')
-		f.write(outstr)
-		f.close()		
+		file_path = os.path.join(outfolder,filename)
+		
+		try: 
+			f = open(file_path,'w')
+			os.chmod(file_path, 0777)
+			f.write(outstr)
+			f.close()
+			os.chmod(file_path, 0755)
+		except:
+			f = open(os.path.join(outfolder, 'saveres_log'), 'a')
+			f.write('Could not write into file: %s \n' % (file_path))
+			f.close()
+		
+	def makegraph(outfolder, filename):
+		basename = os.path.basename(filename)
+		file_path = os.path.join(outfolder, filename)
+		os.chmod(file_path, 0777)
+		png_name = basename + '.png'
 
 	# net file
 	bestnet = treetonet(treedic=besttree)
 	bestlastnet = treetonet(treedic=bestlasttree)
-	writestr(outfolder,'/besttree.net',bestnet)
-	writestr(outfolder,'/bestlasttree.net',bestlastnet)
+	writestr(outfolder,'besttree.net',bestnet)
+	writestr(outfolder,'bestlasttree.net',bestlastnet)
 
 
 	# matrix file
 	bestmatrix = treetomatrix(treedic=besttree)
 	bestlastmatrix = treetomatrix(treedic=bestlasttree)
-	writestr(outfolder,'/besttree.matrix',bestmatrix)
-	writestr(outfolder,'/bestlasttree.matrix',bestlastmatrix)
+	writestr(outfolder,'besttree.matrix',bestmatrix)
+	writestr(outfolder,'bestlasttree.matrix',bestlastmatrix)
 
 	# dot file
 	bestdot = treetodot(treedic=besttree)
 	bestlastdot = treetodot(treedic=bestlasttree)
-	writestr(outfolder,'/besttree.dot',bestdot)
-	writestr(outfolder,'/bestlasttree.dot',bestlastdot)
+	writestr(outfolder,'besttree.dot',bestdot)
+	writestr(outfolder,'bestlasttree.dot',bestlastdot)
 
 	# log file
 	logstr = writelog(iternow=iternow, itertime=itertime, iterationrunres=iterationrunres, bestruntmp=bestruntmp, bestlastruntmp=bestlastruntmp)
-	writestr(outfolder,'/log',logstr)
+	writestr(outfolder,'log',logstr)
 	# plot dot file to png
 
-	os.system('chmod 777 ' + outfolder+'/besttree.dot')
-	os.system('chmod 777 ' + outfolder+'/bestlasttree.dot')
-	os.system('neato -Tpng -Gstart=rand ' + outfolder + '/besttree.dot > ' + outfolder+ '/besttree.png')
-	os.system('neato -Tpng -Gstart=rand ' + outfolder + '/bestlasttree.dot > ' + outfolder+ '/bestlasttree.png')
+	bt_path = os.path.join(outfolder, 'besttree.dot')
+	blt_path = os.path.join(outfolder, 'bestlasttree.dot')
+	os.chmod(bt_path, 0777)
+	os.chmod(blt_path, 0777)
+	btpng_path = os.path.join(outfolder, 'besttree.png')
+	bltpng_path = os.path.join(outfolder, 'bestlasttree.png')
+	#os.chmod(btpng_path, 0777)
+	#os.chmod(bltpng_path, 0777)
+	os.system('neato -Tpng -Gstart=rand ' + bt_path + '> ' + btpng_path)
+	os.system('neato -Tpng -Gstart=rand ' + blt_path + '> ' + bltpng_path)
 
 
 	# close permissions
-	os.system('chmod 755 ' + outfolder+'/besttree.dot')
-	os.system('chmod 755 ' + outfolder+'/bestlasttree.dot')
-	os.system('chmod 755 ' + outfolder)
-
-
+	os.chmod(bt_path, 0755)
+	os.chmod(blt_path, 0755)
+	os.chmod(btpng_path, 0755)
+	os.chmod(bltpng_path, 0755)
+	os.chmod(outfolder, 0755)
 
 
 
