@@ -11,7 +11,7 @@ import time
 
 
 
-#	Execute runsemf81.r with given arguments
+#	Execute f81.r with given arguments
 #
 #	params:
 #		run_args -  dictionary containing following
@@ -21,10 +21,10 @@ import time
 #					'inputfile' - path to .nex file used to run function
 #					'outfolder' - path to desirable output folder 
 #
-def runsemf81(run_args = None):
+def f81(run_args = None):
 
     if run_args is None:							# Stupid. Use properly.
-        print 'No arguments given for pyper_runs_yuan.runsemf81'
+        print 'No arguments given for pyper_runs_yuan.f81'
         return
 
     # Open log file to outfolder for possible debug.
@@ -75,7 +75,7 @@ def main():
                      'runmax'    : 2, 
                      'infile'    : 'test.nex', 
                      'outfolder' : './temp'})
-    runsemf81(run_args)
+    f81(run_args)
 
 if __name__ == "__main__":
     # If you want to use this from command line without

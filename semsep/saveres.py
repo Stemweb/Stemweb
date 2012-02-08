@@ -8,8 +8,8 @@
 # The parameters it gets from R program include:
 # 'iterationrunres' : the result when iteration stops
 # 'itertime' : a vector store time for each iteration, for caculating average time per iter
-# 'bestruntmp': the run id with the best result when stop
-# 'bestlastruntmp': the run id with the best last result when stop
+# 'bestruntmp': the run_script id with the best result when stop
+# 'bestlastruntmp': the run_script id with the best last result when stop
 # 'iter': The iteration id when stopping
 
 # treetonet(treedic): generate string for net file
@@ -96,11 +96,11 @@ def treetodot(treedic):
 def writelog(iternow, itertime, iterationrunres, bestruntmp, bestlastruntmp):
 	# use append to existing log files
 	# the iteration when stopping
-	# run number
+	# run_script number
 	# average time for one iteration
-	# qscore for each run
-	# best tree & qscore for each run
-	# last tree & qscore for each run
+	# qscore for each run_script
+	# best tree & qscore for each run_script
+	# last tree & qscore for each run_script
 	# best tree & qscore
 	# last tree & qscore
 	#... indexing ???
@@ -114,21 +114,21 @@ def writelog(iternow, itertime, iterationrunres, bestruntmp, bestlastruntmp):
 	temp = temp.rx2(bestlastruntmp[0])
 	temp = temp.rx2('qscorevector')
 	bestlastqscore = temp[len(temp)-1]
-	outstr = 'The run stop at iteration: ' + str(iternow) + '\n'
+	outstr = 'The run_script stop at iteration: ' + str(iternow) + '\n'
 	outstr = outstr + 'There are ' + str(runmax) + ' runs at the same time\n'
 	outstr = outstr + 'The average time for each iteration is ' + str(itertimeaverage) + ' seconds \n'
-	outstr = outstr + 'The best tree is generation by run ' + str(bestruntmp[0]) + ' with qscore ' + str(bestqscore[0]) + '\n'
-	outstr = outstr + 'The best tree in the last iteration is generation by run ' + str(bestlastruntmp[0]) + ' with qscore ' + str(bestlastqscore) + '\n\n'
-	for run in range(runmax):
-		outstr = outstr + '****** Here is the information for run '+str(run+1) + '******\n'
+	outstr = outstr + 'The best tree is generation by run_script ' + str(bestruntmp[0]) + ' with qscore ' + str(bestqscore[0]) + '\n'
+	outstr = outstr + 'The best tree in the last iteration is generation by run_script ' + str(bestlastruntmp[0]) + ' with qscore ' + str(bestlastqscore) + '\n\n'
+	for run_script in range(runmax):
+		outstr = outstr + '****** Here is the information for run_script '+str(run_script+1) + '******\n'
 		temp = iterationrunres.rx2('bestres')
-		temp = temp.rx2(run+1)
+		temp = temp.rx2(run_script+1)
 		temp = temp.rx2('qscore')
-		outstr = outstr + 'The best qscore of ' + str(run+1) + ' is ' + str(temp[0]) + '\n'
+		outstr = outstr + 'The best qscore of ' + str(run_script+1) + ' is ' + str(temp[0]) + '\n'
 		temp = iterationrunres.rx2('runres')
-		temp = temp.rx2(run+1)
+		temp = temp.rx2(run_script+1)
 		temp = temp.rx2('qscorevector')
-		outstr = outstr + 'The last qscore of ' + str(run+1) + ' is ' + str(temp[len(temp)-1]) + '\n'
+		outstr = outstr + 'The last qscore of ' + str(run_script+1) + ' is ' + str(temp[len(temp)-1]) + '\n'
 		outstr = outstr + 'The qscore of each iteration is:\n'
 		for tempi in temp: 
 			outstr = outstr + str(tempi) + ' '

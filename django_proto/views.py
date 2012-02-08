@@ -10,7 +10,7 @@ from forms import Run_file
 import models
 import file_operations
 import os
-import pyper_runs_yuan
+import rpy2_scripts
 
 # Default view of the prototype.
 def home(request): 
@@ -22,7 +22,7 @@ def home(request):
     return HttpResponse(t.render(c))
     
 # Handles upload form. If gets POST-data will upload and save file 
-# in server and then redirect to view to run that file.
+# in server and then redirect to view to run_script that file.
 def upload(request):
     if request.method == 'POST':
         form = Upload_file(request.POST, request.FILES)
@@ -35,7 +35,7 @@ def upload(request):
                 input_file.path = fpath
                 fpath = file_operations.handle_uploaded_file(f, fpath)      # Upload the file created path
                 input_file.save()
-                return HttpResponseRedirect('/runparams/%s' % (input_file.id))    # And redirect to run that file
+                return HttpResponseRedirect('/runparams/%s' % (input_file.id))    # And redirect to run_script that file
             else:
                 return HttpResponseRedirect('/server_error')
                 
@@ -54,7 +54,7 @@ def runparams(request, file_id):
     c = RequestContext(request, context)
     return render_to_response('runparams.html', c)
 
-def run(request, file_id):
+def run_script(request, file_id):
     
     if request.method == 'POST':
         form = Run_file(request.POST)
@@ -81,18 +81,10 @@ def run(request, file_id):
                                  'runmax'    : int(srun.runmax), 
                                  'infile'    : srun.input_file.path, 
                                  'outfolder' : srun.res_folder})
-                ret_val = pyper_runs_yuan.runsemf81(run_args)
-                log_file = open(logpath, 'a')
-                log_file.write('Output folder is: %s \n' % (srun.res_folder))
-                log_file.write('runsemf81 return value was: %d \n' % (ret_val))
-                log_file.close()
-                if ret_val == -1:
-                    srun.delete();
-                    HttpResponseRedirect('/script_failure') 
-                else:    
-                    srun.res_pic = 'besttree.png'
-                    srun.save()
-                    return HttpResponseRedirect('/results/%s/%s' % (srun.input_file.id, srun.id))
+                rpy2_scripts.f81(run_args)
+                srun.res_pic = 'besttree.png'
+                srun.save()
+                return HttpResponseRedirect('/results/%s/%s' % (srun.input_file.id, srun.id))
             else:
                 return HttpResponseRedirect('/server_error')
         else: 
