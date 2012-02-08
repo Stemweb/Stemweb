@@ -18,13 +18,13 @@ import os
 #
 def f81(run_args = None):
 
-    if run_args is None:							# Stupid. Use properly.
+    if run_args is None:                            # Stupid. Use properly.
         print 'No arguments given for pyper_runs_yuan.f81'
         return
 
     # Probably could check that all running arguments are in there.
   
-    R = robjects.r									# Singleton instance of R
+    R = robjects.r                                  # Singleton instance of R
     source = r'%s/semsep/allf81.r' % (project_path) # Define source
     R.source(source)                            
     
