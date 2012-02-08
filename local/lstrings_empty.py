@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# First copy this file as lstring.py then
-# add information of your own local database and 
+# First copy this file as lstring.py (into same folder) 
+# then add information of your own local database and 
 # other settings here.
  
 # These are locally relevant database and other settings
-# strings from settings.py. These need to be in the same 
-# folder as settings.py.
+# strings from settings.py. 
 
 # IMPORTANT: DO NOT COMMIT lstrings.py INTO REPOSITORY
 # NOR DO NOT REMOVE lstring.py FROM .gitignore IN ANY
@@ -34,12 +33,11 @@ db_port = ''            # Port to your db. Can be left blank
 # name of your ROOT_URLCONF. Needs to be in here, because
 # of some inconsisties in package naming on linux vs. mac.
 # This is most likely stemweb.urls or Stemweb.urls.
-root_urls = ''
+root_urls = 'Stemweb.urls'
 
 # Absolute path to your local project folder. 
 project_path = r''
 
-# Change prefixes to match your own folder structure.
 template_dirs = ( 
     "%s/django_proto/templates" % (project_path)
 )
@@ -58,4 +56,4 @@ secret_key = ''
 #    /'input_filename'/Input_files.id/'file'
 #    /'input_filename'/Input_files.id/R_runs.id
 #    /'input_filename'/Input_files.id/R_runs.id/'runs results'
-default_upload_path = r'/STAM/Stemweb/uploads'
+default_upload_path = r''
