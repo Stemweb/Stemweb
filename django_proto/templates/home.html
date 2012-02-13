@@ -1,44 +1,38 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-	<head>
-    	<title>
-    		{% block title %} 
-    			Stemweb - home 
-    		{% endblock %}
-    	</title>
-    	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  	</head>
-	
-	<body>
-		<!-- Some introductory text or banner !-->
-		<div class="intro">
-			{% block intro %}
-			This is the home page of django prototype for STAM's web project <br>
-			Stemweb. Feel free to try uploading your .nex files and run them <br>
-			or run already uploaded files. <br>
-			<br>
-			{% endblock %}
-		</div>
-		
-		{% block content %}
-		<div class="form">
-			{% block form %}
-			<form action="/upload" enctype="multipart/form-data" method="post">
-				{% csrf_token %}
-				{{ form.as_p }}
-				<input type="submit" value="Upload" />
-			</form>
-			{% endblock %}
-		</div>	
-		<div class="files">
-			{% block files %}
-				Already uploaded files:<br><br>
-				{% for f in files %}
-					<a href="/runparams/{{ f.id }}/">{{ f.time }} {{ f.name }}</a><br>
-				{% endfor %}
-			{% endblock %}
-		</div>
+{% extends "layout_proto.html" %}
+
+{% block title %} 
+	Stemweb - home 
+{% endblock %}
+
+{% block main_content %}
+	{# Some introductory text. #}
+	<div class="intro">
+		{% block intro %}
+		This is the home page of django prototype for STAM's web project 
+		Stemweb. Feel free to try uploading your .nex files and run them
+		or run already uploaded files. <br>
+		<br>
 		{% endblock %}
-				
-	</body>
-</html>
+	</div>
+	
+	{% block content %}
+	<div class="form">
+		{% block form %}
+		<form action="/upload" enctype="multipart/form-data" method="post">
+			{% csrf_token %}
+			{{ form.as_p }}
+			<input type="submit" value="Upload" />
+		</form>
+		{% endblock %}
+	</div>	
+	<div class="files">
+		{% block files %}
+			Already uploaded files:<br><br>
+			{% for f in files %}
+				<a href="/runparams/{{ f.id }}/">{{ f.time }} {{ f.name }}</a><br>
+			{% endfor %}
+		{% endblock %}
+	</div>
+	{% endblock %}
+
+{% endblock %}			
