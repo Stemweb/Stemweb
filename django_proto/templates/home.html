@@ -24,8 +24,9 @@
 	
 		<div class="intro">
 			{% block intro %}
+			<h1>Home</h1>
 			<p>
-			This is the home page of <a href="http://cosco.hiit.fi/Projects/STAM/">STAM's</a> web project Stemweb (workname).
+			This is <a href="http://cosco.hiit.fi/Projects/STAM/">STAM's</a> web project Stemweb (workname).
 			</p>
 			<p>
 			Project's aim is to help people to run stemmatology algorithms for their own datasets without tedious
@@ -38,7 +39,7 @@
 			{% endblock %}
 		</div>
 		
-		<div class="form">
+		<div class="upload_form">
 			{% block form %}
 			<form action="/upload" enctype="multipart/form-data" method="post">
 				{% csrf_token %}

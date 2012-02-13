@@ -1,3 +1,4 @@
+/* GENERAL SETTINGS */
 html
 {
 	height:100%; 
@@ -17,6 +18,36 @@ body
 	height: 100%;
 	overflow:hidden;
 }
+
+h1
+{
+	text-align: left;
+	padding-left: 20px;
+	font-size: 1.5em;
+	font-family: Verdana;
+	font-variant: small-caps;
+}
+
+a
+{
+	text-decoration: none;
+	color: #48B0B0;
+}
+
+a:visited
+{
+	text-decoration: none;
+	color: #186666;
+}
+
+a:hover
+{
+	text-decoration: none;
+	color: #8FE3DC;
+	
+}
+	
+
 
 /* BANNER AT THE TOP OF THE SITE */
 div#main_banner_and_menu_padding
@@ -194,8 +225,6 @@ div#footer
 	z-index: 100;
 }
 
-
-
 div#footer_padding
 {
 
@@ -203,4 +232,18 @@ div#footer_padding
 	height: 50px;
 	max-height: 50px;
 	width: 100%;
+}
+
+/* HOME SITE*/
+div.intro 
+{
+	padding-left: 10px;
+	padding-right: 100px;
+}
+
+div.upload_form
+{
+	padding-top: 15px;
+	padding-left: 25px;
+	
 }
