@@ -15,7 +15,7 @@ class Script_types(models.Model):
     running_program = models.CharField(max_length = 100)# Program to run this script type.
     
     def __str__(self):
-        return smart_str('%s %s', self.name, self.running_program)
+        return smart_str('%s %s' % (self.name, self.running_program))
    
  
 # Table for all different scripts.
@@ -26,7 +26,7 @@ class Scripts(models.Model):
     path = models.CharField(max_length=200)         # Absolute path to this scripts file.
     
     def __str__(self):
-        return smart_str('%s / %s / %s', self.name, self.script_type.name, self.time)
+        return smart_str('%s / %s / %s' % (self.name, self.script_type.name, self.time))
 
 # Basic table for all input files to any of the scripts.   
 class Input_files(models.Model):
@@ -38,7 +38,7 @@ class Input_files(models.Model):
     path = models.CharField(max_length = 300)       # Absolute file path to this file
     
     def __str__(self):
-        return smart_str('%s %s', self.name, self.time)
+        return smart_str('%s %s' % (self.name, self.time))
   
 # Basic table to manage different runs of the scripts 
 # with different input files.  
@@ -53,7 +53,7 @@ class Script_runs(models.Model):
     res_pic = models.CharField(max_length = 300)    # name of the resulting .png
     
     def __str__(self):
-        return smart_str('%s %s i=%s r=%s', self.input_file.name, self.time, self.itermax, self.runmax)
+        return smart_str('%s %s i=%s r=%s' % (self.input_file.name, self.time, self.itermax, self.runmax))
 
    
 

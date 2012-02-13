@@ -177,7 +177,7 @@ div#main_content
 
 div#subpage_index
 {
-	width: 30%;
+	width: 25%;
 	display: block;
 	overflow: auto;
 	float: left;
@@ -249,7 +249,7 @@ div#footer_padding
 	width: 100%;
 }
 
-/* HOME SITE*/
+/* HOME.HTML */
 div.intro 
 {
 	padding-left: 10px;
@@ -260,6 +260,13 @@ div.upload_form
 {
 	padding-top: 15px;
 	padding-left: 25px;
+	
+}
+
+p.no_files
+{
+	padding-left: 30px;
+	font-style: italic;
 	
 }
 

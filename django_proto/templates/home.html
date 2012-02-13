@@ -6,29 +6,37 @@
 {% block main_content %}
 
 	<div id="subpage_index">
-	{% block subpage_index_title %}
-		<h1>Uploaded files</h1>
-	{% endblock%}
+	{% block subpage_index %}
 	
-		{% block subpage_index_table %}
-		<table id="subpage_index_table">
-			<tr>
-			<td class="subpage_index_header">Time</td>
-			<td class="subpage_index_header">Name</td>
-		</tr>
-		
-		
-			{% for f in files %}
-				<tr><td>{{ f.time|date:"d.m.y H:i" }}</td><td><a href="/runparams/{{ f.id }}/">{{ f.name }}</a></td></tr>
-			{% endfor %}
-		</table>
-		{% endblock %}
-		
+		{% block subpage_index_title %}
+		<h1>Uploaded files</h1>
+		{% endblock%}
+	
+		{% if files|length == 0 %}
+			<p class="no_files">No uploaded files.</p>
+		{% else %}
+			
+			{% block subpage_index_table %}
+			<table id="subpage_index_table">
+				<tr>
+					<td class="subpage_index_header">Time</td>
+					<td class="subpage_index_header">Name</td>
+				</tr>
+			
+				{% for f in files %}
+					<tr><td>{{ f.time|date:"d.m.y H:i" }}</td><td><a href="/runparams/{{ f.id }}/">{{ f.name }}</a></td></tr>
+				{% endfor %}
+			</table>
+			{% endblock %}
+		{% endif %}
+			
 		<p class="development_note">
 		I was thinking to use this left-hand div as news section. Uploaded files will be in
-		user's own 'Files'-tab later. There will be option to keep files opened to
-		'public', 'group' or 'private' (or atleast if it can be done easily enough).
+		user's own 'Files'-tab later. There will be option to keep files open to
+		'public', 'group' or 'private' when you upload them first time 
+		(or atleast if it can be done easily enough).
 		</p>
+	{% endblock %}
 	</div>
 
 	<div id="subpage_content">
@@ -46,7 +54,7 @@
 			</p>
 			<p>
 			Try the algorithm with your own .nex files or run one of the already uploaded files.
-			Please be sure that your file is in the right <a href=#>format</a>.
+			Please be sure that your file is in the right <a href=#>format</a> (deadlink).
 			</p>
 			{% endblock %}
 		</div>

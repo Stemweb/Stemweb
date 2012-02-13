@@ -4,12 +4,8 @@
 	Stemweb - results for {{input_file.name}}
 {% endblock %}
 
-{% block subpage_index_title %}
+{% block subpage_index %}
 	<h1>Some info maybe</h1>
-{% endblock %}
-
-{% block subpage_index_table %}
-
 {% endblock %}
 
 {% block subpage_content %}
@@ -22,14 +18,12 @@
 	<img src="{{ MEDIA_URL }}{{ srun.input_file.name }}/{{srun.input_file.id}}/{{ srun.id }}/{{srun.res_pic}}" 
 		 alt="{{ MEDIA_URL }}{{ srun.input_file.name }}/{{srun.input_file.id}}/{{ srun.id }}/{{srun.res_pic}}" />
 	
-	<p>
+	<p class="development_note">
 	Some debug info:<br>
 	Results for file {{ srun.input_file.name }} / {{ srun.input_file.id }} <br>
 	Iterations: {{ srun.itermax }} <br>
 	Simultaneous runs: {{ srun.runmax }} <br>
-	<br>
-	Local absolute path to input file: {{ srun.input_file.path }}
-	
+	Local absolute path to input file: {{ srun.input_file.path }}<br>	
 	Resulting graphs url: {{ MEDIA_URL }}{{ srun.input_file.name }}/{{srun.input_file.id}}/{{ srun.id }}/{{srun.res_pic}} <br>
 	</p>
 	

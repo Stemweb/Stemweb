@@ -4,28 +4,28 @@
 	Stemweb - run parameters {{input_file.name}}  
 {% endblock %}
 
-{% block subpage_index_title %}
+{% block subpage_index %}
 	<h1>Previous runs</h1>
-{% endblock%}
 
-{% block subpage_index_table %}
-	<table id="subpage_index_table">
-		<tr>
-			<td class="subpage_index_header">Time</td>
-			<td class="subpage_index_header">Iter</td>
-			<td class="subpage_index_header">Runs</td>
-		</tr>
-		
-	{% for run in all_runs %}
-		
+	{% if all_runs|length == 0 %}
+		<p class="no_files">No runs for this file.</p>
+	{% else %}
+		<table id="subpage_index_table">
 			<tr>
-				<td><a href="/results/{{ run.input_file.id }}/{{ run.id }}">{% if run.time %}{{ run.time|date:"d.m.y H:i" }}{% endif %}</a></td>
-				<td>{{ run.itermax }}</td>
-				<td>{{ run.runmax }}</td>
-			</tr>
-		
-	{% endfor %}
-	</table>
+				<td class="subpage_index_header">Time</td>
+				<td class="subpage_index_header">Iter</td>
+				<td class="subpage_index_header">Runs</td>
+			</tr>		
+			{% for run in all_runs %}
+				<tr>
+					<td><a href="/results/{{ run.input_file.id }}/{{ run.id }}">{% if run.time %}{{ run.time|date:"d.m.y H:i" }}{% endif %}</a></td>
+					<td>{{ run.itermax }}</td>
+					<td>{{ run.runmax }}</td>
+				</tr>
+			{% endfor %}
+		</table>
+	{% endif %}
+	
 {% endblock %}
   
 {% block intro %}
@@ -34,7 +34,7 @@
 	Choose parameters for this run or look at the previous runs. 
 	</p>
 	
-	<p>
+	<p class="development_note">
 	Some debug info: <br>
 	Run file {{ input_file.name }} with id {{ input_file.id }} in Input_files with given parameters. <br>
 	Absolute path to file: {{ input_file.path }} <br>
