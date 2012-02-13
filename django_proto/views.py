@@ -48,9 +48,9 @@ def runparams(request, file_id):
                  
     #last_runs = models.Script_runs.objects.get(input_file = file_id)
     form = Run_file()
-    input_file = models.Input_files.objects.get(id = file_id)
-    all_runs = models.Script_runs.objects.filter(input_file__exact = input_file)
-    context = dict({'input_file': input_file, 'form': form, 'all_runs': all_runs})
+    ifile = models.Input_files.objects.get(id = file_id)
+    all_runs = models.Script_runs.objects.filter(input_file__exact = ifile)
+    context = dict({'input_file': ifile, 'form': form, 'all_runs': all_runs})
     c = RequestContext(request, context)
     return render_to_response('runparams.html', c)
 
@@ -62,7 +62,7 @@ def run_script(request, file_id):
             imax = form.cleaned_data['itermaxin']
             rmax = form.cleaned_data['runmax']
             ifile = models.Input_files.objects.get(id = file_id)
-            srun = models.Script_runs(input_file = ifile, itermax = imax, runmax = rmax, res_folder = '', res_pic = '')
+            srun = models.Script_runs.objects.create(input_file = ifile, itermax = imax, runmax = rmax, res_folder = '', res_pic = '')
             srun.save()
             fpath = srun.input_file.path
             run_id = srun.id

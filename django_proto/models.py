@@ -20,7 +20,7 @@ class Script_types(models.Model):
  
 # Table for all different scripts.
 class Scripts(models.Model):
-    time = models.DateTimeField(auto_now = True)    # Time when script was added to database
+    time = models.DateTimeField(auto_now_add = True)# Time when script was added to database
     script_type = models.ForeignKey(Script_types)   # Type of the script from the Script_types
     name = models.CharField(max_length = 50)        # Name of the script
     path = models.CharField(max_length=200)         # Absolute path to this scripts file.
@@ -32,7 +32,7 @@ class Scripts(models.Model):
 class Input_files(models.Model):
       
     #user = models.ForeignKey(User)                  # User who uploaded the file
-    time = models.DateTimeField(auto_now = True)    # Uploading time 
+    time = models.DateTimeField(auto_now_add = True) # Uploading time 
     #file_type = models.CharField(max_length = 10)   # Type of the file.
     name = models.CharField(max_length = 80)        # Base name of the input file
     path = models.CharField(max_length = 300)       # Absolute file path to this file
@@ -44,7 +44,7 @@ class Input_files(models.Model):
 # with different input files.  
 class Script_runs(models.Model):
     
-    #time = models.DateTimeField(auto_now = True)    # Starting time of the run
+    time = models.DateTimeField(auto_now_add = True, null = True) # Starting time of the run
     #script = models.ForeignKey(Scripts)             # Script used in this run
     input_file = models.ForeignKey(Input_files)     # Input file of the run
     itermax = models.IntegerField(blank = True)     # Iteration max of the run

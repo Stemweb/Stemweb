@@ -1,10 +1,10 @@
-{% extends 'home.html' %}
+{% extends 'layout_proto.html' %}
 
 {% block title %} 
 	Stemweb - results for {{input_file.name}}
 {% endblock %}
 
-{% block intro %}
+{% block main_content %}
 	Results for file {{ srun.input_file.name }} / {{ srun.input_file.id }} <br>
 	Iterations: {{ srun.itermax }} <br>
 	Simultaneous runs: {{ srun.runmax }} <br>
@@ -12,9 +12,7 @@
 	Local absolute path to input file: {{ srun.input_file.path }}
 	<br>
 	<br>
-{% endblock %}
-		
-{% block content %}
+
 	Resulting graphs url: {{ MEDIA_URL }}{{ srun.input_file.name }}/{{srun.input_file.id}}/{{ srun.id }}/{{srun.res_pic}} <br>
 	Resulting graph for this run was:<br>
 	<img src="{{ MEDIA_URL }}{{ srun.input_file.name }}/{{srun.input_file.id}}/{{ srun.id }}/{{srun.res_pic}}" 

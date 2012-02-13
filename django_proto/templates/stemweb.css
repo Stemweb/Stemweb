@@ -1,8 +1,30 @@
+html
+{
+	height:100%; 
+	max-height:100%; /
+	padding:0; 
+	margin:0;
+	border:0; 
+	overflow:hidden;
+}
+
 body
 {
 	border: 0px;
 	padding: 0px;
 	margin: 0px;
+	max-height: 100%;
+	height: 100%;
+	overflow:hidden;
+}
+
+/* BANNER AT THE TOP OF THE SITE */
+div#main_banner_and_menu_padding
+{
+	display: block;
+	height: 35px;
+	max-height: 35px;
+	width: 100%;
 }
 
 div#main_banner_and_menu 
@@ -13,19 +35,30 @@ div#main_banner_and_menu
 	margin-left: auto;
 	margin-right: auto;
 	padding: 0px;
-	border: 0.5em;
-	border-style: solid;
-	border-color:  #0099CC;
-	border-radius: 0em;
+	border: 0px;
+	height: 35px;
 	width: 100%;
-	background-color: #0099CC;
-	text-align: center;	
+	text-align: center;
+	
+	background-image: linear-gradient(right , #186666 0%, #48B0B0 67%);
+	background-image: -o-linear-gradient(right , #186666 0%, #48B0B0 67%);
+	background-image: -moz-linear-gradient(right , #186666 0%, #48B0B0 67%);
+	background-image: -webkit-linear-gradient(right , #186666 0%, #48B0B0 67%);
+	background-image: -ms-linear-gradient(right , #186666 0%, #48B0B0 67%);
+
+	background-image: -webkit-gradient(
+		linear,
+		right bottom,
+		left bottom,
+		color-stop(0, #186666),
+		color-stop(0.67, #48B0B0)
+	);	
+	
+	z-index: 100;
 }
 
 div#main_banner 
 {
-	/* margin-left: auto;
-	margin-right: auto; */
 	position: fixed;
 	top: 5px;
 	left: 0px;
@@ -37,22 +70,20 @@ div#main_banner
 	text-align: left;
 	color: white;
 	letter-spacing: 0.05em;
-	width: 50%;
+	width: 60%;
 }
 
 table#menu_table 
 {
-	/* margin-left: auto;
-	margin-right: auto; */
 	padding: 0px;
 	border: 0px;
 	margin: 0px;
 	position: relative;
 	left: 60%;
-	top: 0px;
+	top: 7px;
 	padding-right: 15px;
 	font-family: Verdana;
-	text-align:	right;	
+	text-align:	center;	
 	font-size: 0.7em;
 	width: 40%;
 	color: white;
@@ -63,6 +94,7 @@ a.menu_link
 	color: white;
 	text-decoration: none;
 	letter-spacing: 0.1em;
+	overflow: inherit;
 }
 
 td.menu_item
@@ -72,17 +104,103 @@ td.menu_item
 	margin: 0px;
 	top: 5px;
 	left: 0px;
-	overflow:hidden;
+	overflow: hidden;
 	width: 8%;
 }
 
+
+/* MAIN CONTENT OF THE SITE */
 div#main_content
 {
-	/* position: relative; */
-	padding-top: 50px;
+	position: relative;
+	display: block;
+	overflow:auto;
+	width: 100%;
+	height: 100%;
+	max-height: 100%;
+	font-family: Verdana;
+	background-image: linear-gradient(right , #EFF7F7 25%, #CDE9EB 70%, #E6EDED 75%);
+	background-image: -o-linear-gradient(right , #EFF7F7 25%, #CDE9EB 70%, #E6EDED 75%);
+	background-image: -moz-linear-gradient(right , #EFF7F7 25%, #CDE9EB 70%, #E6EDED 75%);
+	background-image: -webkit-linear-gradient(right , #EFF7F7 25%, #CDE9EB 70%, #E6EDED 75%);
+	background-image: -ms-linear-gradient(right , #EFF7F7 25%, #CDE9EB 70%, #E6EDED 75%);
+	
+	background-image: -webkit-gradient(
+		linear,
+		right bottom,
+		left bottom,
+		color-stop(0.25, #EFF7F7),
+		color-stop(0.7, #CDE9EB),
+		color-stop(0.75, #E6EDED)
+	);
+	
 }
 
-div#subpage_index 
+div#subpage_index
 {
+	width: 30%;
+	display: block;
+	overflow: hidden;
+	float: left;
+	top: 0px;
+	left: 0px;
+	background-color: transparent;
+	overflow: auto;
+}
+
+table#subpage_index_table 
+{
+	display: block;
+	overflow:hidden;
+	background-color: transparent;
+}
+
+div#subpage_content
+{
+	display: block;
+	float: right;
+	left: 30%;
+	width: 70%;
+	background-color: transparent;
+}
+
+/* SITE'S FOOTER */
+div#footer 
+{
+	position:fixed;
+	border: 0;
+	margin: 0;
+	padding: 0;
+   	bottom:0;
+   	width:100%;
+   	height: 50px;
+   	text-align: center;
+   	opacity: 0.55;
 	
+	background-image: linear-gradient(top, #D9E0E0 0%, #F7FCFC 60%);
+	background-image: -o-linear-gradient(top, #D9E0E0 0%, #F7FCFC 60%);
+	background-image: -moz-linear-gradient(top, #D9E0E0 0%, #F7FCFC 60%);
+	background-image: -webkit-linear-gradient(top, #D9E0E0 0%, #F7FCFC 60%);
+	background-image: -ms-linear-gradient(top, #D9E0E0 0%, #F7FCFC 60%);
+	
+	background-image: -webkit-gradient(
+		linear,
+		right top,
+		right bottom,
+		color-stop(0, #D9E0E0),
+		color-stop(0.6, #F7FCFC)
+	);	
+
+	z-index: 100;
+}
+
+
+
+div#footer_padding
+{
+
+	display: block;
+	height: 50px;
+	max-height: 50px;
+	width: 100%;
 }

@@ -15,11 +15,13 @@
 			if not use local jQuery source. (Probably whole internet  
 			is down if google is not reachable though.)			    
 		-->
-    	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+    	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+    	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
     	
     	<!-- Local javascript files -->
     	<script src="/media/js/" type="text/javascript"></script>
     	
+    	<!--  
     	<script type="text/javascript">
     	$(document).ready(function() 
     	{
@@ -52,16 +54,19 @@
   			})();
 		});
     	</script>
+    	-->
   	</head>
 	
 	<body>
 	{% block body %}
+	
+	
 		
 		{# Banner and menu are separated from other content of the site #}
 		{# so that they are always visible on the top. This should be #}
 		{# static and not be altered in any of the subpages. #}
 		
-		<div id="main_banner_and_menu">
+		<div id="main_banner_and_menu">	
 		{%block main_banner_and_menu %}
 		
 			{# Main banner with sites logo, etc. #}
@@ -69,7 +74,7 @@
 			{% block main_banner %}
 		
 				{# placeholder #}
-				STEMWEB - stemmatology online
+				(logo) STEMWEB - stemmatology online
 	
 			{% endblock %}
 			</div>
@@ -91,59 +96,27 @@
 		
 			{% endblock %}
 			</div>
+		{% endblock %}		
+		</div>
+			
+		<div id="main_content">
+		<div id="main_banner_and_menu_padding"></div>
+		
+		{% block main_content %}
+		
+			{# All the other content of the site except banner and menu. This is #}
+			{# changing content depending on subpage. Subpages usually have some #}
+			{# kind of index on the left side and main content on the right side #}
+			{# of the site. #}
+		
 		{% endblock %}
+		
+		<div id="footer_padding"></div>
 		</div>
 	
-		{# All the other content of the site except banner and menu. This is #}
-		{# changing content depending on subpage. Subpages usually have some #}
-		{# kind of index on the left side and main content on the right side #}
-		{# of the site. #}
-		
-		<div id="main_content">
-		{% block main_content %}
-	
-			{# Index for subpage's contents, etc. #}
-			<div id='subpage_index'>
-			{% block subpage_index %}
-				<table id="subpage_index_table">
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-					<tr><td>Item 1</td></tr>
-				
-					
-			
-				</table>
-			{% endblock %}
-			</div>
-
-			{# Content of the subpage depending on the index, etc. #}
-			{# Will be filled with subpage's apps templates. #}
-			<div id='subpage_content'>
-			{% block subpage_content %}
-
-			{% endblock %}
-			</div>		
+		<div id="footer">
+		{% block footer %}
+			Same contact infos, etc. will be shown in the footer for all subpages.
 		{% endblock %}
 		</div>
 	{% endblock %}

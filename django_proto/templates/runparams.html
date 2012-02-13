@@ -3,6 +3,25 @@
 {% block title %} 
 	Stemweb - run parameters {{input_file.name}}  
 {% endblock %}
+
+{% block subpage_index_title %}
+	All runs with this file:
+{% endblock%}
+
+{% block subpage_index_table %}
+	<table id="subpage_index_table">
+		<tr><td>Time</td><td>Iter</td><td>Runs</td></tr>
+	{% for run in all_runs %}
+		<a href="/results/{{ run.input_file.id }}/{{ run.id }}">
+			<tr>
+				<td>{% if run.time %}{{ run.time}}{% endif %}</td>
+				<td>{{ run.itermax }}</td>
+				<td>{{ run.runmax }}</td>
+			</tr>
+		</a>
+	{% endfor %}
+	</table>
+{% endblock %}
   
 {% block intro %}
 	Run file {{ input_file.name }} with id {{ input_file.id }} in Input_files with given parameters. <br>
@@ -17,9 +36,3 @@
 	</form>
 {% endblock %}
 
-{% block files %}
-	All runs with this file:<br><br>
-	{% for run in all_runs %}
-		<a href="/results/{{ run.input_file.id }}/{{ run.id }}">{{ run.time }} iterations: {{ run.itermax }} simultaneous runs: {{ run.runmax }}</a><br>
-	{% endfor %}
-{% endblock %}

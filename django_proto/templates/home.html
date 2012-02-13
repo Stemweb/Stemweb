@@ -1,38 +1,53 @@
 {% extends "layout_proto.html" %}
 
-{% block title %} 
-	Stemweb - home 
-{% endblock %}
+{% block title %} Stemweb - home {% endblock %}
 
+{# Main content of the site. Leaves banner/menu and footer untouched. #}
 {% block main_content %}
-	{# Some introductory text. #}
-	<div class="intro">
-		{% block intro %}
-		This is the home page of django prototype for STAM's web project 
-		Stemweb. Feel free to try uploading your .nex files and run them
-		or run already uploaded files. <br>
-		<br>
-		{% endblock %}
-	</div>
-	
-	{% block content %}
-	<div class="form">
-		{% block form %}
-		<form action="/upload" enctype="multipart/form-data" method="post">
-			{% csrf_token %}
-			{{ form.as_p }}
-			<input type="submit" value="Upload" />
-		</form>
-		{% endblock %}
-	</div>	
-	<div class="files">
-		{% block files %}
-			Already uploaded files:<br><br>
-			{% for f in files %}
-				<a href="/runparams/{{ f.id }}/">{{ f.time }} {{ f.name }}</a><br>
-			{% endfor %}
-		{% endblock %}
-	</div>
-	{% endblock %}
 
+	<div id="subpage_index">
+	{% block subpage_index_title %}
+		All uploaded files:<br>
+	{% endblock%}
+	
+		{% block subpage_index_table %}
+		<table id="subpage_index_table">
+			{% for f in files %}
+				<tr><td>{{ f.time }}</td><td><a href="/runparams/{{ f.id }}/">{{ f.name }}</a></td></tr>
+			{% endfor %}
+		</table>
+		{% endblock %}
+	</div>
+
+	<div id="subpage_content">
+	{% block subpage_content %}
+	
+		<div class="intro">
+			{% block intro %}
+			<p>
+			This is the home page of <a href="http://cosco.hiit.fi/Projects/STAM/">STAM's</a> web project Stemweb (workname).
+			</p>
+			<p>
+			Project's aim is to help people to run stemmatology algorithms for their own datasets without tedious
+			job of searching for/coding of the algorithms themselves. 
+			</p>
+			<p>
+			Try the algorithm with your own .nex files or run one of the already uploaded files.
+			Please be sure that your file is in the right <a href=#>format</a>.
+			</p>
+			{% endblock %}
+		</div>
+		
+		<div class="form">
+			{% block form %}
+			<form action="/upload" enctype="multipart/form-data" method="post">
+				{% csrf_token %}
+				{{ form.as_p }}
+				<input type="submit" value="Upload" />
+			</form>
+			{% endblock %}
+		</div>	
+	{% endblock %}
+	</div>
+		
 {% endblock %}			
