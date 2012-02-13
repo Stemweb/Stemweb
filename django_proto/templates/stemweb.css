@@ -1,7 +1,88 @@
-div#main_banner {
-	margin-left = 10%;
-	margin-right = 10%;
-	font-size = 3em;
+body
+{
+	border: 0px;
+	padding: 0px;
+	margin: 0px;
+}
+
+div#main_banner_and_menu 
+{
+	position: fixed;
+	margin-top: 0px;
+	margin-down: 0px;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 0px;
+	border: 0.5em;
+	border-style: solid;
+	border-color:  #0099CC;
+	border-radius: 0em;
+	width: 100%;
+	background-color: #0099CC;
+	text-align: center;	
+}
+
+div#main_banner 
+{
+	/* margin-left: auto;
+	margin-right: auto; */
+	position: fixed;
+	top: 5px;
+	left: 0px;
+	padding: 0px;
+	padding-left: 20px;
+	border: 0px;
+	font-size: 1em;
 	font-family: Verdana;
+	text-align: left;
+	color: white;
+	letter-spacing: 0.05em;
+	width: 50%;
+}
+
+table#menu_table 
+{
+	/* margin-left: auto;
+	margin-right: auto; */
+	padding: 0px;
+	border: 0px;
+	margin: 0px;
+	position: relative;
+	left: 60%;
+	top: 0px;
+	padding-right: 15px;
+	font-family: Verdana;
+	text-align:	right;	
+	font-size: 0.7em;
+	width: 40%;
+	color: white;
+}
+
+a.menu_link
+{
+	color: white;
+	text-decoration: none;
+	letter-spacing: 0.1em;
+}
+
+td.menu_item
+{
+	padding: 0px;
+	border: 0px;
+	margin: 0px;
+	top: 5px;
+	left: 0px;
+	overflow:hidden;
+	width: 8%;
+}
+
+div#main_content
+{
+	/* position: relative; */
+	padding-top: 50px;
+}
+
+div#subpage_index 
+{
 	
 }
