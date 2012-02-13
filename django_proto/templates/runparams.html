@@ -5,27 +5,40 @@
 {% endblock %}
 
 {% block subpage_index_title %}
-	All runs with this file:
+	<h1>Previous runs</h1>
 {% endblock%}
 
 {% block subpage_index_table %}
 	<table id="subpage_index_table">
-		<tr><td>Time</td><td>Iter</td><td>Runs</td></tr>
+		<tr>
+			<td class="subpage_index_header">Time</td>
+			<td class="subpage_index_header">Iter</td>
+			<td class="subpage_index_header">Runs</td>
+		</tr>
+		
 	{% for run in all_runs %}
-		<a href="/results/{{ run.input_file.id }}/{{ run.id }}">
+		
 			<tr>
-				<td>{% if run.time %}{{ run.time}}{% endif %}</td>
+				<td><a href="/results/{{ run.input_file.id }}/{{ run.id }}">{% if run.time %}{{ run.time|date:"d.m.y H:i" }}{% endif %}</a></td>
 				<td>{{ run.itermax }}</td>
 				<td>{{ run.runmax }}</td>
 			</tr>
-		</a>
+		
 	{% endfor %}
 	</table>
 {% endblock %}
   
 {% block intro %}
+	<h1>Running parameters</h1>
+	<p>
+	Choose parameters for this run or look at the previous runs. 
+	</p>
+	
+	<p>
+	Some debug info: <br>
 	Run file {{ input_file.name }} with id {{ input_file.id }} in Input_files with given parameters. <br>
 	Absolute path to file: {{ input_file.path }} <br>
+	</p>
 {% endblock %}
 		
 {% block form %}

@@ -7,16 +7,28 @@
 
 	<div id="subpage_index">
 	{% block subpage_index_title %}
-		All uploaded files:<br>
+		<h1>Uploaded files</h1>
 	{% endblock%}
 	
 		{% block subpage_index_table %}
 		<table id="subpage_index_table">
+			<tr>
+			<td class="subpage_index_header">Time</td>
+			<td class="subpage_index_header">Name</td>
+		</tr>
+		
+		
 			{% for f in files %}
-				<tr><td>{{ f.time }}</td><td><a href="/runparams/{{ f.id }}/">{{ f.name }}</a></td></tr>
+				<tr><td>{{ f.time|date:"d.m.y H:i" }}</td><td><a href="/runparams/{{ f.id }}/">{{ f.name }}</a></td></tr>
 			{% endfor %}
 		</table>
 		{% endblock %}
+		
+		<p class="development_note">
+		I was thinking to use this left-hand div as news section. Uploaded files will be in
+		user's own 'Files'-tab later. There will be option to keep files opened to
+		'public', 'group' or 'private' (or atleast if it can be done easily enough).
+		</p>
 	</div>
 
 	<div id="subpage_content">

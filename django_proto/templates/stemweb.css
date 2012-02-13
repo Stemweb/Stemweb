@@ -28,6 +28,14 @@ h1
 	font-variant: small-caps;
 }
 
+h2
+{
+	text-align: left;
+	font-size: 1.1;
+	font-family: Verdana;
+	font-variant: small-caps;	
+}
+
 a
 {
 	text-decoration: none;
@@ -171,19 +179,26 @@ div#subpage_index
 {
 	width: 30%;
 	display: block;
-	overflow: hidden;
+	overflow: auto;
 	float: left;
 	top: 0px;
 	left: 0px;
 	background-color: transparent;
-	overflow: auto;
 }
 
 table#subpage_index_table 
 {
+	padding-left: 5px;
 	display: block;
-	overflow:hidden;
+	overflow:auto;
 	background-color: transparent;
+}
+
+td.subpage_index_header
+{
+	font-variant: small-caps;
+	font-size: 1.1em;
+	
 }
 
 div#subpage_content
@@ -246,4 +261,12 @@ div.upload_form
 	padding-top: 15px;
 	padding-left: 25px;
 	
+}
+
+/* DEVELOPMENT SETTINGS */
+p.development_note
+{
+	padding: 5px;
+	font-size: 0.7em;
+	font-style: italic;
 }
