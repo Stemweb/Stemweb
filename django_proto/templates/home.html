@@ -1,4 +1,4 @@
-{% extends "layout_proto.html" %}
+{% extends "base.html" %}
 
 {% block title %} Stemweb - home {% endblock %}
 
@@ -31,10 +31,9 @@
 		{% endif %}
 			
 		<p class="development_note">
-		I was thinking to use this left-hand div as news section. Uploaded files will be in
+		I was thinking to use this left-hand div as news section. File management will be in
 		user's own 'Files'-tab later. There will be option to keep files open to
-		'public', 'group' or 'private' when you upload them first time 
-		(or atleast if it can be done easily enough).
+		'public', 'group' or 'private' (or atleast if it can be done easily enough).
 		</p>
 	{% endblock %}
 	</div>
@@ -68,6 +67,13 @@
 			</form>
 			{% endblock %}
 		</div>	
+		
+		{% if debug %}
+		<p class="development_note">
+			This is just a prototype in development. A lot of valuable information is still missing.
+		</p>
+		{% endif %}
+		
 	{% endblock %}
 	</div>
 		

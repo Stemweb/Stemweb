@@ -7,10 +7,10 @@
 import os
 import string
 import random
-from Stemweb import local
+import Stemweb.settings as settings
 
 # Locally relevant default path for uploaded files. 
-default_upload_path = local.lstrings.default_upload_path
+default_upload_path = os.path.join(settings.MEDIA_ROOT, 'users')
 
 # 	Semiunique ID generator -- copypaste code.
 #

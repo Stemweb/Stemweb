@@ -23,6 +23,8 @@ class Scripts(models.Model):
     time = models.DateTimeField(auto_now_add = True)# Time when script was added to database
     script_type = models.ForeignKey(Script_types)   # Type of the script from the Script_types
     name = models.CharField(max_length = 50)        # Name of the script
+    
+    # REFACTOR THIS TO models.FileField
     path = models.CharField(max_length=200)         # Absolute path to this scripts file.
     
     def __str__(self):
@@ -35,6 +37,8 @@ class Input_files(models.Model):
     time = models.DateTimeField(auto_now_add = True) # Uploading time 
     #file_type = models.CharField(max_length = 10)   # Type of the file.
     name = models.CharField(max_length = 80)        # Base name of the input file
+    
+    # REFACTOR THIS TO models.FileField
     path = models.CharField(max_length = 300)       # Absolute file path to this file
     
     def __str__(self):
@@ -50,6 +54,9 @@ class Script_runs(models.Model):
     itermax = models.IntegerField(blank = True)     # Iteration max of the run
     runmax = models.IntegerField(blank = True)      # How many simultaneous runs
     res_folder = models.CharField(max_length = 300) # Absolute path to result folder
+    
+    
+    # REFACTOR THIS TO models.ImageField
     res_pic = models.CharField(max_length = 300)    # name of the resulting .png
     
     def __str__(self):

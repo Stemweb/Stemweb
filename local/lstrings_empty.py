@@ -6,14 +6,17 @@
 # other settings here.
  
 # These are locally relevant database and other settings
-# strings from settings.py. 
+# strings for settings.py. 
 
 # IMPORTANT: DO NOT COMMIT lstrings.py INTO REPOSITORY
 # NOR DO NOT REMOVE lstring.py FROM .gitignore IN ANY
 # CIRCUMSTANCES. 
 
 # Local db admin name and email. Don't really need these
-# in local testing.
+# in local testing. But it's good to fill these, since
+# in some point in the future the site may try to send
+# some email to admins, which may cause some error messages
+# if they are not set.
 db_admin = ''
 db_email = ''
 
@@ -25,6 +28,7 @@ db_engine = 'django.db.backends.'
 # Name of your db. In sqlite3 this is absolute path for
 # your database-file.
 db_name = ''
+
 db_user = ''            # Your db user. Not needed in sqlite3
 db_pwd = ''             # Your db password. Not needed in sqlite3
 db_host = ''            # Host, leave blank if db is on local computer.
@@ -35,25 +39,5 @@ db_port = ''            # Port to your db. Can be left blank
 # This is most likely stemweb.urls or Stemweb.urls.
 root_urls = 'Stemweb.urls'
 
-# Absolute path to your local project folder. 
-project_path = r''
-
-template_dirs = ( 
-    "%s/django_proto/templates" % (project_path)
-)
-
 # Veeerry secret key.
 secret_key = ''
-
-###################################################################
-#                STEMWEB'S OWN LOCAL STRINGS                      #
-###################################################################
-
-# Absolute path for default upload folder. Most likely
-# some where out of the Stemweb-folder. Folder structure
-# in this folder's childs' is: 
-#    /'input_filename'/Input_files.id/
-#    /'input_filename'/Input_files.id/'file'
-#    /'input_filename'/Input_files.id/R_runs.id
-#    /'input_filename'/Input_files.id/R_runs.id/'runs results'
-default_upload_path = r''

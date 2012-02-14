@@ -15,8 +15,8 @@
 	This is the best tree for this run.
 	</p>
 	
-	<img src="{{ MEDIA_URL }}{{ srun.input_file.name }}/{{srun.input_file.id}}/{{ srun.id }}/{{srun.res_pic}}" 
-		 alt="{{ MEDIA_URL }}{{ srun.input_file.name }}/{{srun.input_file.id}}/{{ srun.id }}/{{srun.res_pic}}" />
+	<img src="{{ MEDIA_URL }}/users/{{ srun.input_file.name }}/{{srun.input_file.id}}/{{ srun.id }}/{{srun.res_pic}}" 
+		 alt="{{ MEDIA_URL }}/users/{{ srun.input_file.name }}/{{srun.input_file.id}}/{{ srun.id }}/{{srun.res_pic}}" />
 	
 	<p class="development_note">
 	Some debug info:<br>
@@ -24,7 +24,5 @@
 	Iterations: {{ srun.itermax }} <br>
 	Simultaneous runs: {{ srun.runmax }} <br>
 	Local absolute path to input file: {{ srun.input_file.path }}<br>	
-	Resulting graphs url: {{ MEDIA_URL }}{{ srun.input_file.name }}/{{srun.input_file.id}}/{{ srun.id }}/{{srun.res_pic}} <br>
-	</p>
 	
 {% endblock %}			

@@ -1,0 +1,9 @@
+All static and user uploaded files will be in this folder. 
+Don't add any dynamic content here. 
+
+Something that could be here:
+
+* 	media-files: photos, videos, etc. (apps own / user)
+*	css-files
+*	javascript-files
+
