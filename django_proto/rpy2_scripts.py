@@ -56,7 +56,7 @@ if __name__ == "__main__":
     project_path = r'/Users/slinkola/STAM/Stemweb/'
     main()
 else:
-    from Stemweb import local
-    project_path = local.lstrings.project_path
+    import Stemweb.settings as settings
+    project_path = settings.SITE_ROOT
 
   

@@ -125,11 +125,19 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     
+    # Django app for user authentication: login, etc.
+    # Project home: https://bitbucket.org/ubernostrum/django-registration/
+    'registration',
+    
     # Own apps
     'django_proto',
     'local',
     'semsep'
 )
+
+# registration apps own setting. Configures how many days
+# user has to activate account before it expires.
+ACCOUNT_ACTIVATION_DAYS = 7
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
