@@ -1,9 +1,14 @@
 All static and user uploaded files will be in this folder. 
 Don't add any dynamic content here. 
 
-Something that could be here:
+Contents:
 
-* 	media-files: photos, videos, etc. (apps own / user)
-*	css-files
-*	javascript-files
+css/ 
+*	all .css files
 
+javascript/
+*	all local javascripts (if any)
+
+users/
+*	all user uploaded files and results of the algorithm runs.
+*	dont add anything here yourself.

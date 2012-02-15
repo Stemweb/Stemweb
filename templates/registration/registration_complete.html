@@ -1,0 +1,16 @@
+{% extends "registration_base.html" %}
+
+{% block reg_content %}
+	<p>You are now registered. Activation email sent.</p>
+	
+	<p class="development_note">
+		Actually no mail was sent yet, but mail messages have
+		been forwared into shell. Check out the shell you used
+		to run 'python manage.py runserver' and copy the url
+		from there into your browser.<br><br>
+		
+		Be sure to remove any '='-characters from the url, since
+		they are added by dbshell in places where line break would
+		cut strings from the middle.
+	</p>
+{% endblock %}

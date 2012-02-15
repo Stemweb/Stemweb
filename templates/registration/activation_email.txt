@@ -1,0 +1,8 @@
+Activate your account at {{ site.name }}:
+
+Be sure to remove all '='-marks from activation key since
+dbshell likes to cut the lines and add it in the middle.
+
+http://{{ site.domain }}{% url registration_activate activation_key %}
+
+Link is valid for {{ expiration_days }} days.

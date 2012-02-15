@@ -1,4 +1,5 @@
 *.pyc
 lstrings.py
 media/users/
+local/default_commit_message
 

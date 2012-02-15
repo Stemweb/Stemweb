@@ -3,8 +3,8 @@ from django.views.generic.simple import direct_to_template
 import settings
 
 # Uncomment the next two lines to enable the admin:
-# from django.contrib import admin
-# admin.autodiscover()
+from django.contrib import admin
+admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^home', 'django_proto.views.home', name='stemweb_home_url'),
@@ -21,9 +21,11 @@ urlpatterns = patterns('',
     # https://bitbucket.org/ubernostrum/django-registration/src/tip/docs/quickstart.rst
     (r'^accounts/', include('registration.backends.default.urls')),
     
+    (r'^$', 'django_proto.views.home'),
+    
     # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    # url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', include(admin.site.urls)),
 )

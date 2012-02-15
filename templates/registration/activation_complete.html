@@ -1,0 +1,12 @@
+{% extends "registration_base.html" %}
+
+{% block title %}
+	{{ site.name }} - activation successful
+{% endblock %}
+
+{% block reg_content %}
+
+		<p>Account successfully activated</p>
+		<p><a href="{% url auth_login %}">Log in</a></p>
+
+{% endblock %}

@@ -5,8 +5,9 @@
 # these tables with "python manage.py syncdb" -command.
 
 from django.db import models
-#from django.contrib.auth.models import User
+from django.contrib.auth.models import User
 from django.utils.encoding import smart_str
+import handler
 
 # Table for all different script types. Basically determines which
 # program needs to be opened for which type of script
@@ -33,13 +34,12 @@ class Scripts(models.Model):
 # Basic table for all input files to any of the scripts.   
 class Input_files(models.Model):
       
-    #user = models.ForeignKey(User)                  # User who uploaded the file
+    user = models.ForeignKey(User)                  # User who uploaded the file
     time = models.DateTimeField(auto_now_add = True) # Uploading time 
-    #file_type = models.CharField(max_length = 10)   # Type of the file.
+    file_ext = models.CharField(max_length = 10, default = 'nex')   # File extension
     name = models.CharField(max_length = 80)        # Base name of the input file
-    
-    # REFACTOR THIS TO models.FileField
-    path = models.CharField(max_length = 300)       # Absolute file path to this file
+    file_field = models.FileField(upload_to = handler.upload_path)
+    path = models.CharField(max_length = 200, blank = True, default = file_field.get_directory_name())       # Absolute file path to this file
     
     def __str__(self):
         return smart_str('%s %s' % (self.name, self.time))
@@ -53,19 +53,15 @@ class Script_runs(models.Model):
     input_file = models.ForeignKey(Input_files)     # Input file of the run
     itermax = models.IntegerField(blank = True)     # Iteration max of the run
     runmax = models.IntegerField(blank = True)      # How many simultaneous runs
-    res_folder = models.CharField(max_length = 300) # Absolute path to result folder
-    
-    
+    folder = models.CharField(max_length = 200, blank = True) # Absolute path to result folder  
+      
     # REFACTOR THIS TO models.ImageField
-    res_pic = models.CharField(max_length = 300)    # name of the resulting .png
+    image = models.ImageField(upload_to = handler.image_path)    
+    
+    
     
     def __str__(self):
         return smart_str('%s %s i=%s r=%s' % (self.input_file.name, self.time, self.itermax, self.runmax))
-
-   
-
-    
-
     
     
     

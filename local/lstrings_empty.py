@@ -41,3 +41,9 @@ root_urls = 'Stemweb.urls'
 
 # Veeerry secret key.
 secret_key = ''
+                                                        # On Univ. of Helsinki cs-department
+email_host = ''         # Smtp email server.               mail.cs.helsinki.fi
+email_host_user = ''    # Username on email server         cs-account@cs.helsinki.fi
+email_host_pwd = ''     # Password on email server         your cs-account pwd 
+email_port = ''         # Port of the email server         587
+email_tls = ''          # Does the email server use tls.   True

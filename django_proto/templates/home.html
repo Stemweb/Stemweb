@@ -19,12 +19,17 @@
 			{% block subpage_index_table %}
 			<table id="subpage_index_table">
 				<tr>
+					<td class="subpage_index_header">User</td>
 					<td class="subpage_index_header">Time</td>
 					<td class="subpage_index_header">Name</td>
 				</tr>
 			
 				{% for f in files %}
-					<tr><td>{{ f.time|date:"d.m.y H:i" }}</td><td><a href="/runparams/{{ f.id }}/">{{ f.name }}</a></td></tr>
+					<tr>
+						<td>{{ f.user }}</td>
+						<td>{{ f.time|date:"d.m.y H:i" }}</td>
+						<td><a href="/runparams/{{ f.id }}/" target="_blank">{{ f.name }}</a></td>
+					</tr>
 				{% endfor %}
 			</table>
 			{% endblock %}
@@ -58,8 +63,18 @@
 			{% endblock %}
 		</div>
 		
+		
+		
 		<div class="upload_form">
 			{% block form %}
+			
+			{% if not user.is_authenticated %}
+			<p class="development_note">
+				You have to <a href={% url registration_register %}>register</a> and login 
+				in this version to be able to upload file.
+			</p>
+			{% endif %}
+			
 			<form action="/upload" enctype="multipart/form-data" method="post">
 				{% csrf_token %}
 				{{ form.as_p }}

@@ -1,0 +1,36 @@
+{% extends "registration_base.html" %}
+
+{% block title %}
+	{{ site.name }} - login
+{% endblock %}
+
+{% block subpage_index %}
+	<h1>Problems in logging?</h1>
+	
+	<p class="no_files">
+		<a href="#">Contact us (dl)</a>
+	</p>
+	
+	<p class="no_files">
+		<a href="{% url auth_password_reset %}">Reset password</a>
+	</p>
+
+{% endblock %}
+
+{% block reg_content %}
+	<h1>Login</h1>
+
+	<form method="post" action=".">
+		{% csrf_token %}
+  		{{ form.as_p }}
+
+  		<input type="submit" value="Log in" />
+  		<input type="hidden" name="next" value="{{ next }}" />
+	</form>
+
+	<p class="development_note">
+		Registered users can upload their own files, etc plaplapla.<br>
+		<a href={% url registration_register %}>Register</a>
+	</p>
+
+{% endblock %}

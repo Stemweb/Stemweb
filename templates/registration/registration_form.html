@@ -1,0 +1,23 @@
+{% extends "registration_base.html" %}
+
+
+
+{% block reg_content %}
+
+	{% if user.is_authenticated %}
+		<p>
+			You are already logged in.
+		<p>
+	{% else %}
+		<form method="post" action=".">
+			{% csrf_token %}
+	  		{{ form.as_p }}
+	
+	  		<input type="submit" value="Register" />
+		</form>
+		
+		<p class="development_note">
+			Registered users can.... <br>
+		<p>
+	{% endif %}
+{% endblock %}

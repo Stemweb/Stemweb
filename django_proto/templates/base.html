@@ -19,7 +19,9 @@
     	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
     	
     	<!-- Local javascript files -->
-    	<script src="{{ MEDIA_URL }}javascript/" type="text/javascript"></script>
+    	<!--  
+    		<script src="{{ MEDIA_URL }}javascript/" type="text/javascript"></script>
+    	-->
     	
     	<!--  
     	<script type="text/javascript">
@@ -86,11 +88,16 @@
 			
 				<table id="menu_table">
 				<tr>
-					<td class="menu_item"><a class="menu_link" href="/home">Home</a></td>
+					<td class="menu_item"><a class="menu_link" href={% url stemweb_home_url %}>Home</a></td>
 					<td class="menu_item"><a class="menu_link">Algorithms</a></td>
 					<td class="menu_item"><a class="menu_link">Files</a></td>
 					<td class="menu_item"><a class="menu_link">Groups</a></td>
-					<td class="menu_item"><a class="menu_link">Login</a></td>
+					
+					{% if user.is_authenticated %}
+					<td class="menu_item"><a class="menu_link" href={% url auth_logout %}>Logout</a></td>
+					{% else %}
+					<td class="menu_item"><a class="menu_link" href={% url auth_login %}>Login</a></td>
+					{% endif %}
 				</tr>
 				</table>
 		

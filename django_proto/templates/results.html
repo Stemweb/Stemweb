@@ -15,8 +15,8 @@
 	This is the best tree for this run.
 	</p>
 	
-	<img src="{{ MEDIA_URL }}/users/{{ srun.input_file.name }}/{{srun.input_file.id}}/{{ srun.id }}/{{srun.res_pic}}" 
-		 alt="{{ MEDIA_URL }}/users/{{ srun.input_file.name }}/{{srun.input_file.id}}/{{ srun.id }}/{{srun.res_pic}}" />
+	<img src="{{ srun.image.url }}" 
+		 alt="{{ srun.image.url }}" />
 	
 	<p class="development_note">
 	Some debug info:<br>
@@ -24,5 +24,8 @@
 	Iterations: {{ srun.itermax }} <br>
 	Simultaneous runs: {{ srun.runmax }} <br>
 	Local absolute path to input file: {{ srun.input_file.path }}<br>	
+	Local absolute path to run folder: {{ srun.folder }}<br>	
+	Path component of the image : {{ srun.image.url }}<br>
+	URL to image: {{ srun.image.url }}
 	
 {% endblock %}			

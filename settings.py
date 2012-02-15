@@ -52,7 +52,7 @@ SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = os.path.join(SITE_ROOT, 'media')
+MEDIA_ROOT = os.path.join(SITE_ROOT, 'media/')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -110,7 +110,8 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = lstrings.root_urls
 
 TEMPLATE_DIRS = template_dirs = ( 
-    os.path.join(SITE_ROOT, os.path.join('django_proto', 'templates'))
+    os.path.join(SITE_ROOT, 'templates'),
+    os.path.join(SITE_ROOT, os.path.join('django_proto', 'templates')),
 )
 
 INSTALLED_APPS = (
@@ -121,9 +122,9 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
+    'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
+    'django.contrib.admindocs',
     
     # Django app for user authentication: login, etc.
     # Project home: https://bitbucket.org/ubernostrum/django-registration/
@@ -132,12 +133,29 @@ INSTALLED_APPS = (
     # Own apps
     'django_proto',
     'local',
-    'semsep'
+    'semsep',
+    #'upload',
 )
 
 # registration apps own setting. Configures how many days
 # user has to activate account before it expires.
-ACCOUNT_ACTIVATION_DAYS = 7
+ACCOUNT_ACTIVATION_DAYS = 2
+LOGIN_REDIRECT_URL = '/home'
+
+
+# Lets not send any emails yet. Change this later to: 
+#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# E-mail settings. Needed for user registrations' confirmation.
+# Later the site will probably send mails when algorithms runs
+# complete, etc.
+DEFAULT_FROM_EMAIL = lstrings.db_email
+EMAIL_HOST = lstrings.email_host
+EMAIL_HOST_USER = lstrings.email_host_user
+EMAIL_HOST_PASSWORD = lstrings.email_host_pwd
+EMAIL_PORT = lstrings.email_port
+EMAIL_USE_TLS = lstrings.email_tls
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

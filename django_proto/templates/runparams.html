@@ -38,10 +38,19 @@
 	Some debug info: <br>
 	Run file {{ input_file.name }} with id {{ input_file.id }} in Input_files with given parameters. <br>
 	Absolute path to file: {{ input_file.path }} <br>
+	Path component: {{ input_file.file_field.path }} <br>
+	URL to file: {{ input_file.file_field.url }} <br>
 	</p>
 {% endblock %}
 		
 {% block form %}
+	{% if not user.is_authenticated %}
+			<p class="development_note">
+				You have to <a href={% url registration_register %}>register</a> and login 
+				in this version to be able to run algorithms.
+			</p>
+	{% endif %}
+
 	<form action="/run/{{input_file.id}}/" enctype="multipart/form-data" method="post">
 		{% csrf_token %}
 		{{ form.as_p }}

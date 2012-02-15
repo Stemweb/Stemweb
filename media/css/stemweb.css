@@ -191,6 +191,7 @@ table#subpage_index_table
 	padding-left: 5px;
 	display: block;
 	overflow:auto;
+	font-size: 0.8em;
 	background-color: transparent;
 }
 
@@ -268,6 +269,13 @@ p.no_files
 	padding-left: 30px;
 	font-style: italic;
 	
+}
+
+/* Registration apps divs */
+div.registration 
+{
+	padding-left: 10px;
+	width: 50%;
 }
 
 /* DEVELOPMENT SETTINGS */

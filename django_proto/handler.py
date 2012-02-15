@@ -12,6 +12,21 @@ import Stemweb.settings as settings
 # Locally relevant default path for uploaded files. 
 default_upload_path = os.path.join(settings.MEDIA_ROOT, 'users')
 
+def upload_path(instance, filename):
+    uppath = os.path.join('users', instance.user.username)
+    uppath = os.path.join(uppath, 'files')
+    uppath = os.path.join(uppath, instance.file_ext)
+    uppath = os.path.join(uppath, id_generator())
+    uppath = os.path.join(uppath, filename)
+    instance.path = os.path.join(settings.MEDIA_ROOT, uppath)
+    
+    return uppath
+
+def image_path(instance, filename):
+    uppath = os.path.join(instance.folder, 'besttree.png')
+    return uppath
+    
+
 # 	Semiunique ID generator -- copypaste code.
 #
 #	Generates random string to be added for example
@@ -76,17 +91,28 @@ def build_filepath(upfile, file_id):
 # 
 #    Returns path to run's storage folder if it has been
 #    succesfully created. Otherwise returns -1
-def build_runpath(runfile, run_id):  
-    path = os.path.dirname(runfile)          
-    uniquepath = os.path.join(path, '%s' % (run_id))                  
-    if not os.path.exists(uniquepath):                # Create dir if it doesn't exist.
-        try:                                          # (It really shouldn't)
-            os.mkdir(uniquepath)                                    
-        except:
-            print 'Couldn\'t create dir %s' % (uniquepath)
-            return -1
-
-    return uniquepath  
+def build_run_folder(user, input_file_id, script_name):  
+    uppath = os.path.join('users')
+    uppath = os.path.join(uppath, user.username)
+    uppath = os.path.join(uppath, 'runs')
+    uppath = os.path.join(uppath, script_name)    # Refactor with actual script's name
+    uppath = os.path.join(uppath, '%s' % input_file_id)
+    uppath = os.path.join(uppath, id_generator())
+    
+    try:
+        os.makedirs(uppath)
+    except:
+        import time
+        log_path = os.path.join(settings.MEDIA_ROOT, 'log_folder.txt')
+        f = open(log_path, 'a')
+        line = time.strftime("%x %X") +  '\t Could not create folder %s \n' % uppath
+        f.write(line)
+        line = 'test %s \n' % os.path.abspath(uppath)
+        f.write(line)
+        f.close()
+        return -1
+    
+    return uppath
   
 #	Calculate size of given dir.
 #
