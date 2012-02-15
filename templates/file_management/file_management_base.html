@@ -1,0 +1,65 @@
+{% extends "home.html" %}
+
+{% block title %}
+	{{ site.name }} - files
+{% endblock %}
+
+{% block script_and_css %}
+	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/file_management.css" />
+	<script src="{{ MEDIA_URL }}javascript/file_management.js" type="text/javascript"></script>
+
+{% endblock %}
+
+{% block subpage_index %}
+
+	<div id="own_files_tabs" class="file_tabs left_file_tabs">  
+	  
+		<ul class="tabnav">    
+			<li><a href="#own_files">Own files</a></li>  
+			<li><a href="#upload">Upload</a></li>  
+		</ul>  
+		  
+		<div id="own_files" class="file_management_tab">  
+			{% block own_files_tab_1 %}
+			 	{% include "file_management_users_files.html" with users_files=files %}
+			 {% endblock %}
+		</div>  
+		  
+		<div id="upload" class="file_management_tab">  
+		 	{% block own_files_tab_2 %}
+		 	
+		 	{% endblock %}
+		</div>
+	</div>
+	
+{% endblock %}
+
+
+{% block subpage_content %}
+
+	<div id="file_management_tabs" class="file_tabs">  
+	  
+		<ul class="tabnav">  
+			<li><a href="#info">Info</a></li>  
+			<li><a href="#previous_runs">Runs</a></li>  
+			<li><a href="#new_run">New run</a></li>  
+		</ul>  
+		  
+		<div id="info" class="file_management_tab">  
+			{% block file_management_tab_1 %}
+				{% include "file_management_index.html" %}
+			{% endblock %}
+		</div>
+		  
+		<div id="previous_runs" class="file_management_tab">  
+			{% block file_management_tab_2 %}
+			 	
+			 {% endblock %}
+		</div>  
+		  
+		<div id="new_run" class="file_management_tab">  
+		 	<p></p>
+		</div>
+	</div>
+	
+{% endblock %}

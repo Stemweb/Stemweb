@@ -21,6 +21,8 @@ urlpatterns = patterns('',
     # https://bitbucket.org/ubernostrum/django-registration/src/tip/docs/quickstart.rst
     (r'^accounts/', include('registration.backends.default.urls')),
     
+    (r'^files/', include('file_management.urls')),
+    
     (r'^$', 'django_proto.views.home'),
     
     # Uncomment the admin/doc line below to enable admin documentation:

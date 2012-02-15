@@ -1,0 +1,111 @@
+
+.file_tabs 
+{  
+	display:block;
+	overflow: auto;
+	padding: 10px;
+	border: 1px solid #186666;
+	border-radius: 15px;
+	
+	background: rgba(72, 176, 176, 0.4);
+	margin-right: 10px;
+	margin-left: 0px;
+	margin-top: 5px;
+	margin-bottom: 55px;  
+}
+
+.left_file_tabs
+{
+	margin-left: 10px;
+	margin-right: 0px;
+	background: rgba(27, 122, 122, 0.6);
+}
+
+.file_tabs a 
+{  
+	color: #222;  
+	text-decoration: none;  
+}  
+  
+.file_tabs a:hover 
+{  
+	color: #009;  
+	text-decoration: underline;  
+}
+
+.tabnav 
+{
+	padding: 0px;
+	padding-left: 15px;
+	padding-top: 6px;
+	border: 0px;
+	margin: 0px;
+}
+  
+.tabnav li 
+{  
+	display: inline;  
+	list-style: none;  
+	padding-right: 5px;
+	border: 0px;
+	padding-bottom: 0px;
+	margin: 0px;
+}  
+  
+.tabnav li a 
+{  
+	text-decoration: none;  
+	text-variant: small-caps;
+	font-size: 1em;
+	color: #222;   
+	padding-top: 4px;
+	padding-left: 5px;
+	padding-right: 5px;  
+	padding-bottom: 0px;
+	outline: none;  
+}
+
+.tabnav li a:hover, .tabnav li a:active, .tabnav li.ui-tabs-selected a
+{  
+	background-image: linear-gradient(bottom, rgb(222,219,193) 37%, rgb(247,245,232) 84%);
+	background-image: -o-linear-gradient(bottom, rgb(222,219,193) 37%, rgb(247,245,232) 84%);
+	background-image: -moz-linear-gradient(bottom, rgb(222,219,193) 37%, rgb(247,245,232) 84%);
+	background-image: -webkit-linear-gradient(bottom, rgb(222,219,193) 37%, rgb(247,245,232) 84%);
+	background-image: -ms-linear-gradient(bottom, rgb(222,219,193) 37%, rgb(247,245,232) 84%);
+	
+	background-image: -webkit-gradient(
+		linear,
+		left bottom,
+		left top,
+		color-stop(0.37, rgb(222,219,193)),
+		color-stop(0.84, rgb(247,245,232))
+	);
+	
+	color: #222;  
+	text-decoration: none;  
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px; 
+	border-bottom: 0px;
+	padding-bottom: 0px;
+	margin-bottom: 0px;
+}  
+  
+.file_management_tab 
+{  
+	overflow:auto;
+	margin-top: 0px;  
+	background: rgba(255,255,255, 0.9);  
+	border: 1px solid #dedbd1;
+	border-radius: 10px;
+	padding: 5px;
+	padding-top: 0px;
+	font-size: 0.8em;
+}  
+  
+.file_management_tab li {   
+margin-left: 20px;  
+}  
+  
+.ui-tabs-hide {  
+display: none;  
+}  

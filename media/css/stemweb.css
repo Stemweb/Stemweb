@@ -177,7 +177,7 @@ div#main_content
 
 div#subpage_index
 {
-	width: 25%;
+	width: 26%;
 	display: block;
 	overflow: auto;
 	float: left;
@@ -206,8 +206,8 @@ div#subpage_content
 {
 	display: block;
 	float: right;
-	left: 30%;
-	width: 70%;
+	left: 27%;
+	width: 73%;
 	background-color: transparent;
 }
 

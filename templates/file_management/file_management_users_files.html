@@ -1,0 +1,14 @@
+{% block users_files %}
+
+	<div>{{ "Upload time"|center:"20"}}{{ "Name"|center:"30" }}</div>
+	
+	{% for f in users_files %}
+		<div>{{ f.time|date:"Y-m-d H:i"|center:"20" }}{{ f.name|rjust:"30" }}</div>
+
+
+
+	{% empty %}
+		No uploaded files.
+	{% endfor %}
+
+{% endblock %}

@@ -18,6 +18,10 @@
     	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
     	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
     	
+    	{% block script_and_css %}
+    	
+    	{% endblock %}
+    	
     	<!-- Local javascript files -->
     	<!--  
     		<script src="{{ MEDIA_URL }}javascript/" type="text/javascript"></script>
@@ -88,9 +92,9 @@
 			
 				<table id="menu_table">
 				<tr>
-					<td class="menu_item"><a class="menu_link" href={% url stemweb_home_url %}>Home</a></td>
+					<td class="menu_item"><a class="menu_link" href="/home">Home</a></td>
 					<td class="menu_item"><a class="menu_link">Algorithms</a></td>
-					<td class="menu_item"><a class="menu_link">Files</a></td>
+					<td class="menu_item"><a class="menu_link" href="{% url file_management_base_url %}">Files</a></td>
 					<td class="menu_item"><a class="menu_link">Groups</a></td>
 					
 					{% if user.is_authenticated %}

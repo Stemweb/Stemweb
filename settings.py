@@ -110,8 +110,11 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = lstrings.root_urls
 
 TEMPLATE_DIRS = template_dirs = ( 
-    os.path.join(SITE_ROOT, 'templates'),
-    os.path.join(SITE_ROOT, os.path.join('django_proto', 'templates')),
+    os.path.join(SITE_ROOT, 'templates/'),
+    os.path.join(SITE_ROOT, 'templates/stemweb'),
+    os.path.join(SITE_ROOT, 'templates/registration'),
+    os.path.join(SITE_ROOT, 'templates/file_management'),
+   
 )
 
 INSTALLED_APPS = (
@@ -135,6 +138,7 @@ INSTALLED_APPS = (
     'local',
     'semsep',
     #'upload',
+    'file_management',
 )
 
 # registration apps own setting. Configures how many days
