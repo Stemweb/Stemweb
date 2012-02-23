@@ -1,0 +1,94 @@
+django-recaptcha-works README
+========================================================================
+django-recaptcha-works provides a Django form field that integrates the
+reCaptcha service. It is released under the terms of the BSD License.
+
+This reCaptcha implementation has no extra requirements other than Django.
+
+The app is based on the code snippet #1644 as published by Chris Beaven
+(aka SmileyChris) on:
+  - http://djangosnippets.org/snippets/1644/
+
+The original code has been further modified by George Notaras in order to
+implement the following:
+
+- transform the snippet to a Django application release
+- add SSL support for both the captcha presentation and the communication
+  with the reCaptcha servers 
+- migration to the Google-hosted reCaptcha API
+- extension of the available application settings
+- addition of a decorator that adds the remote IP to the submitted form
+
+Project Development Web Site:
+ * https://www.codetrax.org/projects/django-recaptcha-works
+
+Public Source Code Repository:
+ * https://source.codetrax.org/hgroot/django-recaptcha-works
+
+
+How this distribution package is organized
+========================================================================
+The following list outlines the kind of information each of the files of this
+distribution package contains:
+
+ * AUTHORS  : List of all authors and contributors.
+ * BUGS     : Information about how to file bug reports or ask for new features.
+ * HELP     : Instructions on how to use this software.
+ * INSTALL  : Information on how to install this application.
+ * LICENSE  : The terms of the license that governs your use of this software.
+ * NOTICE   : Copyright, trademark, attribution and sponsorship information.
+ * SUPPORT  : Information on how to get support for this software.
+ * README   : This file.
+
+
+How to read the HELP document
+========================================================================
+The HELP document is written in reStructuredText (rst). Although
+reStructuredText is an easy-to-read plain text markup format, it is
+recommended to convert it to HTML for a better reading experience.
+
+In order to convert this document to HTML you need `docutils`, which
+you can install in your system using `pip`::
+
+    pip install docutils
+
+Or `easy_install`:
+
+    easy_install docutils
+
+Once `docutils` is installed, you can use the `rst2html.py` utility to
+perform the conversion:
+
+    rst2html.py HELP help.html
+
+Then use any web browser to view the exported `help.html` file.
+
+
+License
+========================================================================
+Licensed under the BSD License.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+    1. Redistributions of source code must retain the above copyright notice, 
+       this list of conditions and the following disclaimer.
+    
+    2. Redistributions in binary form must reproduce the above copyright 
+       notice, this list of conditions and the following disclaimer in the
+       documentation and/or other materials provided with the distribution.
+
+    3. Neither the name of Django nor the names of its contributors may be used
+       to endorse or promote products derived from this software without
+       specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

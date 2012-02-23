@@ -47,3 +47,6 @@ email_host_user = ''    # Username on email server         cs-account@cs.helsink
 email_host_pwd = ''     # Password on email server         your cs-account pwd 
 email_port = ''         # Port of the email server         587
 email_tls = ''          # Does the email server use tls.   True
+
+recaptcha_public_key  = ''
+recaptcha_private_key = ''

@@ -1,0 +1,13 @@
+include AUTHORS
+include BUGS
+include HELP
+include INSTALL
+include LICENSE
+include NOTICE
+include README
+include SUPPORT
+include MANIFEST.in
+include requirements.txt
+include setup.cfg
+include setup.py
+recursive-include src/recaptcha_works *.py

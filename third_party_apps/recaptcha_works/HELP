@@ -1,0 +1,93 @@
+django-recaptcha-works Help
+===========================
+This file contains detailed information on how to configure and use
+``django-recaptcha-works``.
+
+
+reCaptcha Service
+=================
+In order to use this application you need a valid reCaptcha key pair, which
+can be obtained for free from::
+
+    http://www.google.com/recaptcha
+
+ 
+Installation
+============
+In your Django project’s settings module, add ``recaptcha_works`` to your
+``INSTALLED_APPS`` setting::
+
+    INSTALLED_APPS = (
+        ...
+        'recaptcha_works',
+    )
+
+
+Configuration
+=============
+The ``recaptcha_works`` application accepts the following configuration
+options:
+
+RECAPTCHA_PUBLIC_KEY
+  The public key as obtained from *google.com/recaptcha*
+
+RECAPTCHA_PRIVATE_KEY
+  The private key as obtained from *google.com/recaptcha*
+
+RECAPTCHA_USE_SSL
+  Boolean setting (``True``/``False``). Enables/disables secure communication
+  with the recaptcha servers.
+
+RECAPTCHA_OPTIONS
+  A dictionary with the recaptcha customization options.
+  Read the following page for more information:
+  http://code.google.com/apis/recaptcha/docs/customization.html
+
+RECAPTCHA_VALIDATION_OVERRIDE
+  Boolean setting (``True``/``False``). By default, this is set to ``False``.
+  When set to ``True``, the reCaptcha field validation is overridden. This
+  setting is not meant to be enabled in production, but only for application
+  testing. Also, note that this is a **global switch**, which, when enabled,
+  overrides validation of the reCaptcha field on all reCaptcha-protected forms.
+  To override the validation on a single form, set the ``required=False``
+  attribute on the reCaptcha field on that specific form.
+
+Example configuration for production::
+
+    RECAPTCHA_PUBLIC_KEY  = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+    RECAPTCHA_PRIVATE_KEY = 'YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY'
+    RECAPTCHA_USE_SSL = True
+    RECAPTCHA_OPTIONS = {
+        'theme': 'white',
+        'lang': 'en',
+        'tabindex': 0,
+    }
+
+
+Usage
+=====
+*django-recaptcha-works* provides a form field which can be attached to your
+forms. Implementing a reCaptcha protected form is a *two step* process.
+
+**Step 1**: Create the reCaptcha protected form::
+
+    from django import forms
+    from recaptcha_works.fields import RecaptchaField
+    
+    class RecaptchaProtectedForm(forms.Form):
+        # ... other form fields
+        recaptcha = RecaptchaField(label='Human test', required=True)
+
+**Step 2**: Use the ``fix_recaptcha_remote_ip`` decorator around the view that
+processes the form data. This is required because the remote IP is a mandatory
+argument for the verification of the information the user has submitted in the
+reCaptcha field, but it cannot be added to the form field automatically due to
+limitations of the Django framework::
+
+    from recaptcha_works.decorators import fix_recaptcha_remote_ip
+    
+    @fix_recaptcha_remote_ip
+    def view(request, *args, **kwargs):
+        if request.method == 'POST':
+            # ... process the form data here
+

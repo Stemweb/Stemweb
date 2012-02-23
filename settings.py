@@ -1,11 +1,14 @@
 # Import locally configured settings 
 from local import lstrings
 import os
+import sys
 
 # Django settings for stemweb project.
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+
+
 
 ADMINS = (
     (lstrings.db_admin, lstrings.db_email),
@@ -24,6 +27,8 @@ DATABASES = {
     }
 }
 
+SITE_ID = 1
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -37,8 +42,6 @@ TIME_ZONE = 'Europe/Helsinki'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-GB'
 
-SITE_ID = 1
-
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
 USE_I18N = True
@@ -46,6 +49,10 @@ USE_I18N = True
 # If you set this to False, Django will not format dates, numbers and
 # calendars according to the current locale
 USE_L10N = True
+
+# Lets force site.id to 1 so that fixtures/initial_data will change site's 
+# name and domain to right ones with every syncdb command.
+SITE_ID = 1
 
 # Root folder of the site
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
@@ -117,6 +124,10 @@ TEMPLATE_DIRS = template_dirs = (
    
 )
 
+# Add all third party apps into python path.
+THIRD_PARTY_APPS_DIR = os.path.join(SITE_ROOT, 'third_party_apps')
+sys.path.insert(0, THIRD_PARTY_APPS_DIR) 
+
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -124,14 +135,8 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Uncomment the next line to enable the admin:
     'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
-    
-    # Django app for user authentication: login, etc.
-    # Project home: https://bitbucket.org/ubernostrum/django-registration/
-    'registration',
     
     # Own apps
     'django_proto',
@@ -140,6 +145,8 @@ INSTALLED_APPS = (
     #'upload',
     'file_management',
 )
+
+
 
 # registration apps own setting. Configures how many days
 # user has to activate account before it expires.
@@ -160,6 +167,19 @@ EMAIL_HOST_USER = lstrings.email_host_user
 EMAIL_HOST_PASSWORD = lstrings.email_host_pwd
 EMAIL_PORT = lstrings.email_port
 EMAIL_USE_TLS = lstrings.email_tls
+
+# Recaptcha_works options
+RECAPTCHA_PUBLIC_KEY  = lstrings.recaptcha_public_key
+RECAPTCHA_PRIVATE_KEY = lstrings.recaptcha_private_key
+RECAPTCHA_VALIDATION_OVERRIDE = True
+RECAPTCHA_USE_SSL = True
+RECAPTCHA_OPTIONS = {
+    'theme': 'white',
+    'lang': 'en',
+    'tabindex': 0,
+}
+
+
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

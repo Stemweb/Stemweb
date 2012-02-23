@@ -1,4 +1,4 @@
-
+/* Main div for tabs. Contains "navigation bar" and tab-contents. */
 .file_tabs 
 {  
 	display:block;
@@ -19,6 +19,7 @@
 	margin-left: 10px;
 	margin-right: 0px;
 	background: rgba(27, 122, 122, 0.6);
+	
 }
 
 .file_tabs a 
@@ -33,6 +34,7 @@
 	text-decoration: underline;  
 }
 
+/* Navigation bar for all the tabs. */
 .tabnav 
 {
 	padding: 0px;
@@ -90,6 +92,7 @@
 	margin-bottom: 0px;
 }  
   
+ /* Contents of the single tab. */
 .file_management_tab 
 {  
 	overflow:auto;
@@ -99,13 +102,93 @@
 	border-radius: 10px;
 	padding: 5px;
 	padding-top: 0px;
-	font-size: 0.8em;
-}  
+	min-height: 200px;
+}
+
+.file_management_tab h1
+{
+	border-bottom: 1px solid black;
+	
+}
   
 .file_management_tab li {   
 margin-left: 20px;  
 }  
   
+ /* Tells to jQueryUI's tabs-methon what happens when tab is not shown. */
 .ui-tabs-hide {  
 display: none;  
-}  
+}
+
+/* Stylings for the file and run-tables. */
+
+.file_table
+{
+	border-collapse: collapse; 	/* Collapse borders into single line. */
+	font-size: 0.8em;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+.file_table th /* First row with column names */	
+{
+	font-variant: small-caps;
+	font-weight: bold;
+	border-bottom: 1px solid black;
+}
+
+.file_table tr.file_table_row1:hover, .file_table tr.file_table_row2:hover
+{
+	background: rgba(222,219,193, 0.5)
+	
+}
+
+.file_table_row1
+{
+	
+	
+}
+
+.file_table_row2
+{
+	background: rgba(72, 176, 176, 0.2);	
+}
+
+.file_table td
+{
+	
+	
+}
+
+.file_table td.upload_time, .file_table td.file_name
+{
+	width: 50%;	
+	text-align:center;
+	font-size: 0.85em;
+	padding-right: 2px;
+	padding-left: 2px;
+}
+
+.file_table td.file_name
+{
+	border-left: 1px solid black;
+	
+	
+}
+
+.file_table_checkbox
+{
+	width: 13px;
+	
+}
+
+.delete_files
+{
+	margin-left: 10%;
+	
+}
+
+
+

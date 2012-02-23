@@ -1,4 +1,4 @@
-/* GENERAL SETTINGS */
+/* GENERAL STYLINGS */
 html
 {
 	height:100%; 
@@ -52,10 +52,7 @@ a:hover
 {
 	text-decoration: none;
 	color: #8FE3DC;
-	
 }
-	
-
 
 /* BANNER AT THE TOP OF THE SITE */
 div#main_banner_and_menu_padding
@@ -69,14 +66,17 @@ div#main_banner_and_menu_padding
 div#main_banner_and_menu 
 {
 	position: fixed;
+	height: 35px;
+	width: 100%;
+	min-width: 600px;
+	
 	margin-top: 0px;
 	margin-down: 0px;
 	margin-left: auto;
 	margin-right: auto;
 	padding: 0px;
 	border: 0px;
-	height: 35px;
-	width: 100%;
+	
 	text-align: center;
 	
 	background-image: linear-gradient(right , #186666 0%, #48B0B0 67%);
@@ -99,33 +99,70 @@ div#main_banner_and_menu
 div#main_banner 
 {
 	position: fixed;
-	top: 5px;
+	height: 35px;
+	width: 60%;
+	top: 0px;
 	left: 0px;
+	min-width: 360px;
+	overflow: hidden;
+	
 	padding: 0px;
-	padding-left: 20px;
+	padding-left: 0px;
 	border: 0px;
+	
 	font-size: 1em;
 	font-family: Verdana;
 	text-align: left;
 	color: white;
 	letter-spacing: 0.05em;
-	width: 60%;
+
+	background-image: linear-gradient(bottom, rgba(0, 0, 0, 0.3) 0%, rgba(255,255,255, 0.1) 100%);
+	background-image: -o-linear-gradient(bottom, rgba(0, 0, 0, 0.3) 0%, rgba(255,255,255, 0.1) 100%);
+	background-image: -moz-linear-gradient(bottom, rgba(0, 0, 0, 0.3) 0%, rgba(255,255,255, 0.1) 100%);
+	background-image: -webkit-linear-gradient(bottom, rgba(0, 0, 0, 0.3) 0%, rgba(255,255,255, 0.1) 100%);
+	background-image: -ms-linear-gradient(bottom, rgba(0, 0, 0, 0.3) 0%, rgba(255,255,255, 0.1) 100%);
+
+	background-image: -webkit-gradient(
+		linear,
+		left bottom,
+		left top,
+		color-stop(0, rgba(0, 0, 0, 0.3)),
+		color-stop(1, rgba(255,255,255, 0.1))
+	    );
 }
 
 table#menu_table 
 {
-	padding: 0px;
-	border: 0px;
-	margin: 0px;
 	position: relative;
 	left: 60%;
-	top: 7px;
+	top: 0px;
+	height:35px;
+	width: 40%;
+	min-width: 240px;
+	
+	padding: 0px;
 	padding-right: 15px;
+	border: 0px;
+	margin: 0px;
+	
 	font-family: Verdana;
 	text-align:	center;	
 	font-size: 0.7em;
-	width: 40%;
 	color: white;
+	
+	background-image: linear-gradient(bottom, rgba(0, 0, 0, 0.3) 0%, rgba(255,255,255, 0.1) 100%);
+	background-image: -o-linear-gradient(bottom, rgba(0, 0, 0, 0.3) 0%, rgba(255,255,255, 0.1) 100%);
+	background-image: -moz-linear-gradient(bottom, rgba(0, 0, 0, 0.3) 0%, rgba(255,255,255, 0.1) 100%);
+	background-image: -webkit-linear-gradient(bottom, rgba(0, 0, 0, 0.3) 0%, rgba(255,255,255, 0.1) 100%);
+	background-image: -ms-linear-gradient(bottom, rgba(0, 0, 0, 0.3) 0%, rgba(255,255,255, 0.1) 100%);
+	
+	background-image: -webkit-gradient(
+		linear,
+		left bottom,
+		left top,
+		color-stop(0, rgba(0, 0, 0, 0.3)),
+		color-stop(1, rgba(255,255,255, 0.1))
+	);	
 }
 
 a.menu_link
@@ -136,15 +173,21 @@ a.menu_link
 	overflow: inherit;
 }
 
+a.menu_link:hover, a.menu_link:active
+{
+	text-decoration: underline;	
+}
+
 td.menu_item
 {
+	width: 8%;
+	top: 5px;
+	left: 0px;
+	
 	padding: 0px;
 	border: 0px;
 	margin: 0px;
-	top: 5px;
-	left: 0px;
 	overflow: hidden;
-	width: 8%;
 }
 
 
@@ -153,11 +196,14 @@ div#main_content
 {
 	position: relative;
 	display: block;
-	overflow:auto;
 	width: 100%;
 	height: 100%;
 	max-height: 100%;
+	min-width: 600px;
+	overflow:auto;
+	
 	font-family: Verdana;
+	
 	background-image: linear-gradient(right , #EFF7F7 25%, #CDE9EB 70%, #E6EDED 75%);
 	background-image: -o-linear-gradient(right , #EFF7F7 25%, #CDE9EB 70%, #E6EDED 75%);
 	background-image: -moz-linear-gradient(right , #EFF7F7 25%, #CDE9EB 70%, #E6EDED 75%);
@@ -171,25 +217,25 @@ div#main_content
 		color-stop(0.25, #EFF7F7),
 		color-stop(0.7, #CDE9EB),
 		color-stop(0.75, #E6EDED)
-	);
-	
+	);	
 }
 
 div#subpage_index
 {
-	width: 26%;
 	display: block;
-	overflow: auto;
-	float: left;
+	width: 26%;
 	top: 0px;
 	left: 0px;
+	float: left;
+	
+	overflow: auto;
 	background-color: transparent;
 }
 
 table#subpage_index_table 
 {
-	padding-left: 5px;
 	display: block;
+	padding-left: 5px;
 	overflow:auto;
 	font-size: 0.8em;
 	background-color: transparent;
@@ -199,7 +245,6 @@ td.subpage_index_header
 {
 	font-variant: small-caps;
 	font-size: 1.1em;
-	
 }
 
 div#subpage_content
@@ -215,12 +260,14 @@ div#subpage_content
 div#footer 
 {
 	position:fixed;
+	width:100%;
+   	height: 50px;
+   	bottom:0;
+   	
 	border: 0;
 	margin: 0;
 	padding: 0;
-   	bottom:0;
-   	width:100%;
-   	height: 50px;
+
    	text-align: center;
    	opacity: 0.55;
 	
@@ -243,32 +290,30 @@ div#footer
 
 div#footer_padding
 {
-
 	display: block;
 	height: 50px;
 	max-height: 50px;
 	width: 100%;
+	bottom: 0px;
 }
 
 /* HOME.HTML */
 div.intro 
 {
 	padding-left: 10px;
-	padding-right: 100px;
+	padding-right: 200px;
 }
 
 div.upload_form
 {
 	padding-top: 15px;
 	padding-left: 25px;
-	
 }
 
 p.no_files
 {
 	padding-left: 30px;
 	font-style: italic;
-	
 }
 
 /* Registration apps divs */

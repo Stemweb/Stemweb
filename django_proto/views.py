@@ -1,17 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
+
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.template import RequestContext, loader
 from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.decorators import user_passes_test
+
+from recaptcha_works.decorators import fix_recaptcha_remote_ip
+
 from forms import Upload_file
 from forms import Run_file
 import models
 import handler
-import os
 import rpy2_scripts
 from Stemweb import settings
 
@@ -27,6 +30,7 @@ def home(request):
 # Handles upload form. If gets POST-data will upload and save file 
 # in server and then redirect to view to run_script that file.
 @login_required
+@fix_recaptcha_remote_ip
 def upload(request):
     if request.method == 'POST':
         form = Upload_file(request.POST, request.FILES)
@@ -39,12 +43,15 @@ def upload(request):
             
             input_file.save() # Save to be sure input_file.id is created                                      
             return HttpResponseRedirect('/runparams/%s' % (input_file.id))    # And redirect to run_script that file
-        else:
-            return HttpResponseRedirect('/server_error')
-                
+        #else:
+            #return HttpResponseRedirect('/server_error')
     else:
         form = Upload_file()
-        return HttpResponseRedirect('/home')
+            
+    context = RequestContext(request)            
+    return render_to_response('home.html',
+                              { 'form': form },
+                              context_instance=context)
     
 # Handles running of one file.
 def runparams(request, file_id):

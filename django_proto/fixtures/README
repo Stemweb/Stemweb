@@ -1,0 +1,3 @@
+All initial data that django reads to database with syncdb command is in initial_data.json
+
+Basically we just want to add domain and human readable name of the site to site.id = 1.
