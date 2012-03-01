@@ -1,0 +1,69 @@
+# adding root between i7 and GN.
+digraph G {
+label="sankoff-score 902";
+	edge [style=bold dir=none];
+	subgraph 1 {
+		node [shape=plaintext,width=0,align=right,margin=0.02,0];
+		rank=same;
+		n3 [pos="0.208333,0.000000!" height=0.000000 label="AW" style=filled fillcolor=oldlace];
+		n6 [pos="0.208333,0.250000!" height=0.000000 label="CC" style=filled fillcolor=oldlace];
+		n4 [pos="0.541667,0.500000!" height=0.000000 label="DL" style=filled fillcolor=oldlace];
+		n5 [pos="0.875000,0.750000!" height=0.000000 label="HS" style=filled fillcolor=oldlace];
+		n2 [pos="1.208333,1.000000!" height=0.000000 label="DF" style=filled fillcolor=oldlace];
+		n1 [pos="1.541667,1.250000!" height=0.000000 label="GN" style=filled fillcolor=oldlace];
+	}
+	node [shape=box width=0 fixedsize=1];
+	subgraph 2 {
+		rank=same;
+		n9 [pos="0.966667,0.125000!" height=0.250000 label="" style=filled fillcolor=oldlace];
+		nn9 [pos="0.966667,0.250000!" height=0 style=invis label=""];
+		ns9 [pos="0.966667,0.000000!" height=0 style=invis label=""];
+	}
+	subgraph 3 {
+		rank=same;
+		n10 [pos="1.300000,0.312500!" height=0.375000 label="" style=filled fillcolor=oldlace];
+		nn10 [pos="1.300000,0.500000!" height=0 style=invis label=""];
+		ns10 [pos="1.300000,0.125000!" height=0 style=invis label=""];
+	}
+	subgraph 4 {
+		rank=same;
+		n7 [pos="1.633333,0.531250!" height=0.437500 label="" style=filled fillcolor=oldlace];
+		nn7 [pos="1.633333,0.750000!" height=0 style=invis label=""];
+		ns7 [pos="1.633333,0.312500!" height=0 style=invis label=""];
+	}
+	subgraph 5 {
+		rank=same;
+		n8 [pos="1.966667,0.765625!" height=0.468750 label="" style=filled fillcolor=oldlace];
+		nn8 [pos="1.966667,1.000000!" height=0 style=invis label=""];
+		ns8 [pos="1.966667,0.531250!" height=0 style=invis label=""];
+	}
+	subgraph 6 {
+		rank=same;
+		n11 [pos="2.300000,1.007812!" height=0.484375 label="" style=filled fillcolor=oldlace];
+		nn11 [pos="2.300000,1.250000!" height=0 style=invis label=""];
+		ns11 [pos="2.300000,0.765625!" height=0 style=invis label=""];
+	}
+	subgraph 7 {
+		rank=same;
+	}
+	n1 -> nn11;
+	n11 -> nn11;
+	n2 -> nn8;
+	n8 -> nn8;
+	n3 -> ns9;
+	n9 -> ns9;
+	n4 -> nn10;
+	n10 -> nn10;
+	n5 -> nn7;
+	n7 -> nn7;
+	n6 -> nn9;
+	n9 -> nn9;
+	n7 -> ns8;
+	n8 -> ns8;
+	n8 -> ns11;
+	n11 -> ns11;
+	n9 -> ns10;
+	n10 -> ns10;
+	n10 -> ns7;
+	n7 -> ns7;
+}
