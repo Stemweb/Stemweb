@@ -1,18 +1,10 @@
 #!/bin/bash
 
 # input folder output folder iteration 
-folderin=test
-folderres=res
+foldersan= /Users/slinkola/STAM/Stemweb/algorithms/rhm/
+folderin=/Users/slinkola/STAM/Stemweb/algorithms/rhm/test/
+folderres=/Users/slinkola/STAM/Stemweb/algorithms/rhm/res/
 iterationnumber=250
- 
-# mk output folder
-if [ -d "$folderres" ]
-then
-	echo "result folder already exist!"
-else
-	mkdir $folderres
-fi
-
 
 # logfiles
 echo 'start at: ' > $folderin.log
@@ -24,8 +16,8 @@ echo $folderres >> $folderin.log
 
 
 # run
-./binarysankoff $folderin/$fn $iterationnumber 1
-./graph.sh
+/Users/slinkola/STAM/Stemweb/algorithms/rhm/binarysankoff $folderin/$fn $folderres $iterationnumber 1
+/Users/slinkola/STAM/Stemweb/algorithms/rhm/graph.sh
 
 
 # logfiles
@@ -35,9 +27,9 @@ echo `date` >> $folderin.log
 
 # save results
 mv $folderin.log $folderres
-mv sankoff-tree_0.dot $folderin.sankoff-tree_0.dot
-mv $folderin.sankoff-tree_0.dot $folderres
-mv sankoff-tree_noint.dot $folderin.ankoff-tree_noint.dot
+mv sankoff-tree_0.dot $folderres/sankoff-tree_0.dot
+mv $folderin/sankoff-tree_0.dot $folderres
+mv sankoff-tree_noint.dot $folderin.sankoff-tree_noint.dot
 mv $folderin.ankoff-tree_noint.dot $folderres
 mv sankoff-tree.tre $folderin.sankoff-tree.tre
 mv $folderin.sankoff-tree.tre $folderres

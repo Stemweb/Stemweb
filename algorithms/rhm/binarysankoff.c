@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <zlib.h>
+#include <Python.h>
 
 //#define COPY_AND_REPLACE
 
@@ -30,6 +31,7 @@ struct node_st {
   int rightcost;
 };
 
+char *outfolder;
 FILE *fout;
 struct node_st *tree;
 char **names;
@@ -1321,16 +1323,17 @@ int main(int argc, char *argv[])
 {
   set_random_seed();
   
-  if (argc < 4)
+  if (argc < 5)
     usage(argv[0]);
 
   read_file(argv[1]);
-  strap = atoi(argv[3]);
+  outfolder = argv[2];
+  strap = atoi(argv[4]);
   for (boot = 0; boot < strap; boot++)
   {
     init_bootstrap();
     init_tree();
-    optimize_tree(atoi(argv[2]));
+    optimize_tree(atoi(argv[3]));
     free_tree(tree);
   }
   free_mem();

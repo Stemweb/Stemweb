@@ -5,6 +5,9 @@
 from rpy2 import robjects
 import saveres
 import os
+import subprocess
+
+from Stemweb.algorithms.rhm import binarysankoff
 
 #	Execute f81.r with given arguments
 #
@@ -25,7 +28,7 @@ def f81(run_args = None):
     # Probably could check that all running arguments are in there.
   
     R = robjects.r                                  # Singleton instance of R
-    source = r'%s/semsep/allf81.r' % (project_path) # Define source
+    source = r'%s/algorithms/semsep/allf81.r' % (project_path)
     R.source(source)                            
     
     runf81 = R['runf81']                            # Run script
@@ -37,6 +40,29 @@ def f81(run_args = None):
     saveres.writefile(Rres=f81res, outfolder = run_args['outfolder'])
 
     return 1
+
+def rhm_test(run_args = None):
+    
+    if run_args is None:
+        run_args = dict()
+        run_args['infolder'] = os.path.join(project_path, 'algorithms', 'rhm', 'test')
+        run_args['outfolder'] = os.path.join(project_path, 'algorithms', 'rhm', 'res')
+        run_args['itermaxin'] = 250
+        run_args['strap'] = 1
+        
+    if not os.path.exists(run_args['outfolder']):
+        os.mkdir(run_args['outfolder'])
+    
+    rhm_path = os.path.join(project_path, 'algorithms', 'rhm', 'rhmrun.sh')
+    try:
+        #subprocess.call(rhm_path)
+        binarysankoff.main(run_args)
+    except:
+        log_path = os.path.join(os.path.dirname(rhm_path),'log')
+        log_file = open(log_path)
+        log_file.write('Could not run script in %s' % (rhm_path))
+        log_file.close()
+        
 
 # Small main program to test code
 def main():

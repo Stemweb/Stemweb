@@ -15,7 +15,7 @@ from forms import Upload_file
 from forms import Run_file
 import models
 import handler
-import rpy2_scripts
+import run_scripts
 from Stemweb import settings
 
 # Default view of the prototype.
@@ -84,7 +84,8 @@ def run_script(request, file_id):
                              'infile'    : ifile.path, 
                              'outfolder' : abs_folder})
             
-            rpy2_scripts.f81(run_args)     
+            run_scripts.f81(run_args)  
+            run_scripts.rhm_test()
                
             logpath = os.path.join(abs_folder, 'run_log.txt')
             log_file = open(logpath, 'w')    
