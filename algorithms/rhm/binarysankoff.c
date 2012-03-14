@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <zlib.h>
-#include <Python.h>
+//#include <Python.h>
 
 //#define COPY_AND_REPLACE
 
@@ -31,7 +31,7 @@ struct node_st {
   int rightcost;
 };
 
-char *outfolder;
+char *outfolder = "output-directory";
 FILE *fout;
 struct node_st *tree;
 char **names;
@@ -44,7 +44,7 @@ int alternate = 0;
 
 void usage(char *cmd)
 {
-  fprintf(stderr, "usage: %s <directory> <iterations> <bootstrap>\n\tdirectory -- texts (remember to align)\n\titerations -- simulated annealing iterations\n\tbootstrap -- how many bootstrap repetitions? 1 -> no bootstrap\nOutput goes to 'sankoff-tree_i.dot for i=0,...,<bootstrap-1>.\n", cmd);
+  fprintf(stderr, "usage: %s <input-directory> <output-directory> <iterations> <bootstrap>\n\tinput-directory -- texts (remember to align)\n\toutput-directory -- trees (Newick)\n\titerations -- simulated annealing iterations\n\tbootstrap -- how many bootstrap repetitions? 1 -> no bootstrap\nOutput goes to '%s/rhm_i.tre for i=0,...,<bootstrap-1>.\n", cmd, outfolder);
   exit(-1);
 }
 
@@ -378,7 +378,7 @@ int read_file(const char *dirname)
 	  {
 	    if (0&&f1i== 0)
 	      fprintf(stderr, "empty(%s/%d) len=%d: %s", 
-		      names[f2i], ch, strlen(buf+bufpos1), buf+bufpos1);
+		      names[f2i], ch, (int)strlen(buf+bufpos1), buf+bufpos1);
 	    Kyx[f1i*leafs*chunks + f2i*chunks + ch] = 0;
 	  }
 
@@ -688,7 +688,7 @@ double edge_length(struct node_st *a, struct node_st *b)
   return ((double)(edge_label(a, b)+leafpenalty+1))/60.0;
 }
 
-void print_subtree(struct node_st *node)
+void print_subtree_dot(struct node_st *node)
 {
   char *look, *color, *name;
   int ch;
@@ -696,8 +696,8 @@ void print_subtree(struct node_st *node)
   if (!node)
     return;
 
-  print_subtree(node->left);
-  print_subtree(node->right);
+  print_subtree_dot(node->left);
+  print_subtree_dot(node->right);
 
   if (node->id < leafs)
     name = names[node->id];
@@ -767,10 +767,41 @@ void print_subtree(struct node_st *node)
 	    edge_length(node, node->right));
 }
 
+void print_subtree(struct node_st *node)
+{
+  char *name;
+  int ch;
+
+  if (!node)
+    return;
+
+  if (node->left)
+  {
+    fprintf(fout, "(");
+    print_subtree(node->left);
+    fprintf(fout, ",");
+    print_subtree(node->right);
+    fprintf(fout, ")");
+  }
+  else 
+  {
+    if (node->id < leafs)
+      fprintf(fout, "%s", names[node->id]);
+    else
+      fprintf(fout, "i%d", node->id - leafs + 1);
+  }
+
+  if (node->id < leafs)
+    name = names[node->id];
+  else
+    name = NULL;
+  
+}
+
 void open_output()
 {
   char fname[256];
-  sprintf(fname, "sankoff-tree_%d.dot", boot);
+  sprintf(fname, "%s/rhm_%d.tre", outfolder, boot);
   fout = fopen(fname, "w+");
 }
 
@@ -814,9 +845,9 @@ void make_look_nice(struct node_st *node)
 void print_tree()
 {
   int ch;
-  //fprintf(stderr, ".");
   make_look_nice(tree);
   open_output();
+  /*
   fprintf(fout, "graph \"sankoff-tree\" {\nlabel=\"sankoff-score %d ", 
 	  bestval);
   fprintf(fout, "bootstrap ");
@@ -827,8 +858,9 @@ void print_tree()
       fprintf(fout, "%s%d", ch?",":"", bootw[ch]);
   fprintf(fout, "\";\n");
   fprintf(fout, "edge [style=bold];\nnode[shape=plaintext fontsize=20];\n");
+  */
   print_subtree(tree);
-  fprintf(fout, "}\n");
+  fprintf(fout, ";\n");
   close_output();
 }
 
@@ -1248,7 +1280,7 @@ int optimize_tree(int iters)
   fprintf(stderr, "alpha %f.\n", alpha);
 #endif
 
-  fprintf(stderr, "running %d iterations (tree at #%d)\n\n", iters, (int)tree);
+  fprintf(stderr, "running %d iterations (tree at #%ld)\n\n", iters, (long int)tree);
 
   T = 10.0;
 
