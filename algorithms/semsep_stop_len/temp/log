@@ -1,0 +1,18 @@
+The run stop at iteration: 6
+There are 2 runs at the same time
+The average time for each iteration is 0.116465159825 seconds 
+The best tree is generation by run 2 with qscore 5.04577230789
+The best tree in the last iteration is generation by run 2 with qscore 5.04577230789
+
+****** Here is the information for run_script 1******
+The best qscore of 1 is 4.97441261959
+The last qscore of 1 is 4.97441261959
+The qscore of each iteration is:
+0.708629757585 3.57873584857 3.08553938541 4.77292221018 4.73077794851 4.97441261959 
+
+****** Here is the information for run_script 2******
+The best qscore of 2 is 5.04577230789
+The last qscore of 2 is 5.04577230789
+The qscore of each iteration is:
+0.758441166732 1.65155672724 1.6623351371 3.36606291319 4.47130183668 5.04577230789 
+

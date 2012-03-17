@@ -1,0 +1,680 @@
+	
+#_____________________________________________________________________________________
+
+LinkMatuni <- function(NodeNumber, CharList, PositionChar, KidList, ParentList, 
+NeighbourList, NodeList, PositionDiff, lenmat, 
+PositionProb, delta, TextLen, approximation)
+{
+	localtimer=0
+	LinkMatAll = matrix(0, ncol= NodeNumber, nrow = NodeNumber)
+	colnames(LinkMatAll) = NodeList
+	rownames(LinkMatAll) = NodeList
+	#ProbTree = 0
+
+	unchangemat=matrix(0, ncol= NodeNumber, nrow = NodeNumber)
+	colnames(unchangemat) = NodeList
+	rownames(unchangemat) = NodeList
+
+	ProbMatlist=list()
+	for (Position in 1:TextLen)
+	{
+	
+		if (PositionDiff[Position]>1)
+		{
+			PositionDiffTmp = PositionDiff[Position]
+			PositionCharTmp = PositionChar[[Position]]
+	
+#			tmp = lenmat[Position]
+#			ProbChangeMat = matrix(tmp,ncol=PositionDiffTmp,nrow=PositionDiffTmp)
+#			colnames(ProbChangeMat) = PositionCharTmp
+#			rownames(ProbChangeMat) = PositionCharTmp
+#			diag(ProbChangeMat)=ProbSame
+			lenmatposition=lenmat/(PositionDiffTmp-1)
+
+	
+#			tmp = log(lenmat[Position])-log(1/PositionDiffTmp)
+#			LogMat = matrix(tmp,ncol=PositionDiffTmp,nrow=PositionDiffTmp)
+#			diag(LogMat)=log(ProbSame)-log(1/PositionDiffTmp)
+	
+			#########################
+			LinkMat = matrix(-Inf, ncol= NodeNumber, nrow = NodeNumber)
+			colnames(LinkMat) = NodeList
+			rownames(LinkMat) = NodeList
+	
+			UMat = array(0,dim=c(NodeNumber,NodeNumber,PositionDiffTmp),
+			dimnames=list(NodeList,NodeList,PositionCharTmp))
+			uMat = array(0,dim=c(NodeNumber,NodeNumber,PositionDiffTmp),
+			dimnames=list(NodeList,NodeList,PositionCharTmp))
+	
+			ProbMat = array(0,dim=c(NodeNumber,NodeNumber,PositionDiffTmp,
+			PositionDiffTmp),dimnames=list(NodeList,NodeList,PositionCharTmp,
+			PositionCharTmp))
+			
+		
+			# up
+			for (i in NodeList[1:NodeNumber])
+			{
+				if (length(ParentList[[i]])>0)
+				{
+					CharTmp = CharList[i,Position]
+					CharParent = CharList[ParentList[[i]], Position]
+					# U
+					if (length(KidList[[i]]) == 0)# no kid
+					{					
+						if (CharTmp != '?')
+						{	
+							UMat[i,ParentList[[i]],CharTmp] = 1	
+						}else
+						{
+							UMat[i,ParentList[[i]],] = 1
+						}
+					}else # have kid
+					{
+						if (CharTmp != '?')
+						{
+							UMat[i,ParentList[[i]],CharTmp] = 1
+						}else				
+						{
+							tmp = 1
+							for (j in KidList[[i]])
+							{
+									tmp = tmp*uMat[j,i,]
+							}
+							UMat[i,ParentList[[i]],] = tmp 
+						}	
+					}				 
+					# u
+					ProbChangeMattmp=lenmatposition[i,ParentList[[i]]]
+					ProbChangeMat=matrix(ProbChangeMattmp,
+					ncol=PositionDiffTmp,nrow=PositionDiffTmp)
+					colnames(ProbChangeMat) = PositionCharTmp
+					rownames(ProbChangeMat) = PositionCharTmp
+					diag(ProbChangeMat)=1-ProbChangeMattmp*(PositionDiffTmp-1)
+
+					uMat[i,ParentList[[i]],]=
+					UMat[i,ParentList[[i]],]%*%ProbChangeMat 
+				}
+			}
+		
+			#down
+			for (i in NodeList[NodeNumber:1])
+			{
+				CharTmp = CharList[i,Position]
+				if (length(KidList[[i]]) != 0) 
+				{
+					NeighbourTmp = NeighbourList[[i]]
+					KidTmp = KidList[[i]]			
+					for (j in KidTmp)
+					{
+						CharKidTmp = CharList[j,Position]
+						if (CharTmp == '?')
+						{
+							tmp = 1
+							for (k in NeighbourTmp[NeighbourTmp!=j])
+							{
+								tmp = tmp*uMat[k,i,]
+							}
+							UMat[i,j,] = tmp
+						}else
+						{
+							UMat[i,j,CharTmp] = 1
+						} 
+						ProbChangeMattmp=lenmatposition[i,j]
+						ProbChangeMat=matrix(ProbChangeMattmp,
+						ncol=PositionDiffTmp,nrow=PositionDiffTmp)
+						colnames(ProbChangeMat) = PositionCharTmp
+						rownames(ProbChangeMat) = PositionCharTmp
+						diag(ProbChangeMat)=1-ProbChangeMattmp*(PositionDiffTmp-1)
+
+						uMat[i,j,]=UMat[i,j,]%*%ProbChangeMat 
+					}	
+				} 
+			}
+		 	
+			#prob of leaf
+			#probtmp = NULL
+			for (i in NodeList)
+			{
+				tmp = PositionProb[[Position]]*
+				UMat[i,NeighbourList[[i]][1],]* uMat[NeighbourList[[i]][1],i,]	
+				ProbMat[i,i,,1] = tmp/sum(tmp)
+			}
+				
+			 #ProbTree = ProbTree+log(sum(tmp))
+	
+			#2 prob of linked nodes
+			for (i in NodeList[NodeNumber:1])
+			{
+				if (length(KidList[[i]]) > 0)
+				{
+					for (j in KidList[[i]])
+					{		
+						ProbChangeMattmp=lenmatposition[i,j]
+						ProbChangeMat=matrix(ProbChangeMattmp,
+						ncol=PositionDiffTmp,nrow=PositionDiffTmp)
+						colnames(ProbChangeMat) = PositionCharTmp
+						rownames(ProbChangeMat) = PositionCharTmp
+						diag(ProbChangeMat)=1-ProbChangeMattmp*(PositionDiffTmp-1)
+			
+						ProbMat[i,j,,]=matrix(PositionProb[[Position]],
+						nrow=PositionDiffTmp,ncol=PositionDiffTmp)*
+						(t(t(UMat[i,j,]))%*%(t(UMat[j,i,])))*(t(ProbChangeMat))
+						ProbMat[i,j,,] = ProbMat[i,j,,]/(sum(ProbMat[i,j,,]))
+						ProbMat[j,i,,]=t(ProbMat[i,j,,])
+						
+						unchangemat[i,j]=unchangemat[i,j]+
+						sum(diag(ProbMat[i,j,,]))
+						unchangemat[j,i]=unchangemat[i,j]
+					}	
+				}
+			}
+			#prob of unlinked nodes
+			if (approximation == 0)
+			{
+			#3 prob of all nodes
+				for (i in (NodeNumber-1):1)
+				{
+					for (j in (i+1):NodeNumber)
+					{ 
+						if (NodeList[j] != ParentList[[ NodeList[i] ]])
+						{
+							tmp = (ProbMat[NodeList[i],
+							ParentList[[ NodeList[i] ]],,]/
+							matrix(ProbMat[ParentList[[ NodeList[i] ]],
+							ParentList[[ NodeList[i] ]],,1],
+							nrow=PositionDiffTmp,ncol=PositionDiffTmp,byrow=TRUE)) 
+							tmp[is.na(tmp)]=0
+							ProbMat[NodeList[i],NodeList[j],,]=
+							tmp %*% ProbMat[ParentList[[ NodeList[i] ]],
+							NodeList[j],,]
+							ProbMat[NodeList[j],NodeList[i],,]=
+							t(ProbMat[NodeList[i],NodeList[j],,])	
+							
+							unchangemat[NodeList[i],NodeList[j]]=
+							unchangemat[NodeList[i],NodeList[j]]+
+							sum(diag(ProbMat[NodeList[i],NodeList[j],,]))
+							unchangemat[NodeList[j],NodeList[i]]=
+							unchangemat[NodeList[i],NodeList[j]]	
+						}
+					}
+				} 
+			}else
+			{
+				for (i in (NodeNumber-1):1)
+				{
+
+					for (j in (i+1):NodeNumber)
+					{ NodeNumber*(NodeNumber-1)/2
+
+						if (NodeList[j] != ParentList[[ NodeList[i] ]])
+						{
+							tmp1 = ProbMat[NodeList[i],NodeList[i],,1]
+							tmp2 = ProbMat[NodeList[j],NodeList[j],,1]
+							tmp1[is.na(tmp)]=0
+							tmp2[is.na(tmp)]=0
+						
+							ProbMat[NodeList[i],NodeList[j],,]=tmp1 %*% t(tmp2)
+							ProbMat[NodeList[j],NodeList[i],,]=
+							t(ProbMat[NodeList[i],NodeList[j],,])	
+							
+							unchangemat[NodeList[i],NodeList[j]]=
+							unchangemat[NodeList[i],NodeList[j]]+
+							sum(diag(ProbMat[NodeList[i],NodeList[j],,]))
+							unchangemat[NodeList[j],NodeList[i]]=
+							unchangemat[NodeList[i],NodeList[j]]	
+								
+						}
+					}
+				}					 
+			}
+			ProbMatlist[[paste(Position)]]=	ProbMat
+
+		}else
+		{
+			unchangemat=unchangemat+1
+		}
+	}
+	lenmat=1-unchangemat/TextLen
+	diag(lenmat)=0
+	#print (lenmat)
+	for (Position in 1:TextLen)
+	{
+	
+		if (PositionDiff[Position]>1)
+		{
+			PositionDiffTmp = PositionDiff[Position]
+			lenmatposition=lenmat/(PositionDiffTmp-1)
+			ProbMat = ProbMatlist[[paste(Position)]]
+
+			for (i in 1:(NodeNumber-1))
+			{
+				for (j in (i+1):NodeNumber)
+				{
+					tmp = log(lenmatposition[NodeList[i],NodeList[j]])-
+					log(1/PositionDiffTmp)
+					LogMat = matrix(tmp,ncol=PositionDiffTmp,nrow=PositionDiffTmp)
+					diag(LogMat)=log(1-lenmatposition[NodeList[i],NodeList[j]]*
+					(PositionDiffTmp-1))-
+					log(1/PositionDiffTmp)
+
+					LinkMat[NodeList[i],NodeList[j]] = 
+					sum(ProbMat[NodeList[i],NodeList[j],,]*LogMat)
+					LinkMat[NodeList[j],NodeList[i]] = 
+					LinkMat[NodeList[i],NodeList[j]]
+				}
+			}
+			LinkMatAll = LinkMatAll+LinkMat	
+		}
+	}
+
+	noise = rnorm(NodeNumber*(NodeNumber-1)/2, sd=delta)
+
+	k = 1
+	LinkMatAllori = LinkMatAll
+	for (i in 1:(NodeNumber-1))
+	{
+		for (j in (i+1):NodeNumber)
+		{
+			LinkMatAll[NodeList[i],NodeList[j]] = 
+			LinkMatAll[NodeList[i],NodeList[j]]+noise[k]
+		 	LinkMatAll[NodeList[j],NodeList[i]] = 
+			LinkMatAll[NodeList[i],NodeList[j]]+noise[k]
+			k=k+1
+		}
+	}
+
+	LinkMatAllres = list('LinkMatAll'=LinkMatAll, 'LinkMatAllori'=LinkMatAllori,
+	'lenmat'=lenmat)
+	invisible(LinkMatAllres)
+}
+#_____________________________________________________________________________________
+MTreeuni <- function(resfolder, iter, AllNodeNumber, LinkMatAllori,LinkMatAll, windows, itermax, qscoreold, stopin,lenmat)
+{
+	NodeList = colnames(LinkMatAll)
+	NodeLinkedSign = rep(FALSE,AllNodeNumber)
+	names(NodeLinkedSign) = NodeList
+	NodeLinkedSign[NodeList[AllNodeNumber]]=TRUE
+	
+	PathList = vector("list", AllNodeNumber)
+	names(PathList) = NodeList
+	i=1
+	qscore = 0
+	while (i<AllNodeNumber)
+	{
+		NodeRemain = NodeList[!NodeLinkedSign]
+		NodeLinked = NodeList[NodeLinkedSign]
+		tmp = which.max(LinkMatAll[NodeLinked,NodeRemain])
+
+
+		LinkMatAlloritmp = LinkMatAllori[NodeLinked,NodeRemain]
+		qscore = qscore+LinkMatAlloritmp[tmp]
+		To = NodeRemain[ceiling(tmp/length(NodeLinked))]
+
+
+		From = NodeLinked[tmp-
+		(ceiling(tmp/length(NodeLinked))-1)*length(NodeLinked)]
+
+		NodeLinkedSign[[To]] = TRUE
+		PathList[[From]] = c(PathList[[From]],To)
+		PathList[[To]] = c(PathList[[To]],From)
+		i=i+1	 
+	}
+	
+	########## reorder
+	Root = NodeList[AllNodeNumber]
+	NodeListNew = c(Root)
+	i = 1
+	ParentListNew = list()
+	KidListNew = list()
+	NeighbourList = PathList
+	while (i<AllNodeNumber)
+	{
+		for (j in PathList[[NodeListNew[i]]])
+		{
+			if (length(ParentListNew[[NodeListNew[i]]])>0)
+			{ 
+				if (j != ParentListNew[[NodeListNew[i]]])
+				{
+					NodeListNew = c(NodeListNew, j)
+					ParentListNew[[j]] = NodeListNew[i]
+					KidListNew[[NodeListNew[i]]] = c(KidListNew[[NodeListNew[i]]], j)
+				}
+			}else 
+			{
+				NodeListNew = c(NodeListNew, j)
+				ParentListNew[[j]] = NodeListNew[i]
+				KidListNew[[NodeListNew[i]]] = c(KidListNew[[NodeListNew[i]]], j)
+			}
+		}
+		i = i+1
+	}
+	
+	ParentList = ParentListNew
+	KidList = KidListNew
+	NodeList = rev(NodeListNew)
+	
+	StrOut = NULL
+	lenouttmp=NULL
+	for (i in NodeList)
+	{
+		if (length(ParentList[[i]])>0)
+		{
+			StrOut = paste(StrOut, i, '\t', ParentList[[i]],'\n',sep='')
+			lenouttmp = paste(lenouttmp, i,'\t',ParentList[[i]],'\t',
+			lenmat[i,ParentList[[i]]],'\n',sep='')
+		}
+	}
+	if (qscoreold<qscore)
+	{
+		cat(file=paste(resfolder,'/treebest.txt',sep=''), StrOut)
+		cat(file=paste(resfolder,'/lenbest','.txt',sep=''), lenouttmp)
+		cat(paste(iter,'\n',as.numeric(qscore),'\n','----------','\n'),
+		file=paste(resfolder,'/score','log',sep=''),append=TRUE)		
+	}
+	if (stopin==1)
+	{
+		cat(file=paste(resfolder,'/tree',iter,'.txt',sep=''), StrOut)
+		cat(file=paste(resfolder,'/len_',iter,'.txt',sep=''), lenouttmp)
+		cat(paste(iter,'\n',as.numeric(qscore),'\n','----------','\n'),
+		file=paste(resfolder,'/score','log',sep=''),append=TRUE)	
+	}
+
+
+	MTreeres <- list('ParentList'=ParentList, 'KidList'=KidList, 
+	'NeighbourList'=NeighbourList, 'NodeList'=NodeList,
+	'qscore'=qscore)
+	invisible(MTreeres)
+}
+
+
+#_____________________________________________________________________________________	
+
+allstart <- function (resfolderin, windowsin, itermaxin,
+filein, method, approximationin, filecsvin, mdlbasein)
+{
+	rhoin = 0.05**(2/itermaxin)
+	print (rhoin)
+	dir.create(path=resfolderin)
+	Sys.setlocale(locale="C")
+
+	if (method == 'uni')
+	{
+		iternow = 0
+		print (iternow)
+		stop = 0
+		cat('',	file=paste(resfolderin,'/score','log',sep=''))
+		Initialres <- Initialuni(fileread = filein)
+		begTime <- Sys.time()
+		deltain = 0.1		
+		LinkMatunires <- LinkMatuni(NodeNumber = Initialres[['AllNodeNumber']], 
+		CharList = Initialres[['CharList']] , 
+		PositionChar=Initialres[['PositionChar']],
+		KidList=Initialres[['KidList']], 
+		ParentList=Initialres[['ParentList']],	
+		NeighbourList=Initialres[['NeighbourList']], 
+		NodeList=Initialres[['NodeList']], 
+		PositionDiff=Initialres[['PositionDiff']], 
+		lenmat=Initialres[['lenmat']], 
+		PositionProb= Initialres[['PositionProb']], delta = deltain, 
+		TextLen=Initialres[['TextLen']], 
+		approximation = approximationin)
+		qscorevector = c(-100000)
+
+		MTreeunires <- MTreeuni(resfolder=resfolderin, iter=iternow, 
+		AllNodeNumber=Initialres[['AllNodeNumber']],
+		LinkMatAllori=LinkMatunires[['LinkMatAllori']],
+		LinkMatAll=LinkMatunires[['LinkMatAll']], 
+		windows=windowsin, itermax=itermaxin,
+		qscoreold=max(qscorevector),
+		stopin = stop,lenmat=LinkMatunires[['lenmat']])
+
+		qscorevector = c(qscorevector,MTreeunires[['qscore']])
+
+		endTime = Sys.time()
+		cat(paste(iternow,'\n',endTime,'\n',begTime,'\n',endTime-begTime,'\n','----------\n',sep=''),file=paste(resfolderin,'/','log',sep=''))
+		linkmattmp = LinkMatunires[['LinkMatAllori']]
+		linkmattmp[linkmattmp==-Inf]=0
+		#linkmattmp[linkmattmp==NaN]=100
+		linkmattmp=abs(linkmattmp)
+		deltain = max(linkmattmp)*0.1
+		#print ('======')
+		#print (linkmattmp)
+		#print (deltain)
+
+		for (iternow in 1:round(itermaxin*0.1))
+		{
+			if (round(iternow/100)==iternow/100)
+			{
+				print (iternow)
+			}
+
+			deltain = deltain*rhoin
+			begTime = Sys.time()
+			LinkMatunires <- LinkMatuni(NodeNumber = Initialres[['AllNodeNumber']], 
+			CharList = Initialres[['CharList']] , 
+			PositionChar=Initialres[['PositionChar']],
+			KidList=MTreeunires[['KidList']], 
+			ParentList=MTreeunires[['ParentList']],	
+			NeighbourList=MTreeunires[['NeighbourList']], 
+			NodeList=MTreeunires[['NodeList']], 
+			PositionDiff=Initialres[['PositionDiff']],
+			lenmat=LinkMatunires[['lenmat']], 
+			PositionProb= Initialres[['PositionProb']], delta = deltain, 
+			TextLen=Initialres[['TextLen']],  
+			approximation = approximationin)
+
+			MTreeunires <- MTreeuni(resfolder=resfolderin, iter=iternow, 
+			AllNodeNumber=Initialres[['AllNodeNumber']],
+			LinkMatAllori=LinkMatunires[['LinkMatAllori']],
+			LinkMatAll=LinkMatunires[['LinkMatAll']], 
+			windows=windowsin, itermax=itermaxin,
+			qscoreold=max(qscorevector),
+			stopin = stop,lenmat=LinkMatunires[['lenmat']])
+			qscorevector = c(qscorevector,MTreeunires[['qscore']])			
+			endTime <- Sys.time()
+			if ((iternow<5)|(stop==1))
+			{
+				cat(paste(iternow,'\n',endTime,'\n',begTime,
+				'\n',endTime-begTime,'\n','----------\n',sep=''),
+				file=paste(resfolderin,'/','log',sep=''),append=TRUE)
+				StrOuttmp=NULL
+				lenouttmp=NULL
+				for (itmp in MTreeunires[['NodeList']])
+				{
+					if (length(MTreeunires[['ParentList']][[itmp]])>0)
+					{
+						StrOuttmp = paste(StrOuttmp, itmp, '\t', MTreeunires[['ParentList']][[itmp]],'\n',sep='')
+						lenouttmp = paste(lenouttmp, itmp,'\t',MTreeunires[['ParentList']][[itmp]],'\t',
+						LinkMatunires[['lenmat']][itmp,MTreeunires[['ParentList']][[itmp]]],'\n',sep='')
+					}
+				}
+				cat(file=paste(resfolderin,'/tree_',iternow,'.txt',sep=''), StrOuttmp)
+				cat(file=paste(resfolderin,'/len_',iternow,'.txt',sep=''), lenouttmp)
+			}
+			if (length(qscorevector)>10)
+			{
+				qscorechange = 
+				(sum(qscorevector[(length(qscorevector)-9):length(qscorevector)])-
+				10*qscorevector[length(qscorevector)])/10
+			}else
+			{
+				qscorechange = 10000000
+			}
+			if (stop == 1)
+			{
+				print ('stop at')
+				print (iternow)
+				break
+			}
+			if ((iternow>(itermaxin*2/3))&(qscorechange<0.0001))
+			{		
+				stop = 1	
+			}	
+		}
+		allstartres=list('MTreeunires'=MTreeunires,'rhoin'=rhoin,
+		'deltain'=deltain,'qscorevector'=qscorevector,
+		'Initialres'=Initialres,'LinkMatunires'=LinkMatunires)
+		invisible(allstartres)
+	} 
+}
+
+#_____________________________________________________________________________________	
+allend <- function (resfolderin, windowsin, itermaxin,
+filein, method, approximationin, filecsvin, mdlbasein,
+rhoin,deltain,qscorevector,Initialres,MTreeunires,LinkMatunires)
+{
+
+	Sys.setlocale(locale="C")
+
+	if (method == 'uni')
+	{
+		iternow = round(itermaxin*0.1)+1
+		print (iternow)
+		stop = 0
+
+
+		for (iternow in c((itermaxin*0.1+1):itermaxin))
+		{
+			if (round(iternow/100)==iternow/100)
+			{
+				print (iternow)
+			}
+
+			deltain = deltain*rhoin
+			begTime = Sys.time()
+			LinkMatunires <- LinkMatuni(NodeNumber = Initialres[['AllNodeNumber']], 
+			CharList = Initialres[['CharList']] , 
+			PositionChar=Initialres[['PositionChar']],
+			KidList=MTreeunires[['KidList']], 
+			ParentList=MTreeunires[['ParentList']],	
+			NeighbourList=MTreeunires[['NeighbourList']], 
+			NodeList=MTreeunires[['NodeList']], 
+			PositionDiff=Initialres[['PositionDiff']],
+			lenmat=LinkMatunires[['lenmat']], 
+			PositionProb= Initialres[['PositionProb']], delta = deltain, 
+			TextLen=Initialres[['TextLen']],
+			approximation = approximationin)
+					
+			MTreeunires <- MTreeuni(resfolder=resfolderin, iter=iternow, 
+			AllNodeNumber=Initialres[['AllNodeNumber']],
+			LinkMatAllori=LinkMatunires[['LinkMatAllori']],
+			LinkMatAll=LinkMatunires[['LinkMatAll']], 
+			windows=windowsin, itermax=itermaxin,
+			qscoreold=max(qscorevector),
+			stopin = stop,lenmat=LinkMatunires[['lenmat']])
+			qscorevector = c(qscorevector,MTreeunires[['qscore']])			
+			endTime <- Sys.time()
+			if ((iternow<5)|(stop==1))
+			{
+				cat(paste(iternow,'\n',endTime,'\n',begTime,
+				'\n',endTime-begTime,'\n','----------\n',sep=''),
+				file=paste(resfolderin,'/','log',sep=''),append=TRUE)
+			}
+			if (stop==1)
+			{
+				StrOuttmp=NULL
+				lenouttmp=NULL
+				for (itmp in MTreeunires[['NodeList']])
+				{
+					if (length(MTreeunires[['ParentList']][[itmp]])>0)
+					{
+						StrOuttmp = paste(StrOuttmp, itmp, '\t', MTreeunires[['ParentList']][[itmp]],'\n',sep='')
+						lenouttmp = paste(lenouttmp, itmp,'\t',MTreeunires[['ParentList']][[itmp]],'\t',
+						LinkMatunires[['lenmat']][itmp,MTreeunires[['ParentList']][[itmp]]],'\n',sep='')
+					}
+				}
+				cat(file=paste(resfolderin,'/treelast.txt',sep=''), StrOuttmp)
+				cat(file=paste(resfolderin,'/lenlast','.txt',sep=''), lenouttmp)
+			}
+
+			if (length(qscorevector)>10)
+			{
+				qscorechange = 
+				(sum(qscorevector[(length(qscorevector)-9):length(qscorevector)])-
+				10*qscorevector[length(qscorevector)])/10
+			}else
+			{
+				qscorechange = 10000000
+			}
+			if (stop == 1)
+			{
+				print ('stop at')
+				print (iternow)
+				break
+			}
+			if ((iternow>(itermaxin*2/3))&(qscorechange<0.0001))
+			{		
+				stop = 1	
+			}	
+		}
+	} 
+}
+
+#_____________________________________________________________________________________	
+runsem<-function(homefolder, runmax, filesid)
+{
+	nexfolder=paste(homefolder,'/semdata',sep='')
+	files = system(paste('dir -1 ',nexfolder,sep=''),intern=TRUE)
+	files = sort(files)
+	for (filei in files[filesid])
+	{
+		nexfile = paste(nexfolder,'/',filei,sep='')
+		resfolder = paste(homefolder,'/semres/',filei,sep='')
+		system(paste('rm -fr ',resfolder,sep=''),intern=TRUE)
+		system(paste('mkdir ',resfolder,sep=''),intern=TRUE)
+		setwd(resfolder)
+
+		allstartres={}
+		qscorerunvect=NULL
+		idvect=NULL
+		for (run in c(1:runmax))
+		{
+			resfolder2 = paste(homefolder,'/semres/',filei,'/run',run,sep='')
+			system(paste('rm -fr ',resfolder2,sep=''),intern=TRUE)
+			system(paste('mkdir ',resfolder2,sep=''),intern=TRUE)
+
+			allstartres[[paste(run)]]<-allstart(resfolderin = resfolder2, 
+			filein = nexfile,
+			windowsin = 0, itermaxin = 500, 
+			method = 'uni',
+			approximationin = 0) 
+
+
+			qscorevectortmp = allstartres[[paste(run)]][['qscorevector']]
+			qscorerunvect=c(qscorerunvect,qscorevectortmp[length(qscorevectortmp)])
+			idvect = c(idvect,paste(run))
+		}
+		
+		bestrunid = which.max(qscorerunvect)
+		beststartres = allstartres[[idvect[bestrunid]]]
+
+
+		for (run in c(1:runmax))
+		{
+			resfolder2 = paste(homefolder,'/semres/',filei,'/run',run,sep='')
+
+			allend(resfolderin = resfolder2, 
+			filein = nexfile,
+			windowsin = 0, itermaxin = 500, 
+			method = 'uni',
+			approximationin = 0,
+			rhoin=beststartres[['rhoin']],
+			deltain=beststartres[['deltain']],
+			qscorevector=beststartres[['qscorevector']],
+			Initialres=beststartres[['Initialres']],
+			MTreeunires=beststartres[['MTreeunires']],
+			LinkMatunires=beststartres[['LinkMatunires']]) 
+		}
+		save.image(file='bk.RData')
+		setwd(homefolder)
+	}
+}
+
+
+runsem(homefolder='/home/fs/zou/Documents/work/stam/structuralem/SEM_R27_len', runmax=3, filesid=c(1))
+	
+#nohup R CMD BATCH run_1_10.r run_1_10.out >nohup_1_10.out &	
+	
+	
+	
+	
