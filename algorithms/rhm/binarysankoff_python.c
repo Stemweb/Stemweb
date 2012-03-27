@@ -1343,7 +1343,7 @@ int main(int argc, char *argv[])
 /*
  *	Simple wrapper for using this module from python.
  */
-static PyObject* py_main(PyObject* self, PyObject* args)
+PyObject* py_main(PyObject* self, PyObject* args)
 {
 	int itermaxin;
 	PyObject* run_args = NULL;
