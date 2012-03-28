@@ -92,12 +92,7 @@ class Semsep_f81(ConcurrentAlgorithm):
 			Overrided method to call saveres.writefile
 		'''
 		self.file_lock.acquire()
-		saveres.writefile(iterationrunres = robjects.Vector(result['iterationrunres']),
-						  itertime = result['itertime'], 
-						  bestruntmp = result['bestruntmp'],
-						  bestlastruntmp = result['bestlastruntmp'],
-						  iternow = result['iteri'],
-						  outfolder = result['outfolder'])
+		saveres.writefile(result)
 		self.file_lock.release()
 				
 		
