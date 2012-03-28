@@ -23,8 +23,7 @@
 
 ######################################################################
 from rpy2 import *
-
-
+from rpy2 import robjects
 
 def treetonet(treedic):
 	nodelist = list(treedic.rx2('NodeList'))
@@ -137,15 +136,15 @@ def writelog(iternow, itertime, iterationrunres, bestruntmp, bestlastruntmp):
 
 
 
-def writefile(iterationrunres,itertime, bestruntmp,bestlastruntmp,iternow,outfolder):
+def writefile(result):
 	import os
 
-	#iterationrunres = Rres.rx2('iterationrunres')
-	#itertime = Rres.rx2('itertime')
-	#bestruntmp = Rres.rx2('bestruntmp')
-	#bestlastruntmp = Rres.rx2('bestlastruntmp')
-	#iternow = Rres.rx2('iter')
-	
+	iterationrunres = robjects.Vector(result['iterationrunres'])
+	itertime = result['itertime']
+	bestruntmp = result['bestruntmp']
+	bestlastruntmp = result['bestlastruntmp']
+	iternow = result['iteri']
+	outfolder = result['outfolder']
 	
 	# pull out the values that are needed
 	temp = iterationrunres.rx2('bestres')
@@ -203,71 +202,6 @@ def writefile(iterationrunres,itertime, bestruntmp,bestlastruntmp,iternow,outfol
 	os.system('chmod 755 ' + outfolder+'/bestlasttree.dot')
 	os.system('chmod 755 ' + outfolder)
 
-def writefile(iterationrunres,itertime, bestruntmp,bestlastruntmp,iternow,outfolder):
-	import os
-
-	#iterationrunres = Rres.rx2('iterationrunres')
-	#itertime = Rres.rx2('itertime')
-	#bestruntmp = Rres.rx2('bestruntmp')
-	#bestlastruntmp = Rres.rx2('bestlastruntmp')
-	#iternow = Rres.rx2('iter')
-	
-	
-	# pull out the values that are needed
-	temp = iterationrunres.rx2('bestres')
-	bestres = temp.rx2(bestruntmp[0])
-	besttree = bestres.rx2('MTreeunires')
-
-	temp = iterationrunres.rx2('runres')
-	bestlastres = temp.rx2(bestlastruntmp[0])
-	bestlasttree = bestlastres.rx2('MTreeunires')
-
-	# save results
-	# net file
-	outfolder = outfolder.strip('/')
-	if not os.path.exists(outfolder):
-		os.makedirs(outfolder)
-		os.system('chmod 777 ' + outfolder)
-
-	def writestr(outfolder, filename, outstr):
-		f = open(outfolder+filename,'w')
-		f.write(outstr)
-		f.close()		
-
-	# net file
-	bestnet = treetonet(treedic=besttree)
-	bestlastnet = treetonet(treedic=bestlasttree)
-	writestr(outfolder,'/besttree.net',bestnet)
-	writestr(outfolder,'/bestlasttree.net',bestlastnet)
-
-
-	# matrix file
-	bestmatrix = treetomatrix(treedic=besttree)
-	bestlastmatrix = treetomatrix(treedic=bestlasttree)
-	writestr(outfolder,'/besttree.matrix',bestmatrix)
-	writestr(outfolder,'/bestlasttree.matrix',bestlastmatrix)
-
-	# dot file
-	bestdot = treetodot(treedic=besttree)
-	bestlastdot = treetodot(treedic=bestlasttree)
-	writestr(outfolder,'/besttree.dot',bestdot)
-	writestr(outfolder,'/bestlasttree.dot',bestlastdot)
-
-	# log file
-	logstr = writelog(iternow=iternow, itertime=itertime, iterationrunres=iterationrunres, bestruntmp=bestruntmp, bestlastruntmp=bestlastruntmp)
-	writestr(outfolder,'/log',logstr)
-	# plot dot file to png
-
-	os.system('chmod 777 ' + outfolder+'/besttree.dot')
-	os.system('chmod 777 ' + outfolder+'/bestlasttree.dot')
-	os.system('neato -Tpng -Gstart=rand ' + outfolder + '/besttree.dot > ' + outfolder+ '/besttree.png')
-	os.system('neato -Tpng -Gstart=rand ' + outfolder + '/bestlasttree.dot > ' + outfolder+ '/bestlasttree.png')
-
-
-	# close permissions
-	os.system('chmod 755 ' + outfolder+'/besttree.dot')
-	os.system('chmod 755 ' + outfolder+'/bestlasttree.dot')
-	os.system('chmod 755 ' + outfolder)
 
 def writefilelite(iterationrunres,itertime, bestruntmp,iternow,outfolder):
 	import os

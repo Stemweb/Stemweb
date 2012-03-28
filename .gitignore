@@ -7,4 +7,9 @@ media/javascript/jquery-1.7.1.js
 .DS_Store
 algorithms/rhm/NCD
 algorithms/rhm/binarysankoff
+algorithms/rhm/binarysankoff.so
+algorithms/rhm/binarysankoff.dylib
+*/*/*/temp/*
+*/*/temp/*
+*/temp/*
 

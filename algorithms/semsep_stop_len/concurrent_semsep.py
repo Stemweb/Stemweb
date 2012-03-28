@@ -2,12 +2,10 @@
 # -*- coding: utf-8 -*-
 
 from rpy2 import robjects
-import os
 import time
 import math
 import saveres
 import sys
-from Queue import Queue, Empty
 import multiprocessing
 
 if __name__ == '__main__':
@@ -17,7 +15,7 @@ from concurrent_algorithm import ConcurrentAlgorithm
 from concurrent_algorithm import Observer
 from concurrent_algorithm import synchronized
 
-class Semsep(ConcurrentAlgorithm):
+class Semsep_f81(ConcurrentAlgorithm):
 	'''
 		Concurrent implementation of Semsep where temporary results are writed
 		into file at algorithms run time and all observers are notified of new 
@@ -94,7 +92,12 @@ class Semsep(ConcurrentAlgorithm):
 			Overrided method to call saveres.writefile
 		'''
 		self.file_lock.acquire()
-		saveres.writefile(result)
+		saveres.writefile(iterationrunres = robjects.Vector(result['iterationrunres']),
+						  itertime = result['itertime'], 
+						  bestruntmp = result['bestruntmp'],
+						  bestlastruntmp = result['bestlastruntmp'],
+						  iternow = result['iteri'],
+						  outfolder = result['outfolder'])
 		self.file_lock.release()
 				
 		
@@ -110,7 +113,7 @@ if __name__ == '__main__':
 	obs = Observer()
 	obs2 = Observer()
 	obs2.a = 2
-	testrun = Semsep(run_args = run_args)
+	testrun = Semsep_f81(run_args = run_args)
 	testrun.attach(obs)
 	testrun.attach(obs2)
 	testrun.start()
