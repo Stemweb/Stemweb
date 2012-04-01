@@ -25,19 +25,27 @@
 from rpy2 import *
 from rpy2 import robjects
 
-def treetonet(treedic):
+def treetonet(treedic,lenmat):
+
+#	print (lenmat.rx('P','P'))
 	nodelist = list(treedic.rx2('NodeList'))
 	parentlist = treedic.rx2('ParentList')
 	parentlistname = parentlist.names
 	outstr = ''
-	for node in nodelist:
-		if node in parentlistname:
-			neighbor = list(parentlist.rx2(node))
-
-			for neighbori in neighbor:
-				outstr = outstr + node + '\t' + neighbori + '\n'
-
-	outstr = outstr.strip()
+	if type(lenmat)==str:
+		for node in nodelist:
+			if node in parentlistname:
+				neighbor = list(parentlist.rx2(node))
+				for neighbori in neighbor:
+					outstr = outstr + node + '\t' + neighbori + '\n'
+		outstr = outstr.strip()
+	else:
+		for node in nodelist:
+			if node in parentlistname:
+				neighbor = list(parentlist.rx2(node))
+				for neighbori in neighbor:
+					outstr = outstr + node + '\t' + neighbori + '\t' + str(lenmat.rx(node,neighbori)[0]) + '\n'
+		outstr = outstr.strip()
 	return (outstr)
 
 
@@ -67,28 +75,71 @@ def treetomatrix(treedic):
 	return (outstr)
 
 ###################################################################
-def treetodot(treedic):
+def treetodot(treedic, lenmat):
 	# how to print dot file 'neato -Tpdf -Gstart=rand x.dot > x.pdf'
 	import re
 	nodelist = list(treedic.rx2('NodeList'))
 
 	parentlist = treedic.rx2('ParentList')
 	parentlistname = parentlist.names
-	outstr = 'graph clustering {\n\tsize=\"5,5\"\n\n'
+	NeighbourList = treedic.rx2('NeighbourList')
+	
+#	nodelisttemp = []
+#	noderemovetemp = []
+#	for node in nodelist:
+#		if len(re.findall(r'[a-zA-Z]',node)) == 0: # hiddennodes
+			#print (NeighbourList.rx2(node))
+ 
+			#if len(list(NeighbourList.rx2('node')))==1:
+			#	print (NeighbourList.rx2('node'))
 
+#		else:
+#			nodelisttemp.append(node)
+	#nodelist = nodelisttemp
+			
+	
+	
+	outstr = 'graph clustering {\n\tsize=\"5,5\"\n\n'
 	for node in nodelist:
 		if len(re.findall(r'[a-zA-Z]',node)) == 0:
 			outstr = outstr + '\t' + node + ' [shape=point];\n'
 		else:
 			outstr = outstr + '\t' + node + ' [label=\"'+ node + '\" shape=plaintext fontsize=24];\n'	
 	outstr = outstr + '\n'
+	
+	if type(lenmat)==str:
+		for node in nodelist:
+			if node in 	parentlistname:
+				neighbor = list(parentlist.rx2(node))
+				for neighbori in neighbor:
+					outstr = outstr + '\t' + node + ' -- ' + neighbori + ';\n'
+	else:
+		lenmax = 0
+		lenmin = float('Inf')
+		for node in nodelist:
+			if node in 	parentlistname:
+				neighbor = list(parentlist.rx2(node))
+				for neighbori in neighbor:
+					if lenmax < lenmat.rx(node,neighbori)[0]:
+						lenmax = lenmat.rx(node,neighbori)[0]
+					if lenmin > lenmat.rx(node,neighbori)[0]:
+						lenmin = lenmat.rx(node,neighbori)[0]
+		outstr = outstr + '\n/* Here are the normalized edge lengths for printing */\n'
 
-	for node in nodelist:
-		if node in 	parentlistname:
-			neighbor = list(parentlist.rx2(node))
-			for neighbori in neighbor:
-				outstr = outstr + '\t' + node + ' -- ' + neighbori + ';\n'
-
+		for node in nodelist:
+			if node in 	parentlistname:
+				neighbor = list(parentlist.rx2(node))
+				for neighbori in neighbor:
+					temp = lenmat.rx(node,neighbori)[0]
+					temp = (0.5*(temp - lenmin))/(lenmax - lenmin) + 0.5
+					outstr = outstr + '\t' + node + ' -- ' + neighbori +'[len=' + str(temp)+ '];\n'
+		outstr = outstr + '\n/* Here are the original edge lengths */\n'
+		for node in nodelist:
+			if node in 	parentlistname:
+				neighbor = list(parentlist.rx2(node))
+				for neighbori in neighbor:
+					temp = lenmat.rx(node,neighbori)[0]
+					outstr = outstr + '/*\t' + node + ' -- ' + neighbori +'[len=' + str(temp)+ '];*/\n'
 	outstr = outstr + '}'
 	return (outstr)
 
@@ -136,6 +187,7 @@ def writelog(iternow, itertime, iterationrunres, bestruntmp, bestlastruntmp):
 
 
 
+
 def writefile(result):
 	import os
 
@@ -150,6 +202,13 @@ def writefile(result):
 	temp = iterationrunres.rx2('bestres')
 	bestres = temp.rx2(bestruntmp[0])
 	besttree = bestres.rx2('MTreeunires')
+
+	if ('lenmat' in bestres.names):
+		lenmat = bestres.rx2('lenmat')
+		#lenmat = 'nolength'
+
+	else:
+		lenmat = 'nolength'
 
 	temp = iterationrunres.rx2('runres')
 	bestlastres = temp.rx2(bestlastruntmp[0])
@@ -168,8 +227,8 @@ def writefile(result):
 		f.close()		
 
 	# net file
-	bestnet = treetonet(treedic=besttree)
-	bestlastnet = treetonet(treedic=bestlasttree)
+	bestnet = treetonet(treedic=besttree,lenmat=lenmat)
+	bestlastnet = treetonet(treedic=bestlasttree,lenmat=lenmat)
 	writestr(outfolder,'/besttree.net',bestnet)
 	writestr(outfolder,'/bestlasttree.net',bestlastnet)
 
@@ -181,8 +240,8 @@ def writefile(result):
 	writestr(outfolder,'/bestlasttree.matrix',bestlastmatrix)
 
 	# dot file
-	bestdot = treetodot(treedic=besttree)
-	bestlastdot = treetodot(treedic=bestlasttree)
+	bestdot = treetodot(treedic=besttree,lenmat=lenmat)
+	bestlastdot = treetodot(treedic=bestlasttree,lenmat=lenmat)
 	writestr(outfolder,'/besttree.dot',bestdot)
 	writestr(outfolder,'/bestlasttree.dot',bestlastdot)
 
@@ -203,9 +262,13 @@ def writefile(result):
 	os.system('chmod 755 ' + outfolder)
 
 
-def writefilelite(iterationrunres,itertime, bestruntmp,iternow,outfolder):
+def writefilelite(result):
 	import os
-
+	iterationrunres = robjects.Vector(result['iterationrunres'])	
+	itertime = result['itertime']
+	bestruntmp = result['bestruntmp']
+	iternow = result['iteri']
+	outfolder = result['outfolder']
 	temp = iterationrunres.rx2('bestres')
 	bestres = temp.rx2(bestruntmp[0])
 	besttree = bestres.rx2('MTreeunires')
@@ -221,7 +284,7 @@ def writefilelite(iterationrunres,itertime, bestruntmp,iternow,outfolder):
 		f.write(outstr)
 		f.close()		
 
-	bestdot = treetodot(treedic=besttree)
+	bestdot = treetodot(treedic=besttree,lenmat=lenmat)
 	writestr(outfolder,'/besttree.dot',bestdot)
 
 	os.system('chmod 777 ' + outfolder+'/besttree.dot')

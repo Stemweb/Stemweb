@@ -9,7 +9,7 @@ import sys
 import multiprocessing
 
 if __name__ == '__main__':
-	sys.path.append("/Users/slinkola/STAM/Stemweb/algorithms/")
+	sys.path.append("/home/zou/Stemweb/algorithms/")
 	
 from concurrent_algorithm import ConcurrentAlgorithm
 from concurrent_algorithm import Observer
@@ -99,11 +99,11 @@ class Semsep_f81(ConcurrentAlgorithm):
 if __name__ == '__main__':
 
 	run_args = dict({
-					'itermaxin' :100, 
+					'itermaxin' :20, 
 					'runmax'    : 2, 
 					'infile'    : 'test.nex', 
 					'outfolder' : './temp',
-					'source':'/Users/slinkola/STAM/Stemweb/algorithms/semsep_stop_len/allunilen.r'})
+					'source':'/home/zou/Stemweb/algorithms/semsep_stop_len/allunilen.r'})
 	
 	obs = Observer()
 	obs2 = Observer()
