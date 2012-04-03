@@ -25,36 +25,70 @@
 from rpy2 import *
 from rpy2 import robjects
 
-def treetonet(treedic,lenmat):
-
-#	print (lenmat.rx('P','P'))
-	nodelist = list(treedic.rx2('NodeList'))
-	parentlist = treedic.rx2('ParentList')
-	parentlistname = parentlist.names
+#def treetonet(nodelist,parentlist,treedic,lenmat):
+def treetonet(nodelist,parentlist,lenmat):
+	parentlistname = parentlist.keys()
 	outstr = ''
 	if type(lenmat)==str:
 		for node in nodelist:
 			if node in parentlistname:
-				neighbor = list(parentlist.rx2(node))
+				neighbor = parentlist[node]
 				for neighbori in neighbor:
 					outstr = outstr + node + '\t' + neighbori + '\n'
 		outstr = outstr.strip()
 	else:
 		for node in nodelist:
 			if node in parentlistname:
-				neighbor = list(parentlist.rx2(node))
+				neighbor = parentlist[node]
 				for neighbori in neighbor:
 					outstr = outstr + node + '\t' + neighbori + '\t' + str(lenmat.rx(node,neighbori)[0]) + '\n'
 		outstr = outstr.strip()
 	return (outstr)
 
 
+def treetonewick(nodelist,neighborlist,lenmat):
+	import re
+	outstr = ['(',nodelist[0],')',';']
+	
+	nodelistnotextended = list(nodelist)
+	while len(nodelistnotextended) > 0:
+		nodelistnotextendedtemp = list(nodelistnotextended)
+		for node in nodelistnotextended:
+			if node in outstr:
+				nodelistnotextendedtemp.remove(node)
+				nodeindex = outstr.index(node)
+				temp = ['(']
+				for neighbori in neighborlist[node]:
+					if neighbori not in outstr:
+						temp.append(neighbori)
+						if type(lenmat) != str:
+							temp.append(':')
+							temp.append(str(list(lenmat.rx(node,neighbori))[0]))
+						temp.append(',')
+						if len(neighborlist[neighbori])==1:
+							nodelistnotextendedtemp.remove(neighbori)
 
+				if len(temp) > 0:
+					if temp[len(temp)-1]==',':
+						temp.pop(len(temp)-1)
+				temp.append(')')
+				outstr[nodeindex:nodeindex] = temp
+		nodelistnotextended = list(nodelistnotextendedtemp)
+
+	for node in nodelist:
+		if len(re.findall(r'[a-zA-Z]',node))==0:
+			outstr.remove(node)
+	outstrtemp = ''
+	for outstri in outstr:
+		outstrtemp = outstrtemp + outstri
+	return (outstrtemp)
 		
 #####################################################################
-def treetomatrix(treedic):
-	neighborlist = treedic.rx2('NeighbourList')
-	nodelist = list(treedic.rx2('NodeList'))
+#def treetomatrix(treedic):
+def treetomatrix(neighborlist,nodelist):
+
+	#neighborlist = treedic.rx2('NeighbourList')
+	#nodelist = list(treedic.rx2('NodeList'))
 
 	nodenumber = len(nodelist)
 	nodelist.sort()
@@ -66,7 +100,7 @@ def treetomatrix(treedic):
 		for nodej in nodelist:
 			if nodei == nodej:
 				outstrtmp = outstrtmp + ' ' + '0'
-			elif nodej in neighborlist.rx2(nodei):
+			elif nodej in neighborlist[nodei]:
 				outstrtmp = outstrtmp + ' ' + '1'
 			else:
 				outstrtmp = outstrtmp + ' ' + '-1'					
@@ -75,30 +109,10 @@ def treetomatrix(treedic):
 	return (outstr)
 
 ###################################################################
-def treetodot(treedic, lenmat):
+def treetodot(nodelist,parentlist,lenmat):
 	# how to print dot file 'neato -Tpdf -Gstart=rand x.dot > x.pdf'
 	import re
-	nodelist = list(treedic.rx2('NodeList'))
-
-	parentlist = treedic.rx2('ParentList')
-	parentlistname = parentlist.names
-	NeighbourList = treedic.rx2('NeighbourList')
-	
-#	nodelisttemp = []
-#	noderemovetemp = []
-#	for node in nodelist:
-#		if len(re.findall(r'[a-zA-Z]',node)) == 0: # hiddennodes
-			#print (NeighbourList.rx2(node))
- 
-			#if len(list(NeighbourList.rx2('node')))==1:
-			#	print (NeighbourList.rx2('node'))
-
-#		else:
-#			nodelisttemp.append(node)
-	#nodelist = nodelisttemp
-			
-	
-	
+	parentlistname = parentlist.keys()
 	outstr = 'graph clustering {\n\tsize=\"5,5\"\n\n'
 	for node in nodelist:
 		if len(re.findall(r'[a-zA-Z]',node)) == 0:
@@ -110,7 +124,7 @@ def treetodot(treedic, lenmat):
 	if type(lenmat)==str:
 		for node in nodelist:
 			if node in 	parentlistname:
-				neighbor = list(parentlist.rx2(node))
+				neighbor = list(parentlist[node])
 				for neighbori in neighbor:
 					outstr = outstr + '\t' + node + ' -- ' + neighbori + ';\n'
 	else:
@@ -118,7 +132,7 @@ def treetodot(treedic, lenmat):
 		lenmin = float('Inf')
 		for node in nodelist:
 			if node in 	parentlistname:
-				neighbor = list(parentlist.rx2(node))
+				neighbor = list(parentlist[node])
 				for neighbori in neighbor:
 					if lenmax < lenmat.rx(node,neighbori)[0]:
 						lenmax = lenmat.rx(node,neighbori)[0]
@@ -128,7 +142,7 @@ def treetodot(treedic, lenmat):
 
 		for node in nodelist:
 			if node in 	parentlistname:
-				neighbor = list(parentlist.rx2(node))
+				neighbor = list(parentlist[node])
 				for neighbori in neighbor:
 					temp = lenmat.rx(node,neighbori)[0]
 					temp = (0.5*(temp - lenmin))/(lenmax - lenmin) + 0.5
@@ -136,7 +150,7 @@ def treetodot(treedic, lenmat):
 		outstr = outstr + '\n/* Here are the original edge lengths */\n'
 		for node in nodelist:
 			if node in 	parentlistname:
-				neighbor = list(parentlist.rx2(node))
+				neighbor = list(parentlist[node])
 				for neighbori in neighbor:
 					temp = lenmat.rx(node,neighbori)[0]
 					outstr = outstr + '/*\t' + node + ' -- ' + neighbori +'[len=' + str(temp)+ '];*/\n'
@@ -190,7 +204,7 @@ def writelog(iternow, itertime, iterationrunres, bestruntmp, bestlastruntmp):
 
 def writefile(result):
 	import os
-
+	import re
 	iterationrunres = robjects.Vector(result['iterationrunres'])
 	itertime = result['itertime']
 	bestruntmp = result['bestruntmp']
@@ -225,23 +239,120 @@ def writefile(result):
 		f = open(outfolder+filename,'w')
 		f.write(outstr)
 		f.close()		
+	
+	def removehidden(nodelist,parentlist,neighborlist):
+		#nodelistremovetemp = []
+		#for node in nodelist:
+			#nodelistremovetemp.append(node)
+		nodelistremovetemp = list(nodelist)
+		parentlistremovetemp = {}
+		neighborlistremovetemp = {}
+		parentlistname = parentlist.names
+		neighborlistname = neighborlist.names
+		lenmatremovetemp = {}
+		for node in nodelist:
+			if node in parentlistname:
+				parentlistremovetemp[node] = list(parentlist.rx2(node))
+		for node in nodelist:
+			if node in neighborlistname:
+				neighborlistremovetemp[node] = list(neighborlist.rx2(node))
+
+		
+				
+		scanfinish = 0
+		while scanfinish == 0:
+			scanfinish = 1
+			
+			for node in nodelist:
+				if (node in nodelistremovetemp):
+					if (len(neighborlistremovetemp[node])==1 and len(re.findall(r'[a-zA-Z]',node)) == 0):
+						scanfinish = 0
+						# remove node from nodelist
+						nodelistremovetemp.remove(node)
+						# remove node form neighor information
+						neighbortemp = neighborlistremovetemp[node][0]
+						neighborlistremovetemp[neighbortemp].remove(node)
+						if parentlistremovetemp.has_key(neighbortemp):
+							if node in parentlistremovetemp[neighbortemp]:
+								parentlistremovetemp[neighbortemp].remove(node)
+								if len(parentlistremovetemp[neighbortemp])==0:
+									del parentlistremovetemp[neighbortemp]
+						# remove from neighborlist and parentlist
+						if parentlistremovetemp.has_key(node):
+							del parentlistremovetemp[node]
+						if neighborlistremovetemp.has_key(node):
+							del neighborlistremovetemp[node]
+						
+				if (node in nodelistremovetemp):
+					if (len(neighborlistremovetemp[node])==2 and len(re.findall(r'[a-zA-Z]',node))==0): 
+						# remove internal hidden nodes only when there is no edge length
+						neighborlisttemp = neighborlistremovetemp[node]
+						scanfinish = 0
+						# do something for neighbor 1
+						if parentlistremovetemp.has_key(neighborlisttemp[0]):
+							if node in parentlistremovetemp[neighborlisttemp[0]]:
+								parentlistremovetemp[neighborlisttemp[0]].remove(node)
+								parentlistremovetemp[neighborlisttemp[0]].append(neighborlisttemp[1])
+						neighborlistremovetemp[neighborlisttemp[0]].remove(node)
+						neighborlistremovetemp[neighborlisttemp[0]].append(neighborlisttemp[1])
+						# do something for neighbor 2
+						if parentlistremovetemp.has_key(neighborlisttemp[1]):
+							if node in parentlistremovetemp[neighborlisttemp[1]]:
+								parentlistremovetemp[neighborlisttemp[1]].remove(node)
+								if parentlistremovetemp.has_key(neighborlisttemp[0]):
+									if neighborlisttemp[1] not in parentlistremovetemp[neighborlisttemp[0]]:
+										parentlistremovetemp[neighborlisttemp[1]].append(neighborlisttemp[0])
+								else:
+									parentlistremovetemp[neighborlisttemp[1]].append(neighborlisttemp[0])
+								if len(parentlistremovetemp[neighborlisttemp[1]])==0:
+									del parentlistremovetemp[neighborlisttemp[1]]
+									
+						neighborlistremovetemp[neighborlisttemp[1]].remove(node)
+						neighborlistremovetemp[neighborlisttemp[1]].append(neighborlisttemp[0])	
+						# remove node
+						nodelistremovetemp.remove(node)
+						if parentlistremovetemp.has_key(node):
+							del parentlistremovetemp[node]
+						if neighborlistremovetemp.has_key(node):
+							del neighborlistremovetemp[node]
+
+		return nodelistremovetemp,parentlistremovetemp,neighborlistremovetemp
+		
+		
+		
+		
+		
+	nodelistbestori=list(besttree.rx2('NodeList'))	
+	parentlistbestori=besttree.rx2('ParentList')
+	neighborlistbestori=besttree.rx2('NeighbourList')
+	nodelistlastori=list(bestlasttree.rx2('NodeList'))	
+	parentlistlastori =bestlasttree.rx2('ParentList')	
+	neighborlistlastori=bestlasttree.rx2('NeighbourList')
+	nodelistbest, parentlistbest,neighborlistbest =  removehidden(nodelist=nodelistbestori,parentlist=parentlistbestori,neighborlist=neighborlistbestori)
+	nodelistlast, parentlistlast,neighborlistlast =  removehidden(nodelist=nodelistlastori,parentlist=parentlistlastori,neighborlist=neighborlistlastori)
 
 	# net file
-	bestnet = treetonet(treedic=besttree,lenmat=lenmat)
-	bestlastnet = treetonet(treedic=bestlasttree,lenmat=lenmat)
+	bestnet = treetonet(nodelist=nodelistbest,parentlist =parentlistbest,lenmat=lenmat)
 	writestr(outfolder,'/besttree.net',bestnet)
+	bestlastnet = treetonet(nodelist=nodelistlast,parentlist =parentlistlast,lenmat=lenmat)
 	writestr(outfolder,'/bestlasttree.net',bestlastnet)
 
-
+	
+	# newick file
+	bestnewick = treetonewick(neighborlist=neighborlistbest,nodelist=nodelistbest,lenmat=lenmat)
+	lastnewick = treetonewick(neighborlist=neighborlistlast,nodelist=nodelistlast,lenmat=lenmat)
+	writestr(outfolder,'/besttree.tre',bestnewick)
+	writestr(outfolder,'/bestlasttree.tre',lastnewick)	
+	
 	# matrix file
-	bestmatrix = treetomatrix(treedic=besttree)
-	bestlastmatrix = treetomatrix(treedic=bestlasttree)
+	bestmatrix = treetomatrix(neighborlist=neighborlistbest,nodelist=nodelistbest)
+	bestlastmatrix = treetomatrix(neighborlist=neighborlistlast,nodelist=nodelistlast)
 	writestr(outfolder,'/besttree.matrix',bestmatrix)
 	writestr(outfolder,'/bestlasttree.matrix',bestlastmatrix)
 
 	# dot file
-	bestdot = treetodot(treedic=besttree,lenmat=lenmat)
-	bestlastdot = treetodot(treedic=bestlasttree,lenmat=lenmat)
+	bestdot = treetodot(nodelist=nodelistbest,parentlist =parentlistbest,lenmat=lenmat)
+	bestlastdot = treetodot(nodelist=nodelistlast,parentlist =parentlistlast,lenmat=lenmat)
 	writestr(outfolder,'/besttree.dot',bestdot)
 	writestr(outfolder,'/bestlasttree.dot',bestlastdot)
 
@@ -284,7 +395,7 @@ def writefilelite(result):
 		f.write(outstr)
 		f.close()		
 
-	bestdot = treetodot(treedic=besttree,lenmat=lenmat)
+	bestdot = treetodot(nodelist=list(besttree.rx2('NodeList')),parentlist =besttree.rx2('ParentList'),lenmat=lenmat)
 	writestr(outfolder,'/besttree.dot',bestdot)
 
 	os.system('chmod 777 ' + outfolder+'/besttree.dot')
