@@ -211,294 +211,278 @@ char *str_vtou(char *str)
 
 int read_file(const char *dirname)
 {
-  DIR *dir;
-  FILE *f1, *f2;
-  gzFile gfile;
-  char buf[4096];
-  struct dirent *de;
-  int bufpos1, bufpos2, lines, f1i, f2i, ch, line;
-  long f1offset;
+	DIR *dir;
+  	FILE *f1, *f2;
+  	gzFile gfile;
+  	char buf[4096];
+  	struct dirent *de;
+  	int bufpos1, bufpos2, lines, f1i, f2i, ch, line;
+  	long f1offset;
 
-  leafs = 0;
-  names = (char **) malloc(sizeof(void *) * 256);
-  dir = (DIR *) opendir(dirname);
-  while ((de = readdir(dir)))
-  {
-    if (de->d_name[0] != '.')
-    {
-      names[leafs] = (char *) malloc(sizeof(char) * (strlen(de->d_name)+1));
-      strcpy(names[leafs], de->d_name);
-      printf("%s ", names[leafs]);
-      leafs++;
-    }
-  }
-  printf("\n");
-  closedir(dir);
+  	leafs = 0;
+  	names = (char **) malloc(sizeof(void *) * 256);
+  	dir = (DIR *) opendir(dirname);
+  	
+  	// Read names of the files.
+  	while ((de = readdir(dir)))
+  	{
+    	if (de->d_name[0] != '.')
+    	{
+      		names[leafs] = (char *) malloc(sizeof(char) * (strlen(de->d_name)+1));
+      		strcpy(names[leafs], de->d_name);
+      		printf("%s ", names[leafs]);
+      		leafs++;
+    	}
+  	}
+  	printf("\n");
+  	closedir(dir);
 
-  lines = count_lines(fullname(dirname, names[0]));
-  chunks = (lines-1)/chunksize+1;
-  printf("%d files, %d lines, %d chunks of size %d each.\n",
-	 leafs, lines, chunks, chunksize);
+  	lines = count_lines(fullname(dirname, names[0]));
+  	chunks = (lines-1)/chunksize+1;
+  	printf("%d files, %d lines, %d chunks of size %d each.\n", 
+  	leafs, lines, chunks, chunksize);
 
-  Kyx = (int *) malloc(sizeof(int) * leafs * leafs * chunks);
-  Kx = (int *) malloc(sizeof(int) * leafs * chunks);
-  empty = (int *) malloc(sizeof(int) * leafs * chunks);
-  unique = (int *) malloc(sizeof(int) * leafs * chunks);
+  	Kyx = (int *) malloc(sizeof(int) * leafs * leafs * chunks);
+  	Kx = (int *) malloc(sizeof(int) * leafs * chunks);
+  	empty = (int *) malloc(sizeof(int) * leafs * chunks);
+  	unique = (int *) malloc(sizeof(int) * leafs * chunks);
 
-  for (f1i = 0; f1i < leafs; f1i++)
-  {
-    f1 = fopen(fullname(dirname, names[f1i]), "r");
-    assert(f1);
+  	for (f1i = 0; f1i < leafs; f1i++)
+  	{
+    	f1 = fopen(fullname(dirname, names[f1i]), "r");
+    	assert(f1);
 
-    for (ch = 0; ch < chunks; ch++)
-    {
-      Kx[f1i*chunks+ch] = -1;
-      empty[f1i*chunks+ch] = 1;
-      unique[f1i*chunks+ch] = 1;
-    }
+    	for (ch = 0; ch < chunks; ch++)
+    	{
+      		Kx[f1i*chunks+ch] = -1;
+      		empty[f1i*chunks+ch] = 1;
+      		unique[f1i*chunks+ch] = 1;
+    	}
 
-    for (f2i = 0; f2i < leafs; f2i++)
-    {
-      fseek(f1, 0, SEEK_SET);
+    	for (f2i = 0; f2i < leafs; f2i++)
+    	{
+      		fseek(f1, 0, SEEK_SET);
 
-      if (f2i != f1i)
-	f2 = fopen(fullname(dirname, names[f2i]), "r");
-      else
-	f2 = f1;
-      assert(f2);
+      		if (f2i != f1i)
+				f2 = fopen(fullname(dirname, names[f2i]), "r");
+      		else
+				f2 = f1;
+      		assert(f2);
       
-      //printf("%s-%s:", names[f1i], names[f2i]);
+      		//printf("%s-%s:", names[f1i], names[f2i]);
 
-      for (ch = 0; ch < chunks; ch++)
-      {
-	f1offset = ftell(f1);
-	bufpos1 = 0;
-	gfile = gzopen("tmp.gz", "wb");
-	for (line = 0; !feof(f1) && line < chunksize; line++)
-	{
-	  if (bufpos1 > 0 && buf[bufpos1-1] == '\n')
-	    buf[bufpos1-1] = ' ';
-	  fgets(buf+bufpos1, 2048-bufpos1, f1);
+      		for (ch = 0; ch < chunks; ch++)
+      		{
+				f1offset = ftell(f1);
+				bufpos1 = 0;
+				gfile = gzopen("tmp.gz", "wb");
+				for (line = 0; !feof(f1) && line < chunksize; line++)
+				{
+	  				if (bufpos1 > 0 && buf[bufpos1-1] == '\n')
+	    				buf[bufpos1-1] = ' ';
+	  				fgets(buf+bufpos1, 2048-bufpos1, f1);
 #ifdef REPLACE_AMP_BY_ET
-	  if (!strcmp(buf+bufpos1, "&\n"))
-	    strcpy(buf+bufpos1, "et\n");
+	  				if (!strcmp(buf+bufpos1, "&\n"))
+	    				strcpy(buf+bufpos1, "et\n");
 #endif
-	  if (buf[bufpos1] && buf[bufpos1] != '\n')
-	    empty[f1i*chunks+ch] = 0;
-	  if (strcmp(buf+bufpos1, "PUUT\n") && 
-	      strcmp(buf+bufpos1, "POIS\n"))
-	    bufpos1 += strlen(buf+bufpos1);
-	  else 
-	    buf[bufpos1++] = '\n';
-	}
-	buf[bufpos1] = '\0';
+	  				if (buf[bufpos1] && buf[bufpos1] != '\n')
+	    				empty[f1i*chunks+ch] = 0;
+	  				if (strcmp(buf+bufpos1, "PUUT\n") && strcmp(buf+bufpos1, "POIS\n"))
+	    				bufpos1 += strlen(buf+bufpos1);
+	  				else 
+	    				buf[bufpos1++] = '\n';
+				}
+				buf[bufpos1] = '\0';
 
-	//sort_string(buf);
-	bufpos1 = strlen(buf);
-	/*
-	fprintf(stderr, "%s (1): length %d at #%x:\n%s\n", 
-		names[f1i], bufpos1, 
-		(int)buf, buf);
-	*/
-	if (!bufpos1 || buf[bufpos1-1] != '\n')
-	  buf[bufpos1++]='\n';
-	buf[bufpos1] = '\0';
+				//sort_string(buf);
+				bufpos1 = strlen(buf);
+				/*
+				fprintf(stderr, "%s (1): length %d at #%x:\n%s\n", 
+				names[f1i], bufpos1,(int)buf, buf);
+				*/
+				if (!bufpos1 || buf[bufpos1-1] != '\n')
+	  				buf[bufpos1++]='\n';
+				buf[bufpos1] = '\0';
 #ifdef IGNORE_CASE
-	str_tolower(buf);
+				str_tolower(buf);
 #endif
 #ifdef IGNORE_V_VS_U
-	str_vtou(buf);
+				str_vtou(buf);
 #endif
 
-	if (Kx[f1i*chunks+ch] == -1)
-	{
-	  gzputs(gfile, buf);
-	  gzflush(gfile, Z_SYNC_FLUSH);
+				if (Kx[f1i*chunks+ch] == -1)
+				{
+	  				gzputs(gfile, buf);
+	  				gzflush(gfile, Z_SYNC_FLUSH);
 	
-	  Kx[f1i*chunks+ch] = 
-	    (int) ((struct z_stream_s *)gfile)->total_out - GZIP_HEADER;
-	  //fprintf(stderr, "%sKx=%d\n", buf,Kx[f1i * chunks + ch]);
-	  gzclose(gfile);
-	  gfile = gzopen("tmp.gz", "wb");
-	}
+	  				Kx[f1i*chunks+ch] = (int) ((struct z_stream_s *)gfile)->total_out - GZIP_HEADER;
+	  				//fprintf(stderr, "%sKx=%d\n", buf,Kx[f1i * chunks + ch]);
+	  				gzclose(gfile);
+	  				gfile = gzopen("tmp.gz", "wb");
+				}
 
-	if (f2 == f1)
-	  fseek(f1, f1offset, SEEK_SET);
-	bufpos2 = bufpos1;
-	for (line = 0; !feof(f2) && line < chunksize; line++)
-	{
-	  if (bufpos2 > bufpos1 && buf[bufpos2-1] == '\n')
-	    buf[bufpos2-1] = ' ';
-	  fgets(buf+bufpos2, 4096-bufpos2, f2);
-	  if (!strcmp(buf+bufpos2, "&\n"))
-	    strcpy(buf+bufpos2, "et\n");
-	  if (strcmp(buf+bufpos2, "PUUT\n") && 
-	      strcmp(buf+bufpos2, "POIS\n"))
-	    bufpos2 += strlen(buf+bufpos2);
-	  else 
-	    buf[bufpos2++] = '\n';
-	}
-	if (bufpos2==bufpos1 || buf[bufpos2-1] != '\n')
-	  buf[bufpos2++]='\n';
-	buf[bufpos2] = '\0';
+				if (f2 == f1)
+	  				fseek(f1, f1offset, SEEK_SET);
+				bufpos2 = bufpos1;
+				for (line = 0; !feof(f2) && line < chunksize; line++)
+				{
+	  				if (bufpos2 > bufpos1 && buf[bufpos2-1] == '\n')
+	    				buf[bufpos2-1] = ' ';
+	  				fgets(buf+bufpos2, 4096-bufpos2, f2);
+	  				if (!strcmp(buf+bufpos2, "&\n"))
+	    				strcpy(buf+bufpos2, "et\n");
+	  				if (strcmp(buf+bufpos2, "PUUT\n") && strcmp(buf+bufpos2, "POIS\n"))
+	    				bufpos2 += strlen(buf+bufpos2);
+	  				else 
+	    				buf[bufpos2++] = '\n';
+				}
+				if (bufpos2==bufpos1 || buf[bufpos2-1] != '\n')
+	  				buf[bufpos2++]='\n';
+				buf[bufpos2] = '\0';
 #ifdef IGNORE_CASE
-	str_tolower(buf+bufpos1);
+				str_tolower(buf+bufpos1);
 #endif
 #ifdef IGNORE_V_VS_U
-	str_vtou(buf+bufpos1);
+				str_vtou(buf+bufpos1);
 #endif
 
-	/*
-	fprintf(stderr, "%s-%s: at #%x and #%x:\n1:%s\n2:%s\n", 
-		names[f1i], names[f2i],
-		(int)buf, (int)(buf+bufpos1), buf, buf+bufpos1);
-	*/
+				/*
+				fprintf(stderr, "%s-%s: at #%x and #%x:\n1:%s\n2:%s\n", 
+				names[f1i], names[f2i], (int)buf, (int)(buf+bufpos1), buf, buf+bufpos1);
+				*/
 
-	//sort_string(buf+bufpos1);
-	bufpos2 = bufpos1+strlen(buf+bufpos1);
-	/*	
-	fprintf(stderr, "%s-%s: at #%x and #%x:\n1:%s\n2:%s\n", 
-		names[f1i], names[f2i],
-		(int)buf, (int)(buf+bufpos1), buf, buf+bufpos1);
-	fprintf(stderr, "====%d %d ('%c')\n", bufpos2, 
-		strncmp(buf, buf+bufpos1, bufpos2/2),
-		*(buf+bufpos1+bufpos2/2-1));
-		*/
+				//sort_string(buf+bufpos1);
+				bufpos2 = bufpos1+strlen(buf+bufpos1);
+				/*	
+				fprintf(stderr, "%s-%s: at #%x and #%x:\n1:%s\n2:%s\n", names[f1i], names[f2i],
+				(int)buf, (int)(buf+bufpos1), buf, buf+bufpos1);
+				fprintf(stderr, "====%d %d ('%c')\n", bufpos2, 
+				strncmp(buf, buf+bufpos1, bufpos2/2), *(buf+bufpos1+bufpos2/2-1));
+				*/
 
-	if (strncmp(buf, buf+bufpos1, bufpos2/2))
-	{
-	  gzputs(gfile, buf);
-	  gzflush(gfile, Z_SYNC_FLUSH);
+				if (strncmp(buf, buf+bufpos1, bufpos2/2))
+				{
+	  				gzputs(gfile, buf);
+	  				gzflush(gfile, Z_SYNC_FLUSH);
 
-	  if (1 || !isempty(buf+bufpos1))
-	    Kyx[f1i*leafs*chunks + f2i*chunks + ch] = 
-	      (int) ((struct z_stream_s *)gfile)->total_out -
-	      Kx[f1i * chunks + ch] - GZIP_HEADER;
-	  else
-	  {
-	    if (0&&f1i== 0)
-	      fprintf(stderr, "empty(%s/%d) len=%d: %s", 
-		      names[f2i], ch, strlen(buf+bufpos1), buf+bufpos1);
-	    Kyx[f1i*leafs*chunks + f2i*chunks + ch] = 0;
-	  }
+	  				if (1 || !isempty(buf+bufpos1))
+	    				Kyx[f1i*leafs*chunks + f2i*chunks + ch] = 
+	      				(int) ((struct z_stream_s *)gfile)->total_out -
+	      				Kx[f1i * chunks + ch] - GZIP_HEADER;
+	 				else
+	  				{
+	    				if (0&&f1i== 0)
+	      					fprintf(stderr, "empty(%s/%d) len=%d: %s", 
+		      				names[f2i], ch, strlen(buf+bufpos1), buf+bufpos1);
+	    					Kyx[f1i*leafs*chunks + f2i*chunks + ch] = 0;
+	  				}
 
-	  if (0 && f1i == f2i)
-	    fprintf(stderr, "diff %s!=%s (K(%s|%s)=%d):\n%s",
-		    names[f1i], names[f2i], 
-		    names[f2i], names[f1i],
-		    Kyx[f1i*leafs*chunks + f2i*chunks+ch], buf);
-	}
-	else
-	{
-	  /*
-	  fprintf(stderr, "%s-%s: at #%x and #%x:\n%s <- 1\n%s <- 2\n", 
-		  names[f1i], names[f2i],
-		  (int)buf, (int)(buf+bufpos1), buf, buf+bufpos1);
-	  for (bufpos1 = 0; bufpos1 < bufpos2/2; bufpos1++)
-	    fprintf(stderr, "~");
-	  fprintf(stderr, "\n");
-	  */
+	  				if (0 && f1i == f2i)
+	    				fprintf(stderr, "diff %s!=%s (K(%s|%s)=%d):\n%s",
+		    			names[f1i], names[f2i], names[f2i], names[f1i],
+		    			Kyx[f1i*leafs*chunks + f2i*chunks+ch], buf);
+				}
+				else
+				{
+	  				/*
+	  				fprintf(stderr, "%s-%s: at #%x and #%x:\n%s <- 1\n%s <- 2\n", 
+		  			names[f1i], names[f2i], (int)buf, (int)(buf+bufpos1), buf, buf+bufpos1);
+	  				for (bufpos1 = 0; bufpos1 < bufpos2/2; bufpos1++)
+	    				fprintf(stderr, "~");
+	  				fprintf(stderr, "\n");
+	  				*/
 
 #ifdef EXACT_COPY_IS_FREE
-	  Kyx[f1i*leafs*chunks + f2i*chunks + ch] = 0;
+	  				Kyx[f1i*leafs*chunks + f2i*chunks + ch] = 0;
 #else
-	  gzputs(gfile, buf);
-	  gzflush(gfile, Z_SYNC_FLUSH);
+	  				gzputs(gfile, buf);
+	  				gzflush(gfile, Z_SYNC_FLUSH);
 
-	  if (1 || !isempty(buf+bufpos1))
-	    Kyx[f1i*leafs*chunks + f2i*chunks + ch] = 
-	      (int) ((struct z_stream_s *)gfile)->total_out -
-	      Kx[f1i * chunks + ch] - GZIP_HEADER;
-	  else
-	  {
-	    if (0&&f1i== 0)
-	      fprintf(stderr, "empty(%s/%d) len=%d: %s", 
-		      names[f2i], ch, strlen(buf+bufpos1), buf+bufpos1);
-	    Kyx[f1i*leafs*chunks + f2i*chunks + ch] = 0;
-	  }
+	  				if (1 || !isempty(buf+bufpos1))
+	    				Kyx[f1i*leafs*chunks + f2i*chunks + ch] = 
+	      				(int) ((struct z_stream_s *)gfile)->total_out -
+	      				Kx[f1i * chunks + ch] - GZIP_HEADER;
+	  				else
+	  				{
+	    				if (0&&f1i== 0)
+	      					fprintf(stderr, "empty(%s/%d) len=%d: %s", 
+		      				names[f2i], ch, strlen(buf+bufpos1), buf+bufpos1);
+	    					Kyx[f1i*leafs*chunks + f2i*chunks + ch] = 0;
+	  				}
 #endif
-	  if (0 && ch == 0)
-	    fprintf(stderr, "duplicate %s=%s (K(%s|%s)=%d):\n%s",
-		    names[f1i], names[f2i], 
-		    names[f2i], names[f1i],
-		    Kyx[f1i*leafs*chunks + f2i*chunks+ch], buf);
-	  if (f2i<f1i)
-	    unique[f2i*chunks+ch] = 0;
-	}
+	  				if (0 && ch == 0)
+	    				fprintf(stderr, "duplicate %s=%s (K(%s|%s)=%d):\n%s",
+		    			names[f1i], names[f2i], names[f2i], names[f1i],
+		    			Kyx[f1i*leafs*chunks + f2i*chunks+ch], buf);
+	  				if (f2i<f1i)
+	    				unique[f2i*chunks+ch] = 0;
+				}
 
-	if (0 && !strcmp(names[f1i],"S") && !strcmp(names[f2i],"R"))
-	  fprintf(stderr, "%s[%d %d] K_{%d}(%s|%s)=%d.\n",
-		  buf, strncmp(buf, buf+bufpos1, bufpos2/2),
-		  isempty(buf+bufpos1),
-		  ch, names[f2i],names[f1i],
-		  Kyx[f1i*leafs*chunks+f2i*chunks+ch]);
+				if (0 && !strcmp(names[f1i],"S") && !strcmp(names[f2i],"R"))
+	  				fprintf(stderr, "%s[%d %d] K_{%d}(%s|%s)=%d.\n",
+		  			buf, strncmp(buf, buf+bufpos1, bufpos2/2),
+		  			isempty(buf+bufpos1), ch, names[f2i],names[f1i],
+		  			Kyx[f1i*leafs*chunks+f2i*chunks+ch]);
 
-	//printf("%d ", Kyx[f1i * leafs*chunks + f2i * chunks + ch]);
+				//printf("%d ", Kyx[f1i * leafs*chunks + f2i * chunks + ch]);
 
-	gzclose(gfile);      
-      }
-      if (f2i != f1i)
-	fclose(f2);
-      else if (0)
-	fprintf(stderr, "%d %s-%s (K(%s|%s)=%d):\n%s",
-		unique[f1i],
-		names[f1i], names[f2i], 
-		names[f2i], names[f1i],
-		Kyx[f1i*leafs*chunks + f2i*chunks+ch], buf);
+				gzclose(gfile);      
+      		}
+      		if (f2i != f1i)
+				fclose(f2);
+      		else if (0)
+				fprintf(stderr, "%d %s-%s (K(%s|%s)=%d):\n%s",
+				unique[f1i], names[f1i], names[f2i], names[f2i], names[f1i],
+				Kyx[f1i*leafs*chunks + f2i*chunks+ch], buf);
 
-      //printf("\n");
-    }
-    fprintf(stderr, ".");
-    fclose(f1);
-  }
-  fprintf(stderr, "\n");
+      		//printf("\n");
+    	}
+    	fprintf(stderr, ".");
+    	fclose(f1);
+  	}
+  	fprintf(stderr, "\n");
 
-  f2i = 0;
-  for (ch = 0; ch < chunks; ch++)
-    for (f1i = 0; f1i < leafs; f1i++)
-      if (unique[f1i*chunks+ch])
-	f2i++;
-  printf("%d/%d unique.\n", f2i, ch*leafs);
+  	f2i = 0;
+  	for (ch = 0; ch < chunks; ch++)
+    	for (f1i = 0; f1i < leafs; f1i++)
+      		if (unique[f1i*chunks+ch])
+				f2i++;
+	printf("%d/%d unique.\n", f2i, ch*leafs);
 
-  printf("%dx%dx%d information array ready.\n", leafs, leafs, chunks);
+	printf("%dx%dx%d information array ready.\n", leafs, leafs, chunks);
 
-  printf("'%s'(%d)->'%s'(%d)= %d\n", 
-	 names[3], empty[3*chunks],
-	 names[3], empty[3*chunks],
-	 Kyx[3*leafs*chunks+3*chunks]);
-  printf("'%s'(%d)->'%s'(%d) = %d\n", 
-	 names[4], empty[4*chunks],
-	 names[3], empty[3*chunks],
-	 Kyx[4*leafs*chunks+3*chunks]);
-  printf("'%s'->'%s' = %d\n", names[3], names[4], 
-	 Kyx[3*leafs*chunks+4*chunks]);
-  printf("'%s'->'%s' = %d\n", names[4], names[4],
-	 Kyx[4*leafs*chunks+4*chunks]);
+	printf("'%s'(%d)->'%s'(%d)= %d\n", names[3], empty[3*chunks],
+	 	names[3], empty[3*chunks], Kyx[3*leafs*chunks+3*chunks]);
+  	printf("'%s'(%d)->'%s'(%d) = %d\n", names[4], empty[4*chunks],
+	 	names[3], empty[3*chunks], Kyx[4*leafs*chunks+3*chunks]);
+  	printf("'%s'->'%s' = %d\n", names[3], names[4], 
+	 	Kyx[3*leafs*chunks+4*chunks]);
+  	printf("'%s'->'%s' = %d\n", names[4], names[4],
+	 	Kyx[4*leafs*chunks+4*chunks]);
 
-  printf("non-symmetric: %d %d\n", 
-	 Kyx[3*leafs*chunks + 4*chunks],
-	 Kyx[4*leafs*chunks + 3*chunks]);
+  	printf("non-symmetric: %d %d\n", Kyx[3*leafs*chunks + 4*chunks],
+	 	Kyx[4*leafs*chunks + 3*chunks]);
 
-  /*
-  for (f1i = 0; f1i < leafs; f1i++)
-  {
-    Kx[f1i*chunks + ch] *= 2;
-    for (f2i = f1i+1; f2i < leafs; f2i++)
-      for (ch = 0; ch < chunks; ch++)
-      {
-	Kyx[f1i*leafs*chunks + f2i*chunks + ch] =
-	  Kyx[f2i*leafs*chunks + f1i*chunks + ch] =
-	  Kyx[f1i*leafs*chunks + f2i*chunks + ch] +
-	  Kyx[f2i*leafs*chunks + f1i*chunks + ch];
-      }
-  }
+	/*
+	for (f1i = 0; f1i < leafs; f1i++)
+	{
+    	Kx[f1i*chunks + ch] *= 2;
+    	for (f2i = f1i+1; f2i < leafs; f2i++)
+      		for (ch = 0; ch < chunks; ch++)
+      		{
+				Kyx[f1i*leafs*chunks + f2i*chunks + ch] =
+	  			Kyx[f2i*leafs*chunks + f1i*chunks + ch] =
+	  			Kyx[f1i*leafs*chunks + f2i*chunks + ch] +
+	  			Kyx[f2i*leafs*chunks + f1i*chunks + ch];
+      		}
+  	}
 
-  printf("symmetric: %d %d\n", 
-	 Kyx[3*leafs*chunks + 4*chunks],
-	 Kyx[4*leafs*chunks + 3*chunks]);
-  */
+  	printf("symmetric: %d %d\n", 
+	 	Kyx[3*leafs*chunks + 4*chunks],
+	 	Kyx[4*leafs*chunks + 3*chunks]);
+  	*/
 
-  return leafs;
+	return leafs;
 }
 
 struct node_st *new_node(int i)

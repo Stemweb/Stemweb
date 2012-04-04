@@ -3,11 +3,12 @@
 
 from django import forms
 from recaptcha_works.fields import RecaptchaField
+from Stemweb.algorithms.forms import is_positive_integer
 import os
 
-########                                ########
-########           VALIDATORS           ########
-########                                ########
+"""
+				FIELD VALIDATORS
+"""
 
 # Simple validator that check's that FileField's basename 
 # is no more than 30 characters long.
@@ -16,9 +17,10 @@ def validate_upload_file(FileField):
     if len(filename) > 30:
         raise forms.ValidationError('File\'s name %s is too long. Only 30 characters allowed.' % (FileField.name))
 
-########                                ########
-########            THE FORMS           ########
-########                                ########
+
+"""
+				FORMS 
+"""
 
 # Simple form to select a file from local system.
 class Upload_file(forms.Form):
@@ -30,14 +32,7 @@ class Upload_file(forms.Form):
 
 # Form to choose runsemf81 run's parameters.    
 class Run_file(forms.Form):
-    iter_choices = ((5, '5'), (10, '10'), (15, '15'), (20, '20'), (25, '25'))
-    run_choices = ((1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5'))
-    
-    itermaxin = forms.ChoiceField(label="Iterations", 
-                                  choices=iter_choices, 
-                                  initial = 15)
-    
-    runmax = forms.ChoiceField(label="Runs",
-                               choices=run_choices, 
-                               initial = 2)
+
+	itermaxin = forms.IntegerField(label = 'Iteration max', validators = [is_positive_integer])
+	runmax = forms.IntegerField(label = '\"Parallel\" runs', validators = [is_positive_integer])
     

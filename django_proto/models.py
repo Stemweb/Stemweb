@@ -9,30 +9,9 @@ from django.contrib.auth.models import User
 from django.utils.encoding import smart_str
 import handler
 
-# Table for all different script types. Basically determines which
-# program needs to be opened for which type of script
-class Script_types(models.Model):
-    name = models.CharField(max_length = 200)           # Name of the script type. 
-    running_program = models.CharField(max_length = 100)# Program to run this script type.
-    
-    def __str__(self):
-        return smart_str('%s %s' % (self.name, self.running_program))
-   
- 
-# Table for all different scripts.
-class Scripts(models.Model):
-    time = models.DateTimeField(auto_now_add = True)# Time when script was added to database
-    script_type = models.ForeignKey(Script_types)   # Type of the script from the Script_types
-    name = models.CharField(max_length = 50)        # Name of the script
-    
-    # REFACTOR THIS TO models.FileField
-    path = models.CharField(max_length=200)         # Absolute path to this scripts file.
-    
-    def __str__(self):
-        return smart_str('%s / %s / %s' % (self.name, self.script_type.name, self.time))
 
 # Basic table for all input files to any of the scripts.   
-class Input_files(models.Model):
+class InputFiles(models.Model):
       
     user = models.ForeignKey(User)                  # User who uploaded the file
     time = models.DateTimeField(auto_now_add = True) # Uploading time 
@@ -46,11 +25,11 @@ class Input_files(models.Model):
   
 # Basic table to manage different runs of the scripts 
 # with different input files.  
-class Script_runs(models.Model):
+class AlgorithmRuns(models.Model):
     
     time = models.DateTimeField(auto_now_add = True, null = True) # Starting time of the run
     #script = models.ForeignKey(Scripts)             # Script used in this run
-    input_file = models.ForeignKey(Input_files)     # Input file of the run
+    input_file = models.ForeignKey(InputFiles)     # Input file of the run
     itermax = models.IntegerField(blank = True)     # Iteration max of the run
     runmax = models.IntegerField(blank = True)      # How many simultaneous runs
     folder = models.CharField(max_length = 200, blank = True) # Absolute path to result folder  
@@ -61,7 +40,7 @@ class Script_runs(models.Model):
     
     
     def __str__(self):
-        return smart_str('%s %s i=%s r=%s' % (self.input_file.name, self.time, self.itermax, self.runmax))
+        return smart_str('%s %s' % (self.input_file.name, self.time))
     
     
     

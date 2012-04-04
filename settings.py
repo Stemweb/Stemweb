@@ -119,6 +119,7 @@ ROOT_URLCONF = lstrings.root_urls
 TEMPLATE_DIRS = template_dirs = ( 
     os.path.join(SITE_ROOT, 'templates/'),
     os.path.join(SITE_ROOT, 'templates/stemweb'),
+    os.path.join(SITE_ROOT, 'templates/algorithms'),
     os.path.join(SITE_ROOT, 'templates/registration'),
     os.path.join(SITE_ROOT, 'templates/file_management'),
    
@@ -137,6 +138,7 @@ INSTALLED_APPS = (
     # Own apps
     'django_proto',
     'local',
+    'algorithms',
     #'semsep',
     #'upload',
     'file_management',

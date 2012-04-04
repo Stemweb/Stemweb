@@ -13,21 +13,21 @@ import multiprocessing
 if __name__ == '__main__':
 	sys.path.append("/Users/slinkola/STAM/Stemweb/algorithms/")
 	
-from concurrent_algorithm import ConcurrentAlgorithm
+from concurrent_algorithm import StoppableAlgorithm
 from concurrent_algorithm import Observer
 from concurrent_algorithm import synchronized
 
-class Semsep(ConcurrentAlgorithm):
+class Semsep(StoppableAlgorithm):
 	'''
 		Concurrent implementation of Semsep where temporary results are writed
 		into file at algorithms run time and all observers are notified of new 
 		results.
 		
-		Check documentation of ConcurrentAlgorithm for details.
+		Check documentation of StoppableAlgorithm for details.
 	'''
 	
 	#def __init__(self, run_args = None):
-	#	ConcurrentAlgorithm.__init__(self, run_args)
+	#	StoppableAlgorithm.__init__(self, run_args)
 
 	def __algorithm__(self, run_args = None):
 		# assign parameters

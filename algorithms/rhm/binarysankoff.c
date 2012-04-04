@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <zlib.h>
-//#include <Python.h>
+#include <Python.h>
 
 //#define COPY_AND_REPLACE
 
@@ -1371,3 +1371,57 @@ int main(int argc, char *argv[])
   free_mem();
   return 0;
 }
+
+/*
+ *	Simple wrapper for using this module from python.
+ */
+PyObject* py_main(PyObject* self, PyObject* args)
+{
+	int itermaxin;
+	PyObject* run_args = NULL;
+	PyObject* p_outfolder = PyString_FromString("outfolder");
+	PyObject* p_infolder = PyString_FromString("infolder");
+	PyObject* p_itermaxin = PyString_FromString("itermaxin");
+	PyObject* p_strap = PyString_FromString("strap");
+	
+	PyArg_UnpackTuple(args, "ref", 1, 1, &run_args);
+	
+	// Make real copy so that these objects can be deleted here.
+	run_args = PyDict_Copy(run_args);
+	
+	set_random_seed();
+	
+	outfolder = PyString_AsString(PyDict_GetItem(run_args, p_outfolder));
+	strap = (int)PyInt_AsLong(PyDict_GetItem(run_args, p_strap));
+	itermaxin = (int)PyInt_AsLong(PyDict_GetItem(run_args, p_itermaxin));	
+	read_file(PyString_AsString(PyDict_GetItem(run_args, p_infolder)));
+	
+	for (boot = 0; boot < strap; boot++)
+  	{
+    	init_bootstrap();
+    	init_tree();
+   		optimize_tree(itermaxin);
+    	free_tree(tree);
+  	}
+  	//free_mem();
+  	
+  	return PyInt_FromLong(0);	
+}
+
+/*
+ *	Give C-functions names in python.
+ */
+static PyMethodDef binarysankoff_methods[] = {
+	{"main", py_main, METH_VARARGS},
+	{NULL, NULL}
+};
+
+/*
+ *	Python needs this to init module.
+ */
+void initbinarysankoff()
+{
+	(void) Py_InitModule("binarysankoff", binarysankoff_methods);
+}
+
+

@@ -53,17 +53,12 @@ def rhm_test(run_args = None):
     if not os.path.exists(run_args['outfolder']):
         os.mkdir(run_args['outfolder'])
     
-    rhm_path = os.path.join(project_path, 'algorithms', 'rhm', 'rhmrun.sh')
     try:
-        #subprocess.call(rhm_path)
         binarysankoff.main(run_args)
     except:
-        log_path = os.path.join(os.path.dirname(rhm_path),'log')
-        log_file = open(log_path)
-        log_file.write('Could not run script in %s' % (rhm_path))
-        log_file.close()
-        
-
+		pass
+	
+	
 # Small main program to test code
 def main():
     if not os.path.exists('temp'):

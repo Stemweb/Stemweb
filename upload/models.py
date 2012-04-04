@@ -7,7 +7,7 @@ from django.utils.encoding import smart_str
 import utils
 
 # Basic table for all input files for different scripts that user has created.   
-class Input_files(models.Model):
+class InputFiles(models.Model):
       
     # User who uploaded the file
     user = models.ForeignKey(User)        

@@ -22,6 +22,8 @@ urlpatterns = patterns('',
     (r'^accounts/', include('registration.backends.default.urls')),
     
     (r'^files/', include('file_management.urls')),
+    (r'^algorithms/', include('algorithms.urls')),
+    
     
     (r'^$', 'django_proto.views.home'),
     

@@ -4,13 +4,13 @@ from django.contrib.auth.decorators import login_required
 from Stemweb import upload
 import os
 from Stemweb import settings
-from Stemweb.django_proto.models import Input_files
+from Stemweb.django_proto.models import InputFiles
 
 @login_required
 def users_files(request):
     
     # Get all files that user has uploaded.
-    user_files = Input_files.objects.filter(user = request.user)
+    user_files = InputFiles.objects.filter(user = request.user)
     context = RequestContext(request, { 'files': user_files})
     return render_to_response('file_management_users_files.html', context)
 
@@ -21,7 +21,7 @@ def index(request):
     
 @login_required
 def base(request):
-    user_files = Input_files.objects.filter(user = request.user)
+    user_files = InputFiles.objects.filter(user = request.user)
     context = RequestContext(request, { 'files': user_files})
     return render_to_response('file_management_base.html', context)
     

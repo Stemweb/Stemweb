@@ -13,7 +13,7 @@ def upload(request):
         form = Upload_file(request.POST, request.FILES)
         if form.is_valid():
             f = request.FILES['upfile']
-            input_file = models.Input_files(name = f.name, 
+            input_file = models.InputFiles(name = f.name, 
                                             user = request.user, 
                                             file_field = f)  
             
