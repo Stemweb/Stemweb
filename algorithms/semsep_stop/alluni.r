@@ -1,18 +1,20 @@
 #rm(list=ls())
 
-#runf81 <- function(filein, runmax, itermax, approximation=0)
+#rununi <- function(filein, runmax, itermax, approximation=0)
 #{
 	##########################################################################
 
 	
 
-	Initialf81 <- function (fileread)
+	Initialuni <- function (fileread)
 	{
+		ProbSame = 0.95
+		#Data = read.table(file=fileread,sep='\t')
 		Dataraw = readLines(fileread)
 		datastart=1
 		for (i in 1:length(Dataraw))
 		{
-			if (length(grep("matrix",tolower(Dataraw[i])))>0)
+			if (length(grep('matrix',Dataraw[i]))>0)
 			{
 				datastart = i+1
 				break
@@ -21,25 +23,26 @@
 		dataend=length(Dataraw)
 		for (i in length(Dataraw):1)
 		{
-			if (length(grep("end",tolower(Dataraw[i])))>0)
+			if (length(grep('end',Dataraw[i]))>0)
 			{
 				dataend = i-1
 				break
 			}
 		}
-
+	
 		Data=NULL
 		for (i in datastart:dataend)
 		{
 			linetmp=Dataraw[i]
-			linetmp=gsub(" ","\t",linetmp)
-			linetmp=gsub(";","",linetmp)
+			linetmp=gsub(' ','\t',linetmp)
+			linetmp=gsub(';','',linetmp)
 			linetmp=gsub("-","?",linetmp)
-			linetmp=unlist(strsplit(linetmp,split="\t"))
+
+			linetmp=unlist(strsplit(linetmp,split='\t'))
 			linetmpj=NULL
 			for (linetmpi in linetmp)
 			{
-				if ((length(linetmpi)>0)&(linetmpi!=""))
+				if ((length(linetmpi)>0)&(linetmpi!=''))
 				{
 					linetmpj=c(linetmpj,linetmpi)
 				}
@@ -47,40 +50,38 @@
 			Data=rbind(Data,linetmpj)
 		}
 		rownames(Data)=NULL	
-
+	
 
 		TextLen = nchar(toString(Data[1,2]))
 		ObservedNodeNumber = dim(Data)[1]
 		HiddenNodeNumber = ObservedNodeNumber-2
 		AllNodeNumber = ObservedNodeNumber+HiddenNodeNumber
-
+	
 		#1
 		PositionDiff = NULL
 		PositionProb = list()
 		PositionChar = list()
-		######################### different from other models ##############	
+	
 		for (i in 1:TextLen)
 		{ 
 			tmp = table(substr(Data[1:ObservedNodeNumber,2],i,i))
 			namestmp = names(tmp)
-			
-			if (sum(namestmp=="?")==1)
+	
+			if (sum(namestmp=='?')==1)
 			{
-			unkowntmp = tmp[namestmp=="?"]
-			tmp = tmp[namestmp!="?"] # exclude the unknown character		
-			tmp = (tmp+unkowntmp/(length(tmp)))/ObservedNodeNumber
-			PositionProb[[i]] = tmp
-			PositionChar[[i]] = names(tmp)
-		
+				tmp = tmp[namestmp!='?']		
+				PositionProb[[i]] = rep(1/length(tmp),length(tmp))
+				PositionChar[[i]] = names(tmp)
+	
+			
 			}else
 			{
-			tmp = tmp/ObservedNodeNumber
-			PositionProb[[i]] = tmp
-			PositionChar[[i]] = namestmp
+				PositionProb[[i]] = rep(1/length(tmp),length(tmp))
+				PositionChar[[i]] = namestmp
 			}	 
 			PositionDiff = c(PositionDiff,length(tmp))
 		}
-		######################### different from other models ##############
+
 		#3	
 		CharList = NULL
 		CharListrowname = NULL
@@ -88,7 +89,7 @@
 		KidList = list()
 		NeighbourList = list()
 		NodeList = NULL #Root in the last
-
+	
 		for (i in 1:AllNodeNumber)
 		{
 			if (i<=ObservedNodeNumber)
@@ -98,18 +99,18 @@
 				CharListrowname = c(CharListrowname,toString(Data[i,1]))		
 			}else
 			{
-				tmp = rep("?",TextLen)
+				tmp = rep('?',TextLen)
 				CharList = rbind(CharList, tmp)
 				CharListrowname = c(CharListrowname,toString(i))	
 			}
 		}
 
 		rownames(CharList)=CharListrowname
-
+	
 		DistMat = matrix(Inf, ncol=ObservedNodeNumber, nrow=ObservedNodeNumber,
 		dimnames=list(rownames(CharList)[1:ObservedNodeNumber],
 		rownames(CharList)[1:ObservedNodeNumber]))
-
+	
 		for (rowi in 1:(ObservedNodeNumber-1))
 		{
 			for (rowj in (rowi+1):ObservedNodeNumber)
@@ -117,7 +118,7 @@
 				DistMat[rowi,rowj]=sum(unlist(CharList[rowi,])==unlist(CharList[rowj,]))
 				DistMat[rowj,rowi] = DistMat[rowi,rowj]			
 			}
-
+	
 		}
 		#... find min distance id
 		idnew = ObservedNodeNumber
@@ -162,7 +163,7 @@
 			DistMat = DistMat[,-minidrow]
 			DistMat = DistMat[-minidrow,]
 		}
-
+	
 		restid = colnames(DistMat)[colnames(DistMat)!=idnewstr]
 		rootid = idnewstr
 		NodeList = c(NodeList, restid, rootid)
@@ -173,18 +174,22 @@
 		KidList[[rootid]] = c(KidList[[rootid]], restid)
 		NeighbourList[[rootid]] = c(NeighbourList[[rootid]], restid)
 
-		Initialres <- list("CharList" = CharList, "PositionChar"=PositionChar,
-		"KidList"=KidList, "ParentList"=ParentList,	"NeighbourList"=NeighbourList, 
-		"NodeList"=NodeList, "PositionDiff"=PositionDiff, 
-		"AllNodeNumber"=AllNodeNumber,
-		"PositionProb"=PositionProb,"TextLen"=TextLen)
+		Initialres <- list('CharList' = CharList, 'PositionChar'=PositionChar,
+		'KidList'=KidList, 'ParentList'=ParentList,	'NeighbourList'=NeighbourList, 
+		'NodeList'=NodeList, 'PositionDiff'=PositionDiff, 
+		'AllNodeNumber'=AllNodeNumber,
+		'PositionProb'=PositionProb,'TextLen'=TextLen)
 		invisible(Initialres)
 	}
+	
+	
 
-	LinkMatf81 <- function(NodeNumber, CharList, PositionChar, KidList, ParentList, 
+	
+	LinkMatuni <- function(NodeNumber, CharList, PositionChar, KidList, ParentList, 
 	NeighbourList, NodeList, PositionDiff,
 	PositionProb, delta, TextLen, approximation)
 	{
+		ProbSame = 0.95
 		localtimer=0
 		LinkMatAll = matrix(0, ncol= NodeNumber, nrow = NodeNumber)
 		colnames(LinkMatAll) = NodeList
@@ -193,44 +198,42 @@
 
 		for (Position in 1:TextLen)
 		{
-
+	
 			if (PositionDiff[Position]>1)
 			{
-
-
 				PositionDiffTmp = PositionDiff[Position]
 				PositionCharTmp = PositionChar[[Position]]
 				######################### different from other models ##############
-				# prob change mat	
-				tmp = PositionProb[[Position]]
-				ProbChangeMat = matrix(0,ncol=PositionDiffTmp,nrow=PositionDiffTmp)
+				# prob change mat		
+				PositionChangeProb = (1-ProbSame)/(PositionDiffTmp-1)
+				tmp = PositionChangeProb
+				ProbChangeMat = matrix(tmp,ncol=PositionDiffTmp,nrow=PositionDiffTmp)
 				colnames(ProbChangeMat) = PositionCharTmp
 				rownames(ProbChangeMat) = PositionCharTmp
-				for (ci in PositionCharTmp)
-				{
-					ProbChangeMat[ci,] = 0.1*tmp[ci]
-				}
-				diag(ProbChangeMat)=1-0.1*(1-tmp)
-				# log matrix
-				LogMat = log(t(ProbChangeMat))-matrix(log(PositionProb[[Position]]),
-				ncol=PositionDiffTmp,nrow=PositionDiffTmp,byrow=TRUE)
+				diag(ProbChangeMat)=ProbSame
+				
+				# log mat
+				tmp = log(PositionChangeProb)-log(1/PositionDiffTmp)
+				LogMat = matrix(tmp,ncol=PositionDiffTmp,nrow=PositionDiffTmp)
+				diag(LogMat)=log(ProbSame)-log(1/PositionDiffTmp)
 				#
 				######################### different from other models ##############
 				LinkMat = matrix(-Inf, ncol= NodeNumber, nrow = NodeNumber)
 				colnames(LinkMat) = NodeList
 				rownames(LinkMat) = NodeList
-
+	
 				UMat = array(0,dim=c(NodeNumber,NodeNumber,PositionDiffTmp),
 				dimnames=list(NodeList,NodeList,PositionCharTmp))
 				uMat = array(0,dim=c(NodeNumber,NodeNumber,PositionDiffTmp),
 				dimnames=list(NodeList,NodeList,PositionCharTmp))
-
+	
 				ProbMat = array(0,dim=c(NodeNumber,NodeNumber,PositionDiffTmp,
 				PositionDiffTmp),dimnames=list(NodeList,NodeList,PositionCharTmp,
 				PositionCharTmp))
 			
 		
 				# up
+				beg1=Sys.time()
 				for (i in NodeList[1:NodeNumber])
 				{
 					if (length(ParentList[[i]])>0)
@@ -240,7 +243,7 @@
 						# U
 						if (length(KidList[[i]]) == 0)# no kid
 						{					
-							if (CharTmp != "?")
+							if (CharTmp != '?')
 							{	
 								UMat[i,ParentList[[i]],CharTmp] = 1	
 							}else
@@ -249,7 +252,7 @@
 							}
 						}else # have kid
 						{
-							if (CharTmp != "?")
+							if (CharTmp != '?')
 							{
 								UMat[i,ParentList[[i]],CharTmp] = 1
 							}else				
@@ -279,7 +282,7 @@
 						for (j in KidTmp)
 						{
 							CharKidTmp = CharList[j,Position]
-							if (CharTmp == "?")
+							if (CharTmp == '?')
 							{
 								tmp = 1
 								for (k in NeighbourTmp[NeighbourTmp!=j])
@@ -386,24 +389,25 @@
 		noise = rnorm(NodeNumber*(NodeNumber-1)/2, sd=delta)
 		k = 1
 		LinkMatAllori = LinkMatAll
-
 		for (i in 1:(NodeNumber-1))
 		{
 			for (j in (i+1):NodeNumber)
 			{
 				LinkMatAll[NodeList[i],NodeList[j]] = 
 				LinkMatAll[NodeList[i],NodeList[j]]+noise[k]
-				LinkMatAll[NodeList[j],NodeList[i]] = 
+			 	LinkMatAll[NodeList[j],NodeList[i]] = 
 				LinkMatAll[NodeList[i],NodeList[j]]
 				k=k+1
 			}
 		}
 
-		LinkMatAllres = list("LinkMatAll"=LinkMatAll, "LinkMatAllori"=LinkMatAllori)
+		LinkMatAllres = list('LinkMatAll'=LinkMatAll, 'LinkMatAllori'=LinkMatAllori)
 		invisible(LinkMatAllres)
 	}
-
-	MTreef81 <- function(AllNodeNumber, LinkMatAllori,LinkMatAll)
+	
+	
+	
+	MTreeuni <- function(AllNodeNumber, LinkMatAllori,LinkMatAll)
 	{
 		NodeList = colnames(LinkMatAll)
 		NodeLinkedSign = rep(FALSE,AllNodeNumber)
@@ -472,39 +476,39 @@
 				StrOut = paste(StrOut, i, "\t", ParentList[[i]],"\n",sep="")
 			}
 		}
-
 		MTreeres <- list("ParentList"=ParentList, "KidList"=KidList, 
 		"NeighbourList"=NeighbourList, "NodeList"=NodeList,"qscore"=qscore)
 		invisible(MTreeres)
 	}
 
+	
 
 	iterationrun <- function(runmax, approximation, runres, bestres, iter, converge)
 	{ 
-		f81iteration <- function (MTreef81res,rhoin,deltain,qscorevector,Initialres,approximationin)
+		uniiteration <- function (MTreeunires,rhoin,deltain,qscorevector,Initialres,approximationin)
 		{
 			Sys.setlocale(locale="C")
 			deltain = deltain*rhoin
-			LinkMatf81res <- LinkMatf81(NodeNumber = Initialres[["AllNodeNumber"]], 
+			LinkMatunires <- LinkMatuni(NodeNumber = Initialres[["AllNodeNumber"]], 
 			CharList = Initialres[["CharList"]] , 
 			PositionChar=Initialres[["PositionChar"]],
-			KidList=MTreef81res[["KidList"]], 
-			ParentList=MTreef81res[["ParentList"]],	
-			NeighbourList=MTreef81res[["NeighbourList"]], 
-			NodeList=MTreef81res[["NodeList"]], 
+			KidList=MTreeunires[["KidList"]], 
+			ParentList=MTreeunires[["ParentList"]],	
+			NeighbourList=MTreeunires[["NeighbourList"]], 
+			NodeList=MTreeunires[["NodeList"]], 
 			PositionDiff=Initialres[["PositionDiff"]],
 			PositionProb= Initialres[["PositionProb"]], delta = deltain, 
 			TextLen=Initialres[["TextLen"]],
 			approximation = approximationin)
 
-			MTreef81res <- MTreef81(AllNodeNumber=Initialres[["AllNodeNumber"]],
-			LinkMatAllori=LinkMatf81res[["LinkMatAllori"]],
-			LinkMatAll=LinkMatf81res[["LinkMatAll"]]) 
-			qscorevector = c(qscorevector,MTreef81res[["qscore"]])
+			MTreeunires <- MTreeuni(AllNodeNumber=Initialres[["AllNodeNumber"]],
+			LinkMatAllori=LinkMatunires[["LinkMatAllori"]],
+			LinkMatAll=LinkMatunires[["LinkMatAll"]]) 
+			qscorevector = c(qscorevector,MTreeunires[["qscore"]])
 
-			f81iterationres=list("MTreef81res"=MTreef81res,"rhoin"=rhoin,
+			uniiterationres=list("MTreeunires"=MTreeunires,"rhoin"=rhoin,
 			"deltain"=deltain,"qscorevector"=qscorevector,"Initialres"=Initialres)
-			invisible (f81iterationres)
+			invisible (uniiterationres)
 		}
 
 		itertime = NULL
@@ -535,13 +539,13 @@
 			
 			if (qscorechange > 0.00001) # if qscore not converged
 			{
-				MTreef81res = runres[[run]][["MTreef81res"]]
+				MTreeunires = runres[[run]][["MTreeunires"]]
 				rhoin = runres[[run]][["rhoin"]]
 				deltain = runres[[run]][["deltain"]]
 				qscorevector = runres[[run]][["qscorevector"]]
 				Initialres = runres[[run]][["Initialres"]]
 
-				runrestmp[[run]] = f81iteration(MTreef81res=MTreef81res,rhoin=rhoin,deltain=deltain,
+				runrestmp[[run]] = uniiteration(MTreeunires=MTreeunires,rhoin=rhoin,deltain=deltain,
 				qscorevector=qscorevector,Initialres=Initialres,approximationin=approximation)
 
 				#record the best results
@@ -553,7 +557,7 @@
 					bestrestmp[["iter"]] = iter
 
 					bestrestmp[["qscore"]] = runrestmp[[run]][["qscorevector"]][[iter]]
-					bestrestmp[["MTreef81res"]] = runrestmp[[run]][["MTreef81res"]]
+					bestrestmp[["MTreeunires"]] = runrestmp[[run]][["MTreeunires"]]
 					bestres[[run]] = bestrestmp
 
 				}
@@ -583,15 +587,15 @@
 	initiationrun <- function(runmax, itermax, filein, approximation)
 	{
 
-		f81initiation <- function(itermaxin, filein, approximationin)
+		uniinitiation <- function(itermaxin, filein, approximationin)
 		{
 			rhoin = 0.05**(2/itermaxin)
 			Sys.setlocale(locale="C")
 
-			Initialres <- Initialf81(fileread = filein)
+			Initialres <- Initialuni(fileread = filein)
 			deltain = 0.1
 			starttimetmp = Sys.time()
-			LinkMatf81res <- LinkMatf81(NodeNumber = Initialres[["AllNodeNumber"]], 
+			LinkMatunires <- LinkMatuni(NodeNumber = Initialres[["AllNodeNumber"]], 
 			CharList = Initialres[["CharList"]] , 
 			PositionChar=Initialres[["PositionChar"]],
 			KidList=Initialres[["KidList"]], 
@@ -603,21 +607,21 @@
 			TextLen=Initialres[["TextLen"]], 
 			approximation = approximationin)
 
-			MTreef81res <- MTreef81(AllNodeNumber=Initialres[["AllNodeNumber"]],
-			LinkMatAllori=LinkMatf81res[["LinkMatAllori"]],
-			LinkMatAll=LinkMatf81res[["LinkMatAll"]])
-			qscorevector = c(MTreef81res[["qscore"]])
+			MTreeunires <- MTreeuni(AllNodeNumber=Initialres[["AllNodeNumber"]],
+			LinkMatAllori=LinkMatunires[["LinkMatAllori"]],
+			LinkMatAll=LinkMatunires[["LinkMatAll"]])
+			qscorevector = c(MTreeunires[["qscore"]])
 
-			linkmattmp = LinkMatf81res[["LinkMatAllori"]]
+			linkmattmp = LinkMatunires[["LinkMatAllori"]]
 			linkmattmp[linkmattmp==-Inf]=0
 			linkmattmp=abs(linkmattmp)
 			deltain = max(linkmattmp)*0.1
 			endtimetmp = Sys.time()
 			itertime = endtimetmp-starttimetmp	
 
-			f81initialrunres=list("MTreef81res"=MTreef81res,"rhoin"=rhoin,
+			uniinitialrunres=list("MTreeunires"=MTreeunires,"rhoin"=rhoin,
 			"deltain"=deltain,"qscorevector"=qscorevector,"Initialres"=Initialres,"itertime"=itertime)
-			invisible(f81initialrunres) 
+			invisible(uniinitialrunres) 
 		}
 
 		runres = list()
@@ -627,19 +631,19 @@
 		for (run in c(1:runmax))
 		{
 			
-			runres[[run]]=f81initiation(itermaxin=itermax, filein=filein, 
+			runres[[run]]=uniinitiation(itermaxin=itermax, filein=filein, 
 			approximationin=approximation)	
 
 			bestrestmp = list()
 			bestrestmp[["iter"]] = 1
 			bestrestmp[["qscore"]] = runres[[run]][["qscorevector"]][1]
-			bestrestmp[["MTreef81res"]] = runres[[run]][["MTreef81res"]]
+			bestrestmp[["MTreeunires"]] = runres[[run]][["MTreeunires"]]
 			bestres[[run]] = bestrestmp
 			itertime = c(itertime,runres[[run]][["itertime"]])
 		}
 		converge = rep(0, runmax)
 		initiationrunres = list("bestres"=bestres,"runres"=runres, "converge"=converge,"itertime"=itertime)
-			
+		
 		invisible (initiationrunres)
 	}
 
@@ -678,8 +682,8 @@
 		{
 			iterationrunres[["bestres"]][[run]] = bestrestmp[[bestruntmp]] 
 			#### update "bestres"
-			iterationrunres[["runres"]][[run]][["MTreef81res"]] = bestrestmp[[bestruntmp]] [["MTreef81res"]] 
-			#### update "runres"--"MTreef81res"
+			iterationrunres[["runres"]][[run]][["MTreeunires"]] = bestrestmp[[bestruntmp]] [["MTreeunires"]] 
+			#### update "runres"--"MTreeunires"
 			qscorevectortmp = iterationrunres[["runres"]][[run]][["qscorevector"]]
 			qscorevectortmp = c(qscorevectortmp, bestrestmp[[bestruntmp]] [["qscore"]])
 			iterationrunres[["runres"]][[run]][["qscorevector"]] = qscorevectortmp
@@ -691,12 +695,12 @@
 
 
 
-#	invisible (runf81res)
+#	invisible (rununires)
 #}
 
 
 
-#runf81res = runf81(filein = "test.nex", itermax = 20, runmax = 2)
+#rununires = rununi(filein = "test.nex", itermax = 20, runmax = 2)
 
 
 
