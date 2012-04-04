@@ -10,12 +10,19 @@ from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
 
 from forms import SemsepArgs
-from models import Algorithm
+from models import Algorithm, AlgorithmRuns
 
 def base(request):
 	algorithms = Algorithm.objects.all()
-	print len(algorithms)
-	c = RequestContext(request, {"all_algorithms" : algorithms})
-	t = loader.get_template('algorithms_base.html')  
+	c = RequestContext(request, {"all_algorithms" : algorithms}) 
 	return render_to_response("algorithms_base.html", c)
-	
+
+def details(request, algo_id):
+	algorithm = Algorithm.objects.get(id = algo_id)
+	algorithm_runs = None
+	if request.user.is_authenticated():
+		algorithm_runs = AlgorithmRuns.objects.filter(user = request.user, algorithm = algo_id )
+	c = RequestContext(request, {"algorithm" : algorithm, 
+								"algorithm_runs" : algorithm_runs,
+								"all_algorithms": Algorithm.objects.all()})
+	return render_to_response("algorithms_details.html", c)

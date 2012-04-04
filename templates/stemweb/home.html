@@ -8,31 +8,33 @@
 	<div id="subpage_index">
 	{% block subpage_index %}
 	
-		{% block subpage_index_title %}
-		<h1>Uploaded files</h1>
-		{% endblock%}
-	
-		{% if files|length == 0 %}
-			<p class="no_files">No uploaded files.</p>
-		{% else %}
-			
-			{% block subpage_index_table %}
-			<table id="subpage_index_table">
-				<tr>
-					<td class="subpage_index_header">User</td>
-					<td class="subpage_index_header">Time</td>
-					<td class="subpage_index_header">Name</td>
-				</tr>
-			
-				{% for f in files %}
+		{% if user.is_authenticated %}
+			{% block subpage_index_title %}
+			<h1>Uploaded files</h1>
+			{% endblock%}
+		
+			{% if files|length == 0 %}
+				<p class="no_files">No uploaded files.</p>
+			{% else %}
+				
+				{% block subpage_index_table %}
+				<table id="subpage_index_table">
 					<tr>
-						<td>{{ f.user }}</td>
-						<td>{{ f.time|date:"d.m.y H:i" }}</td>
-						<td><a href="/runparams/{{ f.id }}/" target="_blank">{{ f.name }}</a></td>
+						<td class="subpage_index_header">User</td>
+						<td class="subpage_index_header">Time</td>
+						<td class="subpage_index_header">Name</td>
 					</tr>
-				{% endfor %}
-			</table>
-			{% endblock %}
+				
+					{% for f in files %}
+						<tr>
+							<td>{{ f.user }}</td>
+							<td>{{ f.time|date:"d.m.y H:i" }}</td>
+							<td><a href="/runparams/{{ f.id }}/" target="_blank">{{ f.name }}</a></td>
+						</tr>
+					{% endfor %}
+				</table>
+				{% endblock %}
+			{% endif %}
 		{% endif %}
 			
 		<p class="development_note">
@@ -50,15 +52,18 @@
 			{% block intro %}
 			<h1>Home</h1>
 			<p>
-			This is <a href="http://cosco.hiit.fi/Projects/STAM/">STAM's</a> web project Stemweb (workname).
+				This is <a href="http://cosco.hiit.fi/Projects/STAM/">STAM's</a> web project Stemweb (workname).
 			</p>
 			<p>
-			Project's aim is to help people to run stemmatology algorithms for their own datasets without tedious
-			job of searching for/coding of the algorithms themselves. 
+				Project's aim is to help people to run stemmatology algorithms for their own datasets without tedious
+				job of searching for/coding of the algorithms themselves. 
 			</p>
 			<p>
-			Try the algorithm with your own .nex files or run one of the already uploaded files.
-			Please be sure that your file is in the right <a href=#>format</a> (deadlink).
+				Input needed: Brief description of stemmatology.
+			</p>
+			<p>
+				Try the algorithm with your own .nex files or run one of the already uploaded files.
+				Please be sure that your file is in the right <a href=#>format</a> (deadlink).
 			</p>
 			{% endblock %}
 		</div>

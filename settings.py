@@ -11,9 +11,9 @@ SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 
 # Add all third party apps and algorithms into python path.
 THIRD_PARTY_APPS_DIR = os.path.join(SITE_ROOT, 'third_party_apps')
-ALGORITHMS_DIR = os.path.join(SITE_ROOT, 'algorithms')
+#ALGORITHMS_DIR = os.path.join(SITE_ROOT, 'algorithms')
 sys.path.insert(0, THIRD_PARTY_APPS_DIR) 
-sys.path.insert(0, ALGORITHMS_DIR)
+#sys.path.insert(0, ALGORITHMS_DIR)
 
 ADMINS = (
     (lstrings.db_admin, lstrings.db_email),

@@ -1,0 +1,84 @@
+td.algorithm_name 
+{
+	width: 95%;
+	
+}
+
+td.algorithm_name a, td.algorithm_name a:hover, td.algorithm_name a:visited
+{
+	text-decoration: none;
+	color: #186666;
+}
+
+tbody.algorithm_table_body
+{
+	width: 100%;
+	display: block;
+	
+}
+
+tr.algorithm_table_row
+{
+	width: 95%;
+	display: block;
+	border-bottom: 1px solid #CDCBCB;
+	
+}
+
+tr.algorithm_table_row:hover
+{
+	background: rgba(222,219,193, 0.5);
+	cursor: pointer;
+	
+}
+
+#previous_runs td, th
+{
+	width: 20%;
+	font-size: 0.9em;
+	text-align: center;
+}
+
+#previous_runs a, #previous_runs a:hover, #previous_runs a:visited
+{
+	text-decoration: none;
+	color: black;
+}
+
+tr.row:hover
+{
+	background: rgba(222,219,193, 0.5);
+	cursor:pointer;
+	
+}
+
+tr.row
+{
+	border-bottom: 1px solid #CDCBCB;
+	border-top: -1px; 
+	
+}
+
+
+
+th.header { 
+    background-image: url(../img/bg.gif);     
+    cursor: pointer; 
+    background-repeat: no-repeat; 
+    background-position: center right; 
+    padding-right: 20px; 
+    border-right: 1px solid #dad9c7; 
+    margin-left: -1px; 
+}
+
+th.headerSortUp
+{
+	background-image: url(../img/asc.gif);
+	background-color: rgba(222,219,193, 0.5);	
+}
+
+th.headerSortDown
+{
+	background-image: url(../img/desc.gif);
+	background-color: rgba(222,219,193, 0.5);	
+}

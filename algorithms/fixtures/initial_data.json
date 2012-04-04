@@ -3,7 +3,7 @@
     	"model": "algorithms.algorithm",
     	"pk": 1,
     	"fields": {
-      		"name": "Semsep",
+      		"name": "Semstem",
       		"source": "/Users/slinkola/algorithms/semsep_stop_len/allunilen.r",
       		"desc": "Some short desc.",
       		"url": "http://"

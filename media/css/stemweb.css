@@ -23,9 +23,13 @@ h1
 {
 	text-align: left;
 	padding-left: 20px;
+	margin-left: 5px;
+	margin-right: 5px;
 	font-size: 1.5em;
 	font-family: Verdana;
 	font-variant: small-caps;
+	color: #A2A2A2;
+	border-bottom: 1px solid #A2A2A2;
 }
 
 h2
@@ -202,32 +206,35 @@ div#main_content
 	min-width: 600px;
 	overflow:auto;
 	
+	font-size: 0.8em;
 	font-family: Verdana;
 	
-	background-image: linear-gradient(right , #EFF7F7 25%, #CDE9EB 70%, #E6EDED 75%);
-	background-image: -o-linear-gradient(right , #EFF7F7 25%, #CDE9EB 70%, #E6EDED 75%);
-	background-image: -moz-linear-gradient(right , #EFF7F7 25%, #CDE9EB 70%, #E6EDED 75%);
-	background-image: -webkit-linear-gradient(right , #EFF7F7 25%, #CDE9EB 70%, #E6EDED 75%);
-	background-image: -ms-linear-gradient(right , #EFF7F7 25%, #CDE9EB 70%, #E6EDED 75%);
-	
-	background-image: -webkit-gradient(
-		linear,
-		right bottom,
-		left bottom,
-		color-stop(0.25, #EFF7F7),
-		color-stop(0.7, #CDE9EB),
-		color-stop(0.75, #E6EDED)
-	);	
+background-image: linear-gradient(left , rgb(240,240,240) 5%, rgb(255,252,255) 27%, rgb(245,245,245) 89%);
+background-image: -o-linear-gradient(left , rgb(240,240,240) 5%, rgb(255,252,255) 27%, rgb(245,245,245) 89%);
+background-image: -moz-linear-gradient(left , rgb(240,240,240) 5%, rgb(255,252,255) 27%, rgb(245,245,245) 89%);
+background-image: -webkit-linear-gradient(left , rgb(240,240,240) 5%, rgb(255,252,255) 27%, rgb(245,245,245) 89%);
+background-image: -ms-linear-gradient(left , rgb(240,240,240) 5%, rgb(255,252,255) 27%, rgb(245,245,245) 89%);
+
+background-image: -webkit-gradient(
+	linear,
+	left top,
+	right top,
+	color-stop(0.05, rgb(240,240,240)),
+	color-stop(0.27, rgb(255,252,255)),
+	color-stop(0.89, rgb(245,245,245))
+);
 }
 
 div#subpage_index
 {
 	display: block;
 	width: 26%;
+	min-height: 85%;
 	top: 0px;
 	left: 0px;
 	float: left;
-	
+	margin-top: 20px;
+	border-right: 1px solid #CDCBCB;
 	overflow: auto;
 	background-color: transparent;
 }
@@ -237,7 +244,7 @@ table#subpage_index_table
 	display: block;
 	padding-left: 5px;
 	overflow:auto;
-	font-size: 0.8em;
+	font-size: 1em;
 	background-color: transparent;
 }
 
@@ -253,7 +260,10 @@ div#subpage_content
 	float: right;
 	left: 27%;
 	width: 73%;
+	min-height: 70%;
+	
 	background-color: transparent;
+	
 }
 
 /* SITE'S FOOTER */
@@ -301,7 +311,7 @@ div#footer_padding
 div.intro 
 {
 	padding-left: 10px;
-	padding-right: 200px;
+	padding-right: 20px;
 }
 
 div.upload_form

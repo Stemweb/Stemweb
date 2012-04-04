@@ -13,6 +13,7 @@ from recaptcha_works.decorators import fix_recaptcha_remote_ip
 
 from forms import Upload_file
 from Stemweb.algorithms.forms import SemsepArgs
+from Stemweb.algorithms.models import AlgorithmRuns, Algorithm
 from forms import Run_file
 import models
 import handler
@@ -56,7 +57,7 @@ def runparams(request, file_id):
                 
     form = SemsepArgs(user = request.user)
     ifile = models.InputFiles.objects.get(id = file_id)
-    all_runs = models.AlgorithmRuns.objects.filter(input_file__exact = ifile)
+    all_runs = AlgorithmRuns.objects.filter(input_file__exact = ifile, user__exact = request.user)
     context = dict({'input_file': ifile, 'form': form, 'all_runs': all_runs})
     c = RequestContext(request, context)
     return render_to_response('runparams.html', c)
@@ -83,7 +84,9 @@ def run_script(request, file_id):
         	
         	run_scripts.f81(run_args)  
         	img = os.path.join(run_folder, 'besttree.png')
-        	srun = models.AlgorithmRuns.objects.create(input_file = ifile, 
+        	srun = AlgorithmRuns.objects.create(input_file = ifile,
+													 algorithm = Algorithm.objects.get(id = 1), 
+													 user = request.user,
                                                      itermax = imax, 
                                                      runmax = rmax, 
                                                      folder = abs_folder, 
@@ -93,7 +96,7 @@ def run_script(request, file_id):
     else:
         form = SemsepArgs(user = request.user)
      	ifile = models.InputFiles.objects.get(id = file_id)
-     	all_runs = models.AlgorithmRuns.objects.filter(input_file__exact = ifile)
+     	all_runs = AlgorithmRuns.objects.filter(input_file__exact = ifile)
 	
 	c = RequestContext(request)
 	return render_to_response('runparams.html', 
@@ -102,7 +105,7 @@ def run_script(request, file_id):
     
 def results(request, file_id, run_id):
     input_file = models.InputFiles.objects.get(id = file_id)
-    srun = models.AlgorithmRuns.objects.get(id = run_id)
+    srun = AlgorithmRuns.objects.get(id = run_id)
     context = dict({'input_file': input_file, 'srun': srun})
     c = RequestContext(request, context)
     return render_to_response('results.html', c)
