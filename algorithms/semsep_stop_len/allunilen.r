@@ -1,3 +1,5 @@
+# probablity of changing is propotional to edge length
+# change prob = length/number_of_different_elements
 
 Initialuni <- function (fileread)
 {
@@ -27,6 +29,7 @@ Initialuni <- function (fileread)
                 linetmp=Dataraw[i]
                 linetmp=gsub(" ","\t",linetmp)
                 linetmp=gsub(";","",linetmp)
+                linetmp=gsub("-","?",linetmp)
                 linetmp=unlist(strsplit(linetmp,split="\t"))
                 linetmpj=NULL
                 for (linetmpi in linetmp)
@@ -123,6 +126,7 @@ Initialuni <- function (fileread)
                 minidrowname = colnames(DistMat)[minidrow]
                 idnew = idnew + 1
                 idnewstr = toString(idnew)
+                #idnewstr = paste('newgeneratedhiddennodesbysemstem_',idnewstr,sep="")
                 NodeList = c(NodeList, minidcolname, minidrowname)
                 # 1
                 ParentList[[minidcolname]] = c(ParentList[[minidcolname]], idnewstr)
@@ -553,7 +557,8 @@ MTreeuni <- function(AllNodeNumber, LinkMatAllori,LinkMatAll)
 
 iterationrun <- function(runmax, approximation, runres, bestres, iter, converge)
 { 
-	uniiteration <- function (MTreeunires,rhoin,deltain,qscorevector,Initialres,approximationin,lenmat)
+	uniiteration <-
+	function(MTreeunires,rhoin,deltain,qscorevector,Initialres,approximationin,lenmat)
 	{
 		Sys.setlocale(locale="C")
 		deltain = deltain*rhoin
@@ -565,7 +570,7 @@ iterationrun <- function(runmax, approximation, runres, bestres, iter, converge)
 		NeighbourList=MTreeunires[["NeighbourList"]], 
 		NodeList=MTreeunires[["NodeList"]], 
 		PositionDiff=Initialres[["PositionDiff"]],
-                lenmat = lenmat,
+        lenmat = lenmat,
 		PositionProb= Initialres[["PositionProb"]], 
 		delta = deltain, 
 		TextLen=Initialres[["TextLen"]],
@@ -577,8 +582,7 @@ iterationrun <- function(runmax, approximation, runres, bestres, iter, converge)
 		LinkMatAll=LinkMatunires[["LinkMatAll"]]) 
 		qscorevector = c(qscorevector,MTreeunires[["qscore"]])
 
-		uniiterationres=list("MTreeunires"=MTreeunires,"rhoin"=rhoin,
-		"deltain"=deltain,"qscorevector"=qscorevector,"Initialres"=Initialres,"lenmat"=LinkMatunires[["lenmat"]])
+		uniiterationres=list("MTreeunires"=MTreeunires,"rhoin"=rhoin,	"deltain"=deltain,"qscorevector"=qscorevector,"Initialres"=Initialres,"lenmat"=LinkMatunires[["lenmat"]])
 		invisible (uniiterationres)
 	}
 
@@ -629,6 +633,7 @@ iterationrun <- function(runmax, approximation, runres, bestres, iter, converge)
 
 				bestrestmp[["qscore"]] = runrestmp[[run]][["qscorevector"]][[iter]]
 				bestrestmp[["MTreeunires"]] = runrestmp[[run]][["MTreeunires"]]
+				bestrestmp[["lenmat"]] = runrestmp[[run]][["lenmat"]]
 				bestres[[run]] = bestrestmp
 
 			}
@@ -686,7 +691,7 @@ initiationrun <- function(runmax, itermax, filein, approximation)
 		qscorevector = c(MTreeunires[["qscore"]])
 
 		linkmattmp = LinkMatunires[["LinkMatAllori"]]
-		linkmattmp[linkmattmp==-Inf]=0
+		linkmattmp[linkmattmp == -Inf]=0
 		linkmattmp=abs(linkmattmp)
 		deltain = max(linkmattmp)*0.1
 		endtimetmp = Sys.time()
@@ -712,6 +717,7 @@ initiationrun <- function(runmax, itermax, filein, approximation)
 		bestrestmp[["iter"]] = 1
 		bestrestmp[["qscore"]] = runres[[run]][["qscorevector"]][1]
 		bestrestmp[["MTreeunires"]] = runres[[run]][["MTreeunires"]]
+		bestrestmp[["lenmat"]] = runres[[run]][["lenmat"]]
 		bestres[[run]] = bestrestmp
 		itertime = c(itertime,runres[[run]][["itertime"]])
 	}

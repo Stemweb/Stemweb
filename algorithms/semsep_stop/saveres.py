@@ -150,11 +150,11 @@ def writefile(iterationrunres,itertime, bestruntmp,bestlastruntmp,iternow,outfol
 	# pull out the values that are needed
 	temp = iterationrunres.rx2('bestres')
 	bestres = temp.rx2(bestruntmp[0])
-	besttree = bestres.rx2('MTreef81res')
+	besttree = bestres.rx2('MTreeunires')
 
 	temp = iterationrunres.rx2('runres')
 	bestlastres = temp.rx2(bestlastruntmp[0])
-	bestlasttree = bestlastres.rx2('MTreef81res')
+	bestlasttree = bestlastres.rx2('MTreeunires')
 
 	# save results
 	# net file
@@ -216,11 +216,11 @@ def writefile(iterationrunres,itertime, bestruntmp,bestlastruntmp,iternow,outfol
 	# pull out the values that are needed
 	temp = iterationrunres.rx2('bestres')
 	bestres = temp.rx2(bestruntmp[0])
-	besttree = bestres.rx2('MTreef81res')
+	besttree = bestres.rx2('MTreeunires')
 
 	temp = iterationrunres.rx2('runres')
 	bestlastres = temp.rx2(bestlastruntmp[0])
-	bestlasttree = bestlastres.rx2('MTreef81res')
+	bestlasttree = bestlastres.rx2('MTreeunires')
 
 	# save results
 	# net file
@@ -274,7 +274,7 @@ def writefilelite(iterationrunres,itertime, bestruntmp,iternow,outfolder):
 
 	temp = iterationrunres.rx2('bestres')
 	bestres = temp.rx2(bestruntmp[0])
-	besttree = bestres.rx2('MTreef81res')
+	besttree = bestres.rx2('MTreeunires')
 	
 
 	outfolder = outfolder.strip('/')
