@@ -1,0 +1,23 @@
+[
+	{
+    	"model": "algorithms.algorithm",
+    	"pk": 1,
+    	"fields": {
+      		"name": "Semsep",
+      		"source": "/Users/slinkola/algorithms/semsep_stop_len/allunilen.r",
+      		"desc": "Some short desc.",
+      		"url": "http://"
+    	}
+  	},
+  	
+	{
+    	"model": "algorithms.algorithm",
+    	"pk": 2,
+    	"fields": {
+      		"name": "RHM",
+      		"source": "/Users/slinkola/algorithms/rhm/binarysankoff_python.c",
+      		"desc": "Another short desc.",
+      		"url": "http://"
+    	}
+  	}
+]

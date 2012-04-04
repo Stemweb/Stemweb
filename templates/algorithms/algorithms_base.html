@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}
+	{{ site.name }} - algorithms
+{% endblock %}
+
+{% block subpage_index %}
+
+	<div id="all_algorithms_list">
+		{% block all_algorithms_list %}
+			 {% for algo in all_algorithms %}
+			 	<tr class="file_table_row  {% cycle 'file_table_row1' 'file_table_row2' %}" onClick="{% url stemweb_home_url %}">
+					<td class="algorithm_name">
+						{{ algo.name }}
+					</td>
+				</tr>
+			 
+			 
+			 {% endfor %}
+		{% endblock %}
+	
+	
+	
+	</div>
+	
+{% endblock %}
+
