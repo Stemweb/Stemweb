@@ -35,6 +35,7 @@ class Semsep_f81(ConcurrentAlgorithm):
 		approximation = 0 
 		outfolder = run_args['outfolder']
 		source = run_args['source']
+		learnlength = run_args['learnlength']
 		# load R functions
 		R = robjects.r
 		R.source(source) 
@@ -45,7 +46,7 @@ class Semsep_f81(ConcurrentAlgorithm):
 		findbestlastrun = R['findbestlastrun']
 	
 		# initiation
-		initiationrunres = initiationrun(runmax=runmax, itermax=itermaxin, filein=infile, approximation=approximation)
+		initiationrunres = initiationrun(runmax=runmax, itermax=itermaxin, filein=infile, approximation=approximation,learnlength=learnlength)
 		iterationrunres = initiationrunres
 		itertime = []
 		itertime.append(sum(iterationrunres.rx2('itertime'))/len(iterationrunres.rx2('itertime')))
@@ -69,7 +70,7 @@ class Semsep_f81(ConcurrentAlgorithm):
 			if self._stop.value == 0:
 				print (iteri)
 				if iteri != int(math.ceil(itermaxin*0.1+3)):
-					iterationrunres = iterationrun(runmax=runmax, approximation=approximation, runres = iterationrunres.rx2('runres'), bestres = iterationrunres.rx2('bestres'), iter = iteri, converge = iterationrunres.rx2('converge'))
+					iterationrunres = iterationrun(runmax=runmax, approximation=approximation, runres = iterationrunres.rx2('runres'), bestres = iterationrunres.rx2('bestres'), iter = iteri, converge = iterationrunres.rx2('converge'),learnlength=learnlength)
 					bestruntmp1 = findbestrun(iterationrunres=iterationrunres, runmax=runmax)
 					bestruntmp = bestruntmp1.rx2('bestruntmp')
 					if bestqscore < bestruntmp1.rx2('bestqscore')[0]:#if qscore inceased output
@@ -103,7 +104,8 @@ if __name__ == '__main__':
 					'runmax'    : 2, 
 					'infile'    : 'test.nex', 
 					'outfolder' : './temp',
-					'source':'/home/zou/Stemweb/algorithms/semsep_stop_len/allunilen.r'})
+					'source':'/home/zou/Stemweb/algorithms/semsep_stop_len/allunilen.r',
+					'learnlength': 'FALSE'})# TRUE FOR WITH EDGE LENGTH, FALSE FOR WITHOUT EDGE LENGTH
 	
 	obs = Observer()
 	obs2 = Observer()
