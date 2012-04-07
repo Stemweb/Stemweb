@@ -62,6 +62,7 @@ class Semsep_f81(ConcurrentAlgorithm):
 				savevalue = {'iterationrunres':iterationrunres,'itertime':itertime, 'bestruntmp':bestruntmp,'bestlastruntmp':bestlastruntmp,'iteri':(iteri-1),'outfolder':outfolder}
 				self._put_in_results(savevalue)	
 				self._results_queue.close()
+				self._stop.value = 1
 				break # if two runs are coverged, break and return
 	
 			if iteri < 10:
@@ -85,7 +86,9 @@ class Semsep_f81(ConcurrentAlgorithm):
 			else:
 				print ('stop in the middle')
 				self._results_queue.close()
-				break	
+				break
+			
+		self._stop.value = 1
 		
 	#@synchronized(file_lock)		
 	def _write_in_file_(self, result):
