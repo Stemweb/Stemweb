@@ -35,10 +35,12 @@ class Semstem(StoppableAlgorithm):
 		
 	
 	def __algorithm__(self, run_args = None):
-		if run_args['learnlength'] == True:
-			run_args['learlength'] = 'TRUE'
+		if 'learnlength' in run_args:
+			run_args['learnlength'] = 'TRUE'
 		else:
-			run_args['learlength'] = 'FALSE'
+			run_args['learnlength'] = 'FALSE'
+		
+		print run_args['learnlength']
 		
 		# assign parameters
 		infile = run_args['infile']

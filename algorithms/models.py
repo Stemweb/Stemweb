@@ -147,6 +147,9 @@ class Algorithm(models.Model):
 					'''
 						TODO: add AnonymousUser logic here
 					'''
+			if value == 'boolean':
+				kwargs['required'] = False
+					
 			else:			
 				form.fields[key] = ftypes[value](**kwargs)
 		'''

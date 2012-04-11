@@ -217,6 +217,8 @@ div#main_content
 	min-width: 600px;
 	overflow:auto;
 	
+
+	
 	font-size: 0.8em;
 	font-family: Verdana;
 	
@@ -239,15 +241,15 @@ background-image: -webkit-gradient(
 div#subpage_index
 {
 	display: block;
+	position: absolute;
 	width: 26%;
-	min-height: 85%;
-	top: 0px;
-	left: 0px;
+	height: inherit;
+	top: 35px;
+	left: -1px;
 	float: left;
-	margin-top: 20px;
 	border-right: 1px solid #CDCBCB;
 	overflow: auto;
-	background-color: transparent;
+	background-color: #F8F5F4;
 }
 
 table#subpage_index_table 
@@ -267,12 +269,26 @@ td.subpage_index_header
 
 div#subpage_content
 {
-	display: block;
+	display: inline;
+	position: relative;
+	height: inherit;
 	float: right;
-	left: 27%;
-	width: 73%;
-	min-height: 70%;
-	background-color: transparent;
+	width: 74%;
+	/*background-color: transparent;*/
+	background-image: linear-gradient(left , rgb(240,240,240) 0%, rgb(255,255,255) 5%, rgb(255,255,255) 81%);
+background-image: -o-linear-gradient(left , rgb(240,240,240) 0%, rgb(255,255,255) 5%, rgb(255,255,255) 81%);
+background-image: -moz-linear-gradient(left , rgba(240,240,240, 1) 0%, rgba(255,255,255, 0.5) 5%, rgba(255,255,255, 0.3) 81%);
+background-image: -webkit-linear-gradient(left , rgb(240,240,240) 0%, rgb(255,255,255) 14%, rgb(255,255,255) 81%);
+background-image: -ms-linear-gradient(left , rgb(240,240,240) 0%, rgb(255,255,255) 14%, rgb(255,255,255) 81%);
+
+background-image: -webkit-gradient(
+	linear,
+	left top,
+	right top,
+	color-stop(0, rgb(240,240,240)),
+	color-stop(0.14, rgb(255,255,255)),
+	color-stop(0.81, rgb(255,255,255))
+);
 }
 
 /* SITE'S FOOTER */
@@ -319,7 +335,7 @@ div#footer_padding
 /* HOME.HTML */
 div.intro 
 {
-	padding-left: 10px;
+	padding-left: 30px;
 	padding-right: 20px;
 }
 
