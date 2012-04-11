@@ -1,57 +1,96 @@
 {% extends "algorithms_base.html" %}
 
-{% block subpage_content %}
-	<div class="intro">
+{% block algorithms_content %}
+
+
+	<div id="algorithm_base" class="intro">
 		<h1>{{ algorithm.name }}</h1>
-		
-		<p>
-			{{ algorithm.desc }}
-		</p>
 	</div>
 	
-	<div id="new_run" class="intro">
-		<h1>New Run</h1>
+	<div id="algorithm_tabs" class="algorithm_tabs">
+		<ul class="tabnav">  
+			<li><a href="#algorithm_about">About</a></li>  
+			
+			<li><a href="#new_run">{% if user.is_authenticated %}New Run{% else %}Test it{% endif %}</a></li>  
+			{% if user.is_authenticated %}
+			<li><a href="#previous_runs">Previous Runs</a></li>  
+			{% endif %}
+		</ul>  
 	
-	</div>
-	
-	
-	{% if user.is_authenticated %}
-	<div id="previous_runs" class="intro">
-		<h1>Previous Runs</h1>
-	
-		{% if algorithm_runs|length > 0 %}
-		<table id="previous_runs_table" class="file_table">
-			<thead>
-				<tr>
-					<th>Time</th>
-					<th>File</th>
-					<th>Iterations</th>
-					<th>Runs</th>
-					<th>Delete</th>
-				</tr>
-			</thead>
-			<tbody>
-				{% for run in algorithm_runs %}
-				<tr class="row">
-					<span class = "clickable">
-					<td class="run_time">{% if run.time %}{{ run.time|date:"d.m.y H:i" }}{% endif %}</td>
-					<td class="input_file"><a href="/results/{{ run.input_file.id }}/{{ run.id }}">{{ run.input_file.name }}</a></td>
-					<td class="itermax">{{ run.itermax }}</td>
-					<td class="runmax">{{ run.runmax }}</td>	
-					</span>
-					<td class="checkbox" onClick=""> 
-						<input type="checkbox" name="run_delete_{{run.id}}" value="{{run.id}}" />
-					</td>
-				</tr>
-				{% endfor %}
-			</tbody>
-		</table>
-		{% else %}
-			<p>
-				No runs with this algorithm.
+		<div id="algorithm_about" class="intro algorithm_tab">
+			{% if algorithm.paper %}
+			<p class=original_paper">
+				<a href="{{ algorithm.paper }}">Original paper</a>
 			</p>
+			{% endif %}
+			
+			<div id="algorithm_desc">
+				<h1>Short description / tooltip text</h1>
+				{{ algorithm.desc }}
+			</div>
+			
+			<div id="algorithm_template"> 
+				<h1>Long description / template</h1>
+				{% if algorithm.template %} 
+					{% include algorithm.template %} 
+				{% endif %}
+			</div>
+		</div>
+		
+		<div id="new_run" class="intro algorithm_tab">
+		{% block new_run %}
+			{% if form %}
+				<form id="new_run_form" action="/algorithms/run/{{ algorithm.id }}/" enctype="multipart/form-data" method="post">
+					{% csrf_token %}
+					{{ form.as_p }}
+					<input type="submit" value="Run" />
+				</form>
+			{% else %}
+				We are sorry, but no new runs for this algorithm can be made at this time.
+			{% endif %}
+		{% endblock %}
+		</div>
+		
+		{% if user.is_authenticated %}
+		<div id="previous_runs" class="intro algorithm_tab">
+			{% if algorithm_runs|length > 0 %}
+			<div id="previous_runs_div">
+				<div class="pro_tip centered">Hold shift and click multiple columns to sort by more than one attribute.</div>
+				<div class="delete_response"></div>
+				
+				<table id="previous_runs_table" class="file_table centered">
+					<thead>
+						<tr>
+							<th>End Time</th>
+							<th>Start Time</th>
+							<th>Score</th>
+							<th>File</th>
+							<th class="delete_run"></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for run in algorithm_runs %}
+						<tr class="row">
+							<td class="run_time">{% if run.end_time %}{{ run.end_time|date:"d.m.y H:i" }}{% else %}running...{% endif %}</td>
+							<td class="run_time">{{ run.start_time|date:"d.m.y H:i" }}</td>
+							<td class="score">{% if run.score %}{{ run.score }}{% else %}---{% endif %}</td>  
+							<td class="input_file"><a href="/algorithms/results/{{ run.id }}">{{ run.input_file.name }}</a></td>
+							<td class="delete_run"><input type="checkbox" name="run_delete" value="{{run.id}}" /></td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				<div id="delete_runs_button_div" class="centered">
+					<input type="button" id="delete_runs_button" onClick=delete_runs() name='Delete selected' value='Delete selected' />
+				</div>
+			</div>
+
+			{% else %}
+					No runs with this algorithm.
+			{% endif %}
+		</div>
 		{% endif %}
+	
 	</div>
-	{% endif %}
 	
 {% endblock %}

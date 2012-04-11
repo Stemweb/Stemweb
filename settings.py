@@ -2,6 +2,11 @@
 from local import lstrings
 import os
 import sys
+import logging
+
+sys.path.insert(0, '/Users/slinkola/Library/Python/2.7/lib/python/site-packages/')
+import djcelery
+djcelery.setup_loader()
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -10,10 +15,8 @@ TEMPLATE_DEBUG = DEBUG
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 
 # Add all third party apps and algorithms into python path.
-THIRD_PARTY_APPS_DIR = os.path.join(SITE_ROOT, 'third_party_apps')
-#ALGORITHMS_DIR = os.path.join(SITE_ROOT, 'algorithms')
-sys.path.insert(0, THIRD_PARTY_APPS_DIR) 
-#sys.path.insert(0, ALGORITHMS_DIR)
+#THIRD_PARTY_APPS_DIR = os.path.join(SITE_ROOT, 'third_party_apps')
+#sys.path.insert(0, THIRD_PARTY_APPS_DIR) #
 
 ADMINS = (
     (lstrings.db_admin, lstrings.db_email),
@@ -121,7 +124,7 @@ TEMPLATE_DIRS = template_dirs = (
     os.path.join(SITE_ROOT, 'templates/stemweb'),
     os.path.join(SITE_ROOT, 'templates/algorithms'),
     os.path.join(SITE_ROOT, 'templates/registration'),
-    os.path.join(SITE_ROOT, 'templates/file_management'),
+    os.path.join(SITE_ROOT, 'templates/files'),
    
 )
 
@@ -135,14 +138,27 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     
+    # Testing concurrency in webpage
+    'concurrent_server',
+    'djcelery',
+    # For tasking the algorithm runs
+    'third_party_apps.recaptcha_works',
+    'third_party_apps.registration',
+    #'third_party_apps.djangotasks',
+    
     # Own apps
-    'django_proto',
+    'home',
     'local',
     'algorithms',
-    #'semsep',
-    #'upload',
-    'file_management',
+    'files',
 )
+
+# Django-celerey configurations
+BROKER_HOST = "localhost"
+BROKER_PORT = 5672
+BROKER_USER = "guest"
+BROKER_PASSWORD = "guest"
+BROKER_VHOST = "/"
 
 # registration apps own setting. Configures how many days
 # user has to activate account before it expires.
@@ -174,6 +190,23 @@ RECAPTCHA_OPTIONS = {
     'tabindex': 0,
 }
 
+# Add small random delay to concurrency. 
+# TODO: change when in production to False
+CONCURRENT_RANDOM_DELAY = True
+
+# TODO: remove when in production
+DJANGOTASK_DAEMON_THREAD = False
+
+ROOT_LOG_DIR = os.path.join(SITE_ROOT, 'logs')
+if not os.path.exists(ROOT_LOG_DIR):
+	os.mkdir(ROOT_LOG_DIR);
+	
+ALGORITHMS_LOG_DIR = os.path.join(ROOT_LOG_DIR, 'algorithms')
+if not os.path.exists(ALGORITHMS_LOG_DIR):
+	os.makedirs(ALGORITHMS_LOG_DIR);
+
+#TASKS_LOG_FILE = os.path.join(ROOT_LOG_DIR, 'tasks.log')
+
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error.
@@ -181,18 +214,64 @@ RECAPTCHA_OPTIONS = {
 # more details on how to customize your logging configuration.
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+		'algorithm_run': {
+			'format': '%(levelname)s %(asctime)s %(module) pid:%(process)d %(message)s'
+		}
+    },
+	'filters': { },
+   
     'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
+        'null': {
+            'level':'DEBUG',
+            'class':'django.utils.log.NullHandler',
+        },
+        'console':{
+            'level':'DEBUG',
+            'class':'logging.StreamHandler',
+            'formatter': 'verbose',
+            'stream': sys.stdout,
+        },
+		'algorithm_run': {
+			'level':'DEBUG',
+			'class':'logging.handlers.TimedRotatingFileHandler',
+			'formatter': 'verbose',
+			'filename': os.path.join(ALGORITHMS_LOG_DIR, 'runs'),
+			'when': 'D',
+			#'interval': 1,
+		},
+		'authentication': {
+			'level':'DEBUG',
+			'class':'logging.handlers.TimedRotatingFileHandler',
+			'formatter': 'verbose',
+			'filename': os.path.join(ALGORITHMS_LOG_DIR, 'auth'),
+			'when': 'D',
+			#'interval': 1,
+		}
     },
     'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
+		'stemweb.algorithm_run': {
+			'handlers': ['console', 'algorithm_run'],
+			'propagate': False,
+			'level': 'DEBUG',
+		},
+        'django': {
+            'handlers':['null'],
             'propagate': True,
+            'level':'INFO',
         },
+		'stemweb.auth': {
+			'handlers': ['console', 'authentication'],
+			'propagate': False,
+			'level': 'DEBUG',
+		}
+
     }
 }

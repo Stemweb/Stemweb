@@ -24,6 +24,8 @@
 ######################################################################
 from rpy2 import *
 from rpy2 import robjects
+import os
+import unicodedata
 
 #def treetonet(nodelist,parentlist,treedic,lenmat):
 def treetonet(nodelist,parentlist,lenmat):
@@ -201,9 +203,33 @@ def writelog(iternow, itertime, iterationrunres, bestruntmp, bestlastruntmp):
 
 
 
+def writestr(outfolder, filename, outstr):
+	file_path = os.path.join(outfolder, filename)
+	
+	try: 
+		f = open(file_path,'w')
+		os.chmod(file_path, 0777)
+		f.write(outstr)
+		f.close()
+		os.chmod(file_path, 0644)
+	except:
+		f = open(os.path.join(outfolder, 'saveres_log'), 'a')
+		f.write('Could not write into file: %s \n' % (file_path))
+		f.close()
+		pass
+	
+
+def dot2png(outfolder, filename):
+	file_path = os.path.join(outfolder, filename)
+	os.chmod(file_path, 0777)
+	png_name = os.path.splitext(filename)[0] + '.png'	# Change .dot to .png				
+	png_path = os.path.join(outfolder, png_name)
+	os.system('neato -Tpng -Gstart=rand ' + file_path + '> ' + png_path)
+	os.chmod(file_path, 0644)
+	os.chmod(png_path, 0644)
+
 
 def writefile(result):
-	import os
 	import re
 	iterationrunres = robjects.Vector(result['iterationrunres'])
 	itertime = result['itertime']
@@ -230,15 +256,11 @@ def writefile(result):
 
 	# save results
 	# net file
-	outfolder = outfolder.strip('/')
+	#outfolder = outfolder.strip('/')
 	if not os.path.exists(outfolder):
 		os.makedirs(outfolder)
-		os.system('chmod 777 ' + outfolder)
+		#os.system('chmod 777 ' + outfolder)
 
-	def writestr(outfolder, filename, outstr):
-		f = open(outfolder+filename,'w')
-		f.write(outstr)
-		f.close()		
 	
 	def removehidden(nodelist,parentlist,neighborlist):
 		#nodelistremovetemp = []
@@ -333,44 +355,36 @@ def writefile(result):
 
 	# net file
 	bestnet = treetonet(nodelist=nodelistbest,parentlist =parentlistbest,lenmat=lenmat)
-	writestr(outfolder,'/besttree.net',bestnet)
+	writestr(outfolder,'besttree.net',bestnet)
 	bestlastnet = treetonet(nodelist=nodelistlast,parentlist =parentlistlast,lenmat=lenmat)
-	writestr(outfolder,'/bestlasttree.net',bestlastnet)
+	writestr(outfolder,'bestlasttree.net',bestlastnet)
 
 	
 	# newick file
 	bestnewick = treetonewick(neighborlist=neighborlistbest,nodelist=nodelistbest,lenmat=lenmat)
 	lastnewick = treetonewick(neighborlist=neighborlistlast,nodelist=nodelistlast,lenmat=lenmat)
-	writestr(outfolder,'/besttree.tre',bestnewick)
-	writestr(outfolder,'/bestlasttree.tre',lastnewick)	
+	writestr(outfolder,'besttree.tre',bestnewick)
+	writestr(outfolder,'bestlasttree.tre',lastnewick)	
 	
 	# matrix file
 	bestmatrix = treetomatrix(neighborlist=neighborlistbest,nodelist=nodelistbest)
 	bestlastmatrix = treetomatrix(neighborlist=neighborlistlast,nodelist=nodelistlast)
-	writestr(outfolder,'/besttree.matrix',bestmatrix)
-	writestr(outfolder,'/bestlasttree.matrix',bestlastmatrix)
+	writestr(outfolder,'besttree.matrix',bestmatrix)
+	writestr(outfolder,'bestlasttree.matrix',bestlastmatrix)
 
 	# dot file
 	bestdot = treetodot(nodelist=nodelistbest,parentlist =parentlistbest,lenmat=lenmat)
 	bestlastdot = treetodot(nodelist=nodelistlast,parentlist =parentlistlast,lenmat=lenmat)
-	writestr(outfolder,'/besttree.dot',bestdot)
-	writestr(outfolder,'/bestlasttree.dot',bestlastdot)
+	writestr(outfolder,'besttree.dot',bestdot)
+	writestr(outfolder,'bestlasttree.dot',bestlastdot)
 
 	# log file
 	logstr = writelog(iternow=iternow, itertime=itertime, iterationrunres=iterationrunres, bestruntmp=bestruntmp, bestlastruntmp=bestlastruntmp)
-	writestr(outfolder,'/log',logstr)
+	writestr(outfolder,'log',logstr)
+
 	# plot dot file to png
-
-	os.system('chmod 777 ' + outfolder+'/besttree.dot')
-	os.system('chmod 777 ' + outfolder+'/bestlasttree.dot')
-	os.system('neato -Tpng -Gstart=rand ' + outfolder + '/besttree.dot > ' + outfolder+ '/besttree.png')
-	os.system('neato -Tpng -Gstart=rand ' + outfolder + '/bestlasttree.dot > ' + outfolder+ '/bestlasttree.png')
-
-
-	# close permissions
-	os.system('chmod 755 ' + outfolder+'/besttree.dot')
-	os.system('chmod 755 ' + outfolder+'/bestlasttree.dot')
-	os.system('chmod 755 ' + outfolder)
+	dot2png(outfolder, 'besttree.dot')
+	dot2png(outfolder, 'bestlasttree.dot')
 
 
 def writefilelite(result):

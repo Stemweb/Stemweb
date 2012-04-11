@@ -1,0 +1,31 @@
+{% extends "files_base.html" %}
+
+{% block subpage_content %}
+
+	<h1>{{ file.name|upper }}, last accessed {{ file.last_access|date:"d.m.y H:i" }}</h1>
+
+	<div id="one_file_tabs" class="file_tabs">  
+	  
+		<ul class="tabnav">  
+			<li><a href="#file_about">About</a></li>  
+			<li><a href="#file_new_run">New Run</a></li>  
+			<li><a href="#file_previous_runs">Previous run</a></li>  
+		</ul>  
+		  
+		<div id="file_about" class="file_tab">  
+			Something about this file. Also sneak peek of the whole file incase user has forgotten which is which.
+		</div>
+		
+		<div id="file_new_run" class="file_tab">  
+			List all the algorithms that can be runned with this file. Possibly could join this to 'About'-tab 
+			for quickness of use.
+		</div>
+		  
+		<div id="file_previous_runs" class="file_tab">  
+			Runs made with this file. Will be in same format as previous runs of algorithm's but name of the file
+			is replaced by the name of the algorithm.
+		</div>  
+		  
+		
+	</div>
+{% endblock %}

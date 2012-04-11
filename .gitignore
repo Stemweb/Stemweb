@@ -12,4 +12,6 @@ algorithms/rhm/binarysankoff.dylib
 */*/*/temp/*
 */*/temp/*
 */temp/*
-
+logs/
+*.so
+*.dylib

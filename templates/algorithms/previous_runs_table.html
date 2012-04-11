@@ -1,0 +1,25 @@
+{# Not used at the moment #}
+<table id="previous_runs_table" class="file_table">
+	<thead>
+		<tr>
+			<th>Time</th>
+			<th>File</th>
+			<th>Iterations</th>
+			<th>Runs</th>
+			<th class="delete_run">Delete</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for run in algorithm_runs %}
+		<tr class="row">
+			<td class="run_time">{% if run.start_time %}{{ run.start_time|date:"d.m.y H:i" }}{% endif %}</td>
+			<td class="input_file"><a href="/results/{{ run.input_file.id }}/{{ run.id }}">{{ run.input_file.name }}</a></td>
+			<td class="itermax">{{ run.itermax }}</td>
+			<td class="runmax">{{ run.runmax }}</td>	
+			<td class="delete_run"> 
+				<input type="checkbox" name="run_delete_{{run.id}}" value="{{run.id}}" onClick=delete_run() />
+			</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>

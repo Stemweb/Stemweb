@@ -1,12 +1,46 @@
 [
 	{
+  		"model": "algorithms.algorithmarg",
+  		"pk": 1,
+  		"fields": {
+  			"key": "infile",
+  			"value": "input_file",
+  			"verbose_name": "Input File",
+  			"description": "Algorithm currently accepts only .nex files"
+  		}
+  	},
+  	
+	{
+  		"model": "algorithms.algorithmarg",
+  		"pk": 2,
+  		"fields": {
+  			"key": "itermaxin",
+  			"value": "positive_integer",
+  			"verbose_name": "Iterations",
+  			"description": ""
+  		}
+  	},
+  	
+  	{
+  		"model": "algorithms.algorithmarg",
+  		"pk": 3,
+  		"fields": {
+  			"key": "runmax",
+  			"value": "positive_integer",
+  			"verbose_name": "Runs",
+  			"description": "Number of 'parallel' runs"
+  		}
+  	},
+
+	{
     	"model": "algorithms.algorithm",
     	"pk": 1,
     	"fields": {
       		"name": "Semstem",
       		"source": "/Users/slinkola/algorithms/semsep_stop_len/allunilen.r",
-      		"desc": "Some short desc.",
-      		"url": "http://"
+      		"desc": "Input needed about some short desc of semstem's behaviour. Max length.. 2000 chars? There will be longer description also available, but this text comes straight from database.",
+      		"url": "http://",
+      		"args": [1,2,3]
     	}
   	},
   	
@@ -16,8 +50,10 @@
     	"fields": {
       		"name": "RHM",
       		"source": "/Users/slinkola/algorithms/rhm/binarysankoff_python.c",
-      		"desc": "Another short desc.",
+      		"desc": "Another short desc, now about RHM. Also comes from database.",
       		"url": "http://"
     	}
   	}
+  	
+
 ]

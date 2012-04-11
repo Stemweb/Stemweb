@@ -1,0 +1,83 @@
+{% extends "home.html" %}
+
+{% block title %}
+	{{ site.name }} - files
+{% endblock %}
+
+{% block script_and_css %}
+	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/algorithms.css" /> 
+	<script src="{{ MEDIA_URL }}javascript/files.js" type="text/javascript"></script>
+	<script type="text/javascript" src="{{ MEDIA_URL}}javascript/jquery.tablesorter.js"></script>
+
+{% endblock %}
+
+{% block subpage_index %}
+
+	<div id="all_files_tabs" class="file_tabs intro">  
+	  
+		<ul class="tabnav">    
+			<li><a href="#user_files">Files</a></li>  
+			<li><a href="#upload">Upload</a></li>  
+		</ul>  
+		  
+		<div id="user_files" class="file_tab">  
+			<table id="user_files_table" class="file_table">
+				<thead>
+					<tr>
+						<th>Name</th>
+						{# <th>Upload Time</th> #}
+						<th>Last Access</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for f in user_files %}
+					<tr class="row">
+						<td><a href="/files/{{ f.id }}/">{{ f.name }}</a></td>
+						{# <td>{{ f.upload_time|date:"d.m.y H:i" }}</td> #}
+						<td>{{ f.last_access|date:"d.m.y H:i" }}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+
+			</table>
+		</div>  
+		  
+		<div id="upload" class="file_tab">  
+		 	<form id="upload_form" action="/files/upload/" enctype="multipart/form-data" method="post">
+				{% csrf_token %}
+				{{ form.as_p }}
+				<input type="submit" value="Upload" />
+			</form>
+		</div>
+	</div>
+	
+{% endblock %}
+
+
+{% block subpage_content %}
+
+	<h1>User Files</h1>
+
+	<div id="files_home_tabs" class="file_tabs">  
+	  
+		<ul class="tabnav">   
+			<li><a href="#files_info">Info</a></li>  
+			<li><a href="#recent_activity">Recent Activity</a></li>  
+		</ul>  
+		  
+		<div id="files_info" class="file_tab">  
+			Some info about files. Don't know if this tab is needed.
+		</div>  
+		  
+		<div id="recent_activity" class="file_tab">  
+		 	Few recent (last) activites of the user considering files.
+		 	Could have entries like: 
+		 	<ul>
+		 		<li>Uploads</li>
+		 		<li>Recent ended runs</li>
+		 		<li>Recent started runs</li>
+		 	</ul> 
+		</div>
+	</div>
+	
+{% endblock %}

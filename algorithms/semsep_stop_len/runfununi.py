@@ -61,7 +61,7 @@ class Semsep(StoppableAlgorithm):
 				bestruntmp = bestruntmp1.rx2('bestruntmp')
 				bestlastruntmp = findbestlastrun(iterationrunres=iterationrunres, runmax=runmax)
 				savevalue = {'iterationrunres':iterationrunres,'itertime':itertime, 'bestruntmp':bestruntmp,'bestlastruntmp':bestlastruntmp,'iteri':(iteri-1),'outfolder':outfolder}
-				self._put_in_results(savevalue)	
+				self._put_in_results_(savevalue)	
 				self._results_queue.close()
 				break # if two runs are coverged, break and return
 	
@@ -78,7 +78,7 @@ class Semsep(StoppableAlgorithm):
 						bestqscore = bestruntmp1.rx2('bestqscore')[0]
 						bestlastruntmp = findbestlastrun(iterationrunres=iterationrunres, runmax=runmax)
 						savevalue = {'iterationrunres':iterationrunres,'itertime':itertime, 'bestruntmp':bestruntmp,'bestlastruntmp':bestlastruntmp,'iteri':iteri,'outfolder':outfolder}
-						self._put_in_results(savevalue)	
+						self._put_in_results_(savevalue)	
 				else:# new start
 					bestruntmp1 = findbestrun(iterationrunres=iterationrunres, runmax=runmax)
 					bestruntmp = bestruntmp1.rx2('bestruntmp')

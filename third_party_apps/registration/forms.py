@@ -9,7 +9,7 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.forms import AuthenticationForm
 
-from recaptcha_works.fields import RecaptchaField
+from Stemweb.third_party_apps.recaptcha_works.fields import RecaptchaField
 
 # I put this on all required fields, because it's easier to pick up
 # on them with CSS or JavaScript if they have a class of "required"

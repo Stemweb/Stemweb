@@ -47,10 +47,10 @@
 
 from django import forms
 
-from recaptcha_works.widgets import RecaptchaWidget
-from recaptcha_works import settings
-from recaptcha_works.exceptions import RecaptchaError
-from recaptcha_works.utils import validate_recaptcha
+from .widgets import RecaptchaWidget
+from . import settings
+from .exceptions import RecaptchaError
+from .utils import validate_recaptcha
 
 
 class RecaptchaField(forms.Field):

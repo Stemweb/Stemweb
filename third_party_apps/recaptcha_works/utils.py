@@ -48,7 +48,7 @@
 import httplib
 from django.utils.http import urlencode
 
-from recaptcha_works.exceptions import RecaptchaError
+from .exceptions import RecaptchaError
 
 
 def validate_recaptcha(remote_ip, challenge, response, private_key, use_ssl):

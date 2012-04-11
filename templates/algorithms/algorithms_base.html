@@ -5,43 +5,56 @@
 {% endblock %}
 
 {% block script_and_css %}
-	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/file_management.css" />
+	<!--  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/file_management.css" /> -->
 	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/algorithms.css" />
-	<script src="{{ MEDIA_URL }}javascript/general.js" type="text/javascript"></script>
+	
+
+	<script type="text/javascript">
+		{# Hack to get tablesorter work when refreshing page. #}
+		document.write('<script type="text/javascript" src="{{ MEDIA_URL }}javascript/general.js?' + new Date().getTime() + '"><\/script>');
+	</script>
 	<script type="text/javascript" src="{{ MEDIA_URL}}javascript/jquery.tablesorter.js"></script>
 
 {% endblock %}
 
-{% block subpage_index_title %}
-	<h1>Available algorithms</h1>
-{% endblock%}
-
-{% block subpage_index_table %}
-		<table id="subpage_index_table" class="file_table">
-			<tbody class="algorithm_table_body">
-			 {% for algo in all_algorithms %}
-			 	<tr class="algorithm_table_row">
-			 		<td class="algorithm_name">
-			 			<a href="{% url algorithms_details_url algo_id=algo.id %}">{{ algo.name }}</a>
-					</td>
-				</tr>
-			 {% endfor %}
-		 	</tbody>
-		 </table>
+{% block subpage_index %}
+	{% block subpage_index_title %}
+		<h1>Available algorithms</h1>
+	{% endblock%}
+	<table id="subpage_index_table" class="file_table">
+		<tbody class="algorithm_table_body">
+		 {% for algo in all_algorithms %}
+		 	<tr class="algorithm_table_row">
+		 		<td class="algorithm_name">
+		 			<a href="{% url algorithms_details_url algo_id=algo.id %}">{{ algo.name }}</a>
+				</td>
+			</tr>
+		 {% endfor %}
+	 	</tbody>
+	 </table>
 {% endblock %}
 
 {% block subpage_content %}
-	<div class="intro">
-		<h1>Algorithms in stemmatology</h1>
-		
-		<p>
-		Input needed: Some general info about algorithms in stemmatology:<br>
-		<ul>
-			<li>problem types</li>
-			<li>focus</li>	
-			<li>etcetera</li>
-		</ul>
-		</p>
+	  
+	<div id="subpage_navigation">
+		<div id="prev" onclick="prev()">Prev</div>
+		<div id="next" onclick="next()">Next</div>
 	</div>
+	
+
+	{% block algorithms_content %}
+		<div class="intro">
+			<h1>Algorithms in stemmatology</h1>
+			
+			<p class='input_needed'>
+				Input needed: Some general info about algorithms in stemmatology:<br>
+				<ul>
+					<li>problem types</li>
+					<li>focus</li>	
+					<li>etcetera</li>
+				</ul>
+			</p>
+		</div>
+	{% endblock %}
 	
 {% endblock %}

@@ -51,7 +51,7 @@ try:
 except ImportError:
     from django.utils.functional import wraps  # Python 2.4 fallback.
 
-from recaptcha_works.utils import post_payload_add_recaptcha_remote_ip_field
+from .utils import post_payload_add_recaptcha_remote_ip_field
 
 
 def fix_recaptcha_remote_ip(view_func):

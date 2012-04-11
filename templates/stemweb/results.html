@@ -15,8 +15,10 @@
 	This is the best tree for this run.
 	</p>
 	
-	<img src="{{ srun.image.url }}" 
+	{% if srun.image %}
+	<img id="run_result_image" src="{{ srun.image.url }}" 
 		 alt="{{ srun.image.url }}" />
+	{% endif %}
 	
 	<p class="development_note">
 	Some debug info:<br>
@@ -27,5 +29,6 @@
 	Local absolute path to run folder: {{ srun.folder }}<br>	
 	Path component of the image : {{ srun.image.url }}<br>
 	URL to image: {{ srun.image.url }}
+	</p>
 	
 {% endblock %}			

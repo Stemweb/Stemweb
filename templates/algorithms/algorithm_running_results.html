@@ -1,0 +1,47 @@
+{% extends "algorithms_base.html" %}
+
+{% block subpage_index %}
+	<h1>Run info</h1>
+	
+	<ul id="algorithm_result_list">
+		<li>Start: {{ algorithm_run.start_time }}</li>
+		<li>End: {% if algorithm_run.end_time %}{{ algorithm_run.end_time }}{% else %}running...{% endif %} </li>
+		<li>Score: {% if algorithm_run.score %}{{ algorithm_run.score }}{% else %}---{% endif %} </li>
+		<li>Iteration: {% if algorithm_run.current_iteration %}{{ algorithm_run.current_iteration }}{% else %}---{% endif %} </li>
+	</ul>
+	
+	{% if run_arguments %}
+	<h1>Run arguments</h1>
+	<ul id="algorithm_result_list">
+		{% for key,value in run_arguments.items %}
+			<li>{{key}}: {{value}}</li>
+		{% endfor %}		
+	</ul>
+	{% endif %}
+	
+{% endblock %}
+
+{% block subpage_content %}
+	{% if not algorithm_run.finished %}
+	<script type="text/javascript">
+		window.setTimeout("location.reload(true);", 10000);
+	</script>
+	<h1>Current results of {{ algorithm_run.algorithm.name }} using {{ algorithm_run.input_file.name }}</h1>
+	
+	<p>Page will refresh in 10 second periods.</p>
+	
+	{% else %}
+	<h1>Final results of {{ algorithm_run.algorithm.name }} using {{ algorithm_run.input_file.name }}</h1>
+	{% endif %}
+
+	<div id="algorithm_result_div">
+	{% if algorithm_run.image %}	
+	<img id="run_result_image" src="{{ algorithm_run.image.url }}" 
+		 alt="{{ algorithm_run.image.url }}" />	 
+	{% else %}
+		No image for this run.
+	{% endif %}
+	</div>
+
+
+{% endblock %}

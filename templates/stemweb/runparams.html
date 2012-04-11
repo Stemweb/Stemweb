@@ -18,7 +18,7 @@
 			</tr>		
 			{% for run in all_runs %}
 				<tr>
-					<td><a href="/results/{{ run.input_file.id }}/{{ run.id }}">{% if run.time %}{{ run.time|date:"d.m.y H:i" }}{% endif %}</a></td>
+					<td><a href="/results/{{ run.input_file.id }}/{{ run.id }}">{% if run.start_time %}{{ run.start_time|date:"d.m.y H:i" }}{% endif %}</a></td>
 					<td>{{ run.itermax }}</td>
 					<td>{{ run.runmax }}</td>
 				</tr>
