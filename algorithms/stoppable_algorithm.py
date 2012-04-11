@@ -285,7 +285,7 @@ class StoppableAlgorithm():
 		
 		
 if __name__ == '__main__':
-	from semsep_stop_len.semstem import Semstem
+	from semstem.semstem import Semstem
 	
 	run_args = dict({
 					'itermaxin' :100, 

@@ -31,6 +31,28 @@
   			"description": "Number of 'parallel' runs"
   		}
   	},
+  	
+  	{
+  		"model": "algorithms.algorithmarg",
+  		"pk": 4,
+  		"fields": {
+  			"key": "learnlength",
+  			"value": "boolean",
+  			"verbose_name": "Estimate Arc Length",
+  			"description": "tooltip for arc length"
+  		}
+  	},
+  	
+  	{
+  		"model": "algorithms.algorithmarg",
+  		"pk": 5,
+  		"fields": {
+  			"key": "input_file",
+  			"value": "input_file",
+  			"verbose_name": "Input File",
+  			"description": "Must be .nex"
+  		}
+  	},
 
 	{
     	"model": "algorithms.algorithm",
@@ -40,8 +62,8 @@
       		"source": "/Users/slinkola/algorithms/semsep_stop_len/allunilen.r",
       		"desc": "Short tooltip text of semstem",
       		"url": "http://",
-      		"args": [1,2,3],
-      		"template": "semstem_about.html",
+      		"args": [1,2,3,4],
+      		"template": "semstem_about.html"
     	}
   	},
   	
@@ -63,7 +85,8 @@
       		"name": "Neighbour Joining",
       		"source": "sumting",
       		"desc": "Neighbour joining algorithm",
-      		"url": "http://"
+      		"url": "http://",
+      		"args": [5]
     	}
   	}
   	

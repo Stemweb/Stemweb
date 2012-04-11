@@ -6,7 +6,7 @@ import os
 from django import forms
 from Stemweb.settings import SITE_ROOT
 
-from .semsep_stop_len.semstem import Semstem
+from .semstem.semstem import Semstem
 from .neighbour_joining.nj_class import NJ
 import validators
 
@@ -20,7 +20,7 @@ THREADS = {}
 ALGORITHMS_CALLING_DICT = { 
 	'1': { 
 		'callable': Semstem,	
-		'source': os.path.join(SITE_ROOT, 'algorithms/semsep_stop_len/allunilen.r'),
+		'source': os.path.join(SITE_ROOT, 'algorithms/semstem/allunilen.r'),
 	},
 	'2': {
 		'callable': None,

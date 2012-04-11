@@ -77,7 +77,7 @@ class Algorithm(models.Model):
 	paper = models.URLField(blank = True)
 	url = models.URLField(blank = True)
 	name = models.CharField(max_length = 50)
-	source = models.CharField(max_length = 200)
+	source = models.CharField(max_length = 200, null = True)
 	stoppable = models.BooleanField(default = False)
 	args = models.ManyToManyField(AlgorithmArg, blank = True)
 
