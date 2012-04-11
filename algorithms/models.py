@@ -6,8 +6,6 @@ from django.db import models
 from django.contrib.auth.models import User, AnonymousUser
 from django import forms
 
-from Stemweb.third_party_apps import djangotasks
-
 from Stemweb.files.models import InputFile
 from .settings import ARG_VALUE_CHOICES, ARG_VALUE_FIELD_TYPE_KEYS, ARG_VALUE_FIELD_TYPE_VALIDATORS
 from .settings import ALGORITHMS_CALLING_DICT as call_dict
@@ -97,7 +95,7 @@ class Algorithm(models.Model):
 	def get_callable(self, kwargs):
 		'''
 			Update run_args dictionary with all the keys from settings 
-			ALGORITHM_CALLABLES except 'callable' itself which is returned.
+			ALGORITHM_CALLING_DICT except 'callable' itself which is returned.
 			
 			Any keys that are present in run_args already are not updated.
 		'''
@@ -270,9 +268,4 @@ class AlgorithmRun(models.Model):
 	class Meta:
 		ordering = ['finished', '-end_time', '-start_time']
 	
-
-'''
-	Register AlgorithmRun's start method as task to djangotasks
-'''
-djangotasks.register_task(AlgorithmRun.start, "AlgorithmRun.start")
 	

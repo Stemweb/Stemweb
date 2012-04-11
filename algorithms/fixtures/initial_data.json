@@ -38,9 +38,10 @@
     	"fields": {
       		"name": "Semstem",
       		"source": "/Users/slinkola/algorithms/semsep_stop_len/allunilen.r",
-      		"desc": "Input needed about some short desc of semstem's behaviour. Max length.. 2000 chars? There will be longer description also available, but this text comes straight from database.",
+      		"desc": "Short tooltip text of semstem",
       		"url": "http://",
-      		"args": [1,2,3]
+      		"args": [1,2,3],
+      		"template": "semstem_about.html",
     	}
   	},
   	
@@ -51,6 +52,17 @@
       		"name": "RHM",
       		"source": "/Users/slinkola/algorithms/rhm/binarysankoff_python.c",
       		"desc": "Another short desc, now about RHM. Also comes from database.",
+      		"url": "http://"
+    	}
+  	},
+  	
+  	{
+    	"model": "algorithms.algorithm",
+    	"pk": 3,
+    	"fields": {
+      		"name": "Neighbour Joining",
+      		"source": "sumting",
+      		"desc": "Neighbour joining algorithm",
       		"url": "http://"
     	}
   	}

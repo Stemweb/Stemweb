@@ -9,9 +9,10 @@ algorithms/rhm/NCD
 algorithms/rhm/binarysankoff
 algorithms/rhm/binarysankoff.so
 algorithms/rhm/binarysankoff.dylib
-*/*/*/temp/*
-*/*/temp/*
-*/temp/*
+*/*/*/temp/
+*/*/temp/
+*/temp/
 logs/
 *.so
 *.dylib
+*.nex

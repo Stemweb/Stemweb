@@ -97,6 +97,30 @@ int count_lines(const char *fname)
   return line;
 }
 
+int count_columns(const char *fname)
+{
+  FILE *f;
+  int col;
+  char tmp[2048], *ptr;
+
+  f = fopen(fname, "r");
+  assert(f);
+
+  col = 0;
+  fgets(tmp, 2048, f);
+  ptr = tmp;
+  while (*ptr)
+  {
+    while (*ptr != '\t' && *ptr) ptr++;
+    col++;
+    if (*ptr) ptr++;
+  }
+
+  fclose(f);
+
+  return col;
+}
+
 int isempty(char *str)
 {
   while (*str)
@@ -209,7 +233,81 @@ char *str_vtou(char *str)
   return str;
 }
 
-int read_file(const char *dirname)
+long *get_rowoffsets(const char *fname, int lines)
+{
+  FILE *f;
+  int line;
+  char buf[2048];
+  long *offset;
+
+  assert(f = fopen(fname, "r"));
+
+  offset = (long *) malloc(sizeof *offset * lines);
+
+  for (line = -1; line < lines; line++)
+  {
+    if (line >= 0) offset[line] = ftell(f);
+    fgets(buf, 2048, f);
+  }
+
+  fclose(f);
+  return offset;
+}
+  
+char **get_names(const char *fname, int leafs)
+{
+  FILE *f;
+  char **names;
+  char buf[2048], *ptr0, *ptr;
+  int i;
+  
+  f = fopen(fname, "r");
+
+  fgets(buf, 2048, f);
+  names = (char **) malloc(sizeof (char *) * 256);
+
+  ptr0 = buf;
+  for (i = 0; i < leafs; i++)
+  {
+    ptr = ptr0;
+    while (*ptr && *ptr != '\t' && *ptr != '\n') ptr++;
+    names[i] = (char *) malloc(sizeof(char) * (ptr-ptr0+1));
+    strncpy(names[i], ptr0, ptr-ptr0);
+    ptr0 = ptr;
+    if (*ptr0) ptr0++;
+  }
+
+  fclose(f);
+
+  return names;
+}
+
+void fetch_word(char *buf, int w, FILE *f)
+{
+  int i;
+  char str[2048], *ptr;
+ 
+  //  printf("reading:%d", ferror(f));
+  fgets(str, 2048, f);
+  if (ferror(f)) printf("'%s'\n", str);
+  //  printf("*%d\n", ferror(f));
+  ptr = str;
+  for (i = 0; i < w && *ptr; i++)
+  {
+    while(*ptr && *ptr != '\t' && *ptr != '\n') ptr++;
+    if (*ptr) ptr++;
+  }
+  i = 0;
+  while (*ptr && *ptr != '\t' && *ptr != '\n')
+  {
+    buf[i] = *ptr;
+    i++; ptr++;
+  }
+  buf[i] = '\0';
+  return;
+}
+
+int read_file(const char *target_path)
 {
   DIR *dir;
   FILE *f1, *f2;
@@ -217,27 +315,42 @@ int read_file(const char *dirname)
   char buf[4096];
   struct dirent *de;
   int bufpos1, bufpos2, lines, f1i, f2i, ch, line;
-  long f1offset;
+  long f1offset, *rowoffset;
 
   leafs = 0;
-  names = (char **) malloc(sizeof(void *) * 256);
-  dir = (DIR *) opendir(dirname);
-  while ((de = readdir(dir)))
-  {
-    if (de->d_name[0] != '.')
-    {
-      names[leafs] = (char *) malloc(sizeof(char) * (strlen(de->d_name)+1));
-      strcpy(names[leafs], de->d_name);
-      printf("%s ", names[leafs]);
-      leafs++;
-    }
-  }
-  printf("\n");
-  closedir(dir);
 
-  lines = count_lines(fullname(dirname, names[0]));
+  // check whether the target is a directory with files
+  // or a single CSV formatted file
+  dir = (DIR *) opendir(target_path);
+
+  if (dir) // directory
+  {
+    names = (char **) malloc(sizeof(void *) * 256);
+    while ((de = readdir(dir)))
+    {
+      if (de->d_name[0] != '.')
+      {
+	names[leafs] = (char *) malloc(sizeof(char) * (strlen(de->d_name)+1));
+	strcpy(names[leafs], de->d_name);
+	printf("%s ", names[leafs]);
+	leafs++;
+      }
+    }
+    printf("\n");
+    closedir(dir);
+    lines = count_lines(fullname(target_path, names[0]));
+  }
+  else
+  {
+    leafs = count_columns(target_path);
+    lines = count_lines(target_path)-1;
+    names = get_names(target_path, leafs);
+    rowoffset = get_rowoffsets(target_path, lines);
+    assert(f1 = (FILE *) fopen(target_path, "r"));
+  }
+
   chunks = (lines-1)/chunksize+1;
-  printf("%d files, %d lines, %d chunks of size %d each.\n",
+  printf("%d taxa, %d lines, %d chunks of size %d each.\n",
 	 leafs, lines, chunks, chunksize);
 
   Kyx = (int *) malloc(sizeof(int) * leafs * leafs * chunks);
@@ -247,8 +360,10 @@ int read_file(const char *dirname)
 
   for (f1i = 0; f1i < leafs; f1i++)
   {
-    f1 = fopen(fullname(dirname, names[f1i]), "r");
-    assert(f1);
+    if (dir) {
+      f1 = fopen(fullname(target_path, names[f1i]), "r");
+      assert(f1);
+    }
 
     for (ch = 0; ch < chunks; ch++)
     {
@@ -259,47 +374,57 @@ int read_file(const char *dirname)
 
     for (f2i = 0; f2i < leafs; f2i++)
     {
-      fseek(f1, 0, SEEK_SET);
-
-      if (f2i != f1i)
-	f2 = fopen(fullname(dirname, names[f2i]), "r");
+      if (dir)
+      {
+	fseek(f1, 0, SEEK_SET);
+	if (f2i != f1i)
+	  f2 = fopen(fullname(target_path, names[f2i]), "r");
+	else
+	  f2 = f1;
+      }
       else
 	f2 = f1;
+
       assert(f2);
       
-      //printf("%s-%s:", names[f1i], names[f2i]);
-
       for (ch = 0; ch < chunks; ch++)
       {
+	//	printf("::%d:", ferror(f1));
+	if (!dir) // move to the correct position
+	  fseek(f1, rowoffset[chunksize*ch], SEEK_SET);
+	//	printf("seek %ld\n", rowoffset[chunksize*ch]);
+	//	printf("%d::\n", ferror(f1));
+	// record where started in case need to read twice
 	f1offset = ftell(f1);
+
 	bufpos1 = 0;
+	// open temporary gzip file for writing compressed data
 	gfile = gzopen("tmp.gz", "wb");
-	for (line = 0; !feof(f1) && line < chunksize; line++)
+	for (line = 0; !ferror(f1) && !feof(f1) && line < chunksize; line++)
 	{
 	  if (bufpos1 > 0 && buf[bufpos1-1] == '\n')
 	    buf[bufpos1-1] = ' ';
-	  fgets(buf+bufpos1, 2048-bufpos1, f1);
+	  if (dir)
+	    fgets(buf+bufpos1, 2048-bufpos1, f1);
+	  else // extract f1i'th word from the current row in CSV file
+	  {
+	    //	    printf("_%d", ferror(f1));
+	    fetch_word(buf+bufpos1, f1i, f1);
+	    //	    printf("_%d_\n", ferror(f1));
+	  }
 #ifdef REPLACE_AMP_BY_ET
 	  if (!strcmp(buf+bufpos1, "&\n"))
 	    strcpy(buf+bufpos1, "et\n");
 #endif
 	  if (buf[bufpos1] && buf[bufpos1] != '\n')
 	    empty[f1i*chunks+ch] = 0;
-	  if (strcmp(buf+bufpos1, "PUUT\n") && 
-	      strcmp(buf+bufpos1, "POIS\n"))
-	    bufpos1 += strlen(buf+bufpos1);
-	  else 
-	    buf[bufpos1++] = '\n';
+	  bufpos1 += strlen(buf+bufpos1);
 	}
 	buf[bufpos1] = '\0';
 
 	//sort_string(buf);
 	bufpos1 = strlen(buf);
-	/*
-	fprintf(stderr, "%s (1): length %d at #%x:\n%s\n", 
-		names[f1i], bufpos1, 
-		(int)buf, buf);
-	*/
+
 	if (!bufpos1 || buf[bufpos1-1] != '\n')
 	  buf[bufpos1++]='\n';
 	buf[bufpos1] = '\0';
@@ -310,33 +435,41 @@ int read_file(const char *dirname)
 	str_vtou(buf);
 #endif
 
+	//	printf("###1st### chunk %d %d %d\n%s###\n", ch, feof(f1), ferror(f1), buf);
+
 	if (Kx[f1i*chunks+ch] == -1)
 	{
 	  gzputs(gfile, buf);
-	  gzflush(gfile, Z_SYNC_FLUSH);
+	  gzflush(gfile, Z_PARTIAL_FLUSH);
 	
 	  Kx[f1i*chunks+ch] = 
-	    (int) ((struct z_stream_s *)gfile)->total_out - GZIP_HEADER;
+	    (int) gzoffset(gfile) - GZIP_HEADER;
 	  //fprintf(stderr, "%sKx=%d\n", buf,Kx[f1i * chunks + ch]);
 	  gzclose(gfile);
 	  gfile = gzopen("tmp.gz", "wb");
 	}
 
-	if (f2 == f1)
+	if (dir && f2 == f1)
 	  fseek(f1, f1offset, SEEK_SET);
+
+	if (!dir) // move to the correct position
+	  fseek(f2, rowoffset[chunksize*ch], SEEK_SET);
+
 	bufpos2 = bufpos1;
-	for (line = 0; !feof(f2) && line < chunksize; line++)
+	for (line = 0; !ferror(f2) && !feof(f2) && line < chunksize; line++)
 	{
 	  if (bufpos2 > bufpos1 && buf[bufpos2-1] == '\n')
 	    buf[bufpos2-1] = ' ';
-	  fgets(buf+bufpos2, 4096-bufpos2, f2);
+	  if (dir)
+	    fgets(buf+bufpos2, 4096-bufpos2, f2);
+	  else
+	    fetch_word(buf+bufpos2, f2i, f2);
+#ifdef REPLACE_AMP_BY_ET
 	  if (!strcmp(buf+bufpos2, "&\n"))
 	    strcpy(buf+bufpos2, "et\n");
-	  if (strcmp(buf+bufpos2, "PUUT\n") && 
-	      strcmp(buf+bufpos2, "POIS\n"))
-	    bufpos2 += strlen(buf+bufpos2);
-	  else 
-	    buf[bufpos2++] = '\n';
+#endif
+	  bufpos2 += strlen(buf+bufpos2);
+	  //buf[bufpos2++] = '\n';
 	}
 	if (bufpos2==bufpos1 || buf[bufpos2-1] != '\n')
 	  buf[bufpos2++]='\n';
@@ -348,110 +481,48 @@ int read_file(const char *dirname)
 	str_vtou(buf+bufpos1);
 #endif
 
-	/*
-	fprintf(stderr, "%s-%s: at #%x and #%x:\n1:%s\n2:%s\n", 
-		names[f1i], names[f2i],
-		(int)buf, (int)(buf+bufpos1), buf, buf+bufpos1);
-	*/
-
-	//sort_string(buf+bufpos1);
 	bufpos2 = bufpos1+strlen(buf+bufpos1);
-	/*	
-	fprintf(stderr, "%s-%s: at #%x and #%x:\n1:%s\n2:%s\n", 
-		names[f1i], names[f2i],
-		(int)buf, (int)(buf+bufpos1), buf, buf+bufpos1);
-	fprintf(stderr, "====%d %d ('%c')\n", bufpos2, 
-		strncmp(buf, buf+bufpos1, bufpos2/2),
-		*(buf+bufpos1+bufpos2/2-1));
-		*/
+
+	//	printf("###2nd### (%s->%s)\n%s###\n", names[f1i], names[f2i], buf);
 
 	if (strncmp(buf, buf+bufpos1, bufpos2/2))
 	{
 	  gzputs(gfile, buf);
-	  gzflush(gfile, Z_SYNC_FLUSH);
+	  gzflush(gfile, Z_PARTIAL_FLUSH);
 
-	  if (1 || !isempty(buf+bufpos1))
-	    Kyx[f1i*leafs*chunks + f2i*chunks + ch] = 
-	      (int) ((struct z_stream_s *)gfile)->total_out -
-	      Kx[f1i * chunks + ch] - GZIP_HEADER;
-	  else
-	  {
-	    if (0&&f1i== 0)
-	      fprintf(stderr, "empty(%s/%d) len=%d: %s", 
-		      names[f2i], ch, (int)strlen(buf+bufpos1), buf+bufpos1);
-	    Kyx[f1i*leafs*chunks + f2i*chunks + ch] = 0;
-	  }
-
-	  if (0 && f1i == f2i)
-	    fprintf(stderr, "diff %s!=%s (K(%s|%s)=%d):\n%s",
-		    names[f1i], names[f2i], 
-		    names[f2i], names[f1i],
-		    Kyx[f1i*leafs*chunks + f2i*chunks+ch], buf);
+	  Kyx[f1i*leafs*chunks + f2i*chunks + ch] = 
+	    (int) gzoffset(gfile) -
+	    Kx[f1i * chunks + ch] - GZIP_HEADER;
 	}
 	else
 	{
-	  /*
-	  fprintf(stderr, "%s-%s: at #%x and #%x:\n%s <- 1\n%s <- 2\n", 
-		  names[f1i], names[f2i],
-		  (int)buf, (int)(buf+bufpos1), buf, buf+bufpos1);
-	  for (bufpos1 = 0; bufpos1 < bufpos2/2; bufpos1++)
-	    fprintf(stderr, "~");
-	  fprintf(stderr, "\n");
-	  */
-
 #ifdef EXACT_COPY_IS_FREE
 	  Kyx[f1i*leafs*chunks + f2i*chunks + ch] = 0;
 #else
 	  gzputs(gfile, buf);
-	  gzflush(gfile, Z_SYNC_FLUSH);
+	  gzflush(gfile, Z_PARTIAL_FLUSH);
 
-	  if (1 || !isempty(buf+bufpos1))
-	    Kyx[f1i*leafs*chunks + f2i*chunks + ch] = 
-	      (int) ((struct z_stream_s *)gfile)->total_out -
-	      Kx[f1i * chunks + ch] - GZIP_HEADER;
-	  else
-	  {
-	    if (0&&f1i== 0)
-	      fprintf(stderr, "empty(%s/%d) len=%d: %s", 
-		      names[f2i], ch, strlen(buf+bufpos1), buf+bufpos1);
-	    Kyx[f1i*leafs*chunks + f2i*chunks + ch] = 0;
-	  }
+	  Kyx[f1i*leafs*chunks + f2i*chunks + ch] = 
+	    (int) gzoffset(gfile) -
+	    Kx[f1i * chunks + ch] - GZIP_HEADER;
 #endif
-	  if (0 && ch == 0)
-	    fprintf(stderr, "duplicate %s=%s (K(%s|%s)=%d):\n%s",
-		    names[f1i], names[f2i], 
-		    names[f2i], names[f1i],
-		    Kyx[f1i*leafs*chunks + f2i*chunks+ch], buf);
 	  if (f2i<f1i)
 	    unique[f2i*chunks+ch] = 0;
 	}
 
-	if (0 && !strcmp(names[f1i],"S") && !strcmp(names[f2i],"R"))
-	  fprintf(stderr, "%s[%d %d] K_{%d}(%s|%s)=%d.\n",
-		  buf, strncmp(buf, buf+bufpos1, bufpos2/2),
-		  isempty(buf+bufpos1),
-		  ch, names[f2i],names[f1i],
-		  Kyx[f1i*leafs*chunks+f2i*chunks+ch]);
-
-	//printf("%d ", Kyx[f1i * leafs*chunks + f2i * chunks + ch]);
+	//printf("%d\n", Kyx[f1i * leafs*chunks + f2i * chunks + ch]);
 
 	gzclose(gfile);      
       }
-      if (f2i != f1i)
+      if (dir && f2i != f1i)
 	fclose(f2);
-      else if (0)
-	fprintf(stderr, "%d %s-%s (K(%s|%s)=%d):\n%s",
-		unique[f1i],
-		names[f1i], names[f2i], 
-		names[f2i], names[f1i],
-		Kyx[f1i*leafs*chunks + f2i*chunks+ch], buf);
-
-      //printf("\n");
     }
     fprintf(stderr, ".");
-    fclose(f1);
+    if (dir) fclose(f1);
   }
   fprintf(stderr, "\n");
+
+  if (!dir) fclose(f1);
 
   f2i = 0;
   for (ch = 0; ch < chunks; ch++)
@@ -463,21 +534,21 @@ int read_file(const char *dirname)
   printf("%dx%dx%d information array ready.\n", leafs, leafs, chunks);
 
   printf("'%s'(%d)->'%s'(%d)= %d\n", 
-	 names[3], empty[3*chunks],
-	 names[3], empty[3*chunks],
-	 Kyx[3*leafs*chunks+3*chunks]);
+	 names[1], empty[1*chunks],
+	 names[1], empty[1*chunks],
+	 Kyx[1*leafs*chunks+1*chunks]);
   printf("'%s'(%d)->'%s'(%d) = %d\n", 
-	 names[4], empty[4*chunks],
-	 names[3], empty[3*chunks],
-	 Kyx[4*leafs*chunks+3*chunks]);
-  printf("'%s'->'%s' = %d\n", names[3], names[4], 
-	 Kyx[3*leafs*chunks+4*chunks]);
-  printf("'%s'->'%s' = %d\n", names[4], names[4],
-	 Kyx[4*leafs*chunks+4*chunks]);
+	 names[2], empty[2*chunks],
+	 names[1], empty[1*chunks],
+	 Kyx[2*leafs*chunks+1*chunks]);
+  printf("'%s'->'%s' = %d\n", names[1], names[2], 
+	 Kyx[1*leafs*chunks+2*chunks]);
+  printf("'%s'->'%s' = %d\n", names[2], names[2],
+	 Kyx[2*leafs*chunks+2*chunks]);
 
   printf("non-symmetric: %d %d\n", 
-	 Kyx[3*leafs*chunks + 4*chunks],
-	 Kyx[4*leafs*chunks + 3*chunks]);
+	 Kyx[1*leafs*chunks + 2*chunks],
+	 Kyx[2*leafs*chunks + 1*chunks]);
 
   /*
   for (f1i = 0; f1i < leafs; f1i++)
@@ -770,7 +841,6 @@ void print_subtree_dot(struct node_st *node)
 void print_subtree(struct node_st *node)
 {
   char *name;
-  int ch;
 
   if (!node)
     return;
@@ -844,21 +914,8 @@ void make_look_nice(struct node_st *node)
 
 void print_tree()
 {
-  int ch;
   make_look_nice(tree);
   open_output();
-  /*
-  fprintf(fout, "graph \"sankoff-tree\" {\nlabel=\"sankoff-score %d ", 
-	  bestval);
-  fprintf(fout, "bootstrap ");
-  if (strap == 1)
-    fprintf(fout, "off");
-  else
-    for (ch = 0; ch < chunks; ch++)
-      fprintf(fout, "%s%d", ch?",":"", bootw[ch]);
-  fprintf(fout, "\";\n");
-  fprintf(fout, "edge [style=bold];\nnode[shape=plaintext fontsize=20];\n");
-  */
   print_subtree(tree);
   fprintf(fout, ";\n");
   close_output();

@@ -22,10 +22,10 @@
 # _______________the useful functions______________________________________________
 
 ######################################################################
-from rpy2 import *
 from rpy2 import robjects
 import os
 import unicodedata
+import logging
 
 #def treetonet(nodelist,parentlist,treedic,lenmat):
 def treetonet(nodelist,parentlist,lenmat):
@@ -43,40 +43,44 @@ def treetonet(nodelist,parentlist,lenmat):
 			if node in parentlistname:
 				neighbor = parentlist[node]
 				for neighbori in neighbor:
-					outstr = outstr + node + '\t' + neighbori + '\t' + str(lenmat.rx(node,neighbori)[0]) + '\n'
+					outstr = outstr + node + '\t' + neighbori + '\t' + str(lenmat[(node,neighbori)]) + '\n'
 		outstr = outstr.strip()
 	return (outstr)
 
 
 def treetonewick(nodelist,neighborlist,lenmat):
 	import re
-	outstr = ['(',nodelist[0],')',';']
+	for node in neighborlist.keys():
+		if len(neighborlist[node])>1:
+			break
+	outstr = [node,';']
 	
 	nodelistnotextended = list(nodelist)
 	while len(nodelistnotextended) > 0:
 		nodelistnotextendedtemp = list(nodelistnotextended)
 		for node in nodelistnotextended:
-			if node in outstr:
+			if (node in outstr) and (node in nodelistnotextendedtemp):
+
 				nodelistnotextendedtemp.remove(node)
 				nodeindex = outstr.index(node)
-				temp = ['(']
+				temp = []
 				for neighbori in neighborlist[node]:
 					if neighbori not in outstr:
 						temp.append(neighbori)
 						if type(lenmat) != str:
 							temp.append(':')
-							temp.append(str(list(lenmat.rx(node,neighbori))[0]))
+							temp.append(str(lenmat[(node,neighbori)]))
 						temp.append(',')
 						if len(neighborlist[neighbori])==1:
 							nodelistnotextendedtemp.remove(neighbori)
-
+					
 				if len(temp) > 0:
 					if temp[len(temp)-1]==',':
 						temp.pop(len(temp)-1)
-				temp.append(')')
+					temp[0:0]=['(']
+					temp.append(')')
 				outstr[nodeindex:nodeindex] = temp
 		nodelistnotextended = list(nodelistnotextendedtemp)
-
 	for node in nodelist:
 		if len(re.findall(r'[a-zA-Z]',node))==0:
 			outstr.remove(node)
@@ -84,7 +88,9 @@ def treetonewick(nodelist,neighborlist,lenmat):
 	for outstri in outstr:
 		outstrtemp = outstrtemp + outstri
 	return (outstrtemp)
-		
+
+	
+	
 #####################################################################
 #def treetomatrix(treedic):
 def treetomatrix(neighborlist,nodelist):
@@ -136,28 +142,29 @@ def treetodot(nodelist,parentlist,lenmat):
 			if node in 	parentlistname:
 				neighbor = list(parentlist[node])
 				for neighbori in neighbor:
-					if lenmax < lenmat.rx(node,neighbori)[0]:
-						lenmax = lenmat.rx(node,neighbori)[0]
-					if lenmin > lenmat.rx(node,neighbori)[0]:
-						lenmin = lenmat.rx(node,neighbori)[0]
+					if lenmax < lenmat[(node,neighbori)]:
+						lenmax = lenmat[(node,neighbori)]
+					if lenmin > lenmat[(node,neighbori)]:
+						lenmin = lenmat[(node,neighbori)]
 		outstr = outstr + '\n/* Here are the normalized edge lengths for printing */\n'
 
 		for node in nodelist:
 			if node in 	parentlistname:
 				neighbor = list(parentlist[node])
 				for neighbori in neighbor:
-					temp = lenmat.rx(node,neighbori)[0]
-					temp = (0.5*(temp - lenmin))/(lenmax - lenmin) + 0.5
+					temp = lenmat[(node,neighbori)]
+					temp = (0.6*(temp - lenmin))/(lenmax - lenmin) + 0.4
 					outstr = outstr + '\t' + node + ' -- ' + neighbori +'[len=' + str(temp)+ '];\n'
 		outstr = outstr + '\n/* Here are the original edge lengths */\n'
 		for node in nodelist:
 			if node in 	parentlistname:
 				neighbor = list(parentlist[node])
 				for neighbori in neighbor:
-					temp = lenmat.rx(node,neighbori)[0]
+					temp = lenmat[(node,neighbori)]
 					outstr = outstr + '/*\t' + node + ' -- ' + neighbori +'[len=' + str(temp)+ '];*/\n'
 	outstr = outstr + '}'
 	return (outstr)
+
 
 def writelog(iternow, itertime, iterationrunres, bestruntmp, bestlastruntmp):
 	# use append to existing log files
@@ -243,16 +250,11 @@ def writefile(result):
 	bestres = temp.rx2(bestruntmp[0])
 	besttree = bestres.rx2('MTreeunires')
 
-	if ('lenmat' in bestres.names):
-		lenmat = bestres.rx2('lenmat')
-		#lenmat = 'nolength'
-
-	else:
-		lenmat = 'nolength'
 
 	temp = iterationrunres.rx2('runres')
 	bestlastres = temp.rx2(bestlastruntmp[0])
 	bestlasttree = bestlastres.rx2('MTreeunires')
+
 
 	# save results
 	# net file
@@ -261,14 +263,12 @@ def writefile(result):
 		os.makedirs(outfolder)
 		#os.system('chmod 777 ' + outfolder)
 
-	
-	def removehidden(nodelist,parentlist,neighborlist):
-		#nodelistremovetemp = []
-		#for node in nodelist:
-			#nodelistremovetemp.append(node)
+
+	def removehidden(nodelist,parentlist,neighborlist,lenmat):
 		nodelistremovetemp = list(nodelist)
 		parentlistremovetemp = {}
 		neighborlistremovetemp = {}
+		lenmatremovetemp = {}
 		parentlistname = parentlist.names
 		neighborlistname = neighborlist.names
 		lenmatremovetemp = {}
@@ -278,6 +278,13 @@ def writefile(result):
 		for node in nodelist:
 			if node in neighborlistname:
 				neighborlistremovetemp[node] = list(neighborlist.rx2(node))
+		if type(lenmat)!=str:
+			for nodei in nodelist:
+				for nodej in nodelist:
+					lenmatremovetemp[(nodei,nodej)]=list(lenmat.rx(nodei,nodej))[0]
+					lenmatremovetemp[(nodej,nodei)]=lenmatremovetemp[(nodei,nodej)]
+		else:
+			lenmatremovetemp = 'nolength'
 
 		
 				
@@ -287,7 +294,8 @@ def writefile(result):
 			
 			for node in nodelist:
 				if (node in nodelistremovetemp):
-					if (len(neighborlistremovetemp[node])==1 and len(re.findall(r'[a-zA-Z]',node)) == 0):
+					if (len(neighborlistremovetemp[node])==1 and len(re.findall(r'[a-zA-Z]',node)) == 0): 
+						# hidden node in the leaf position
 						scanfinish = 0
 						# remove node from nodelist
 						nodelistremovetemp.remove(node)
@@ -310,6 +318,10 @@ def writefile(result):
 						# remove internal hidden nodes only when there is no edge length
 						neighborlisttemp = neighborlistremovetemp[node]
 						scanfinish = 0
+						# change edge length
+						if type(lenmatremovetemp)!=str:
+							lenmatremovetemp[(neighborlisttemp[1],neighborlisttemp[0])] = lenmatremovetemp[(neighborlisttemp[1],node)] +lenmatremovetemp[(neighborlisttemp[0],node)]
+							lenmatremovetemp[(neighborlisttemp[1],neighborlisttemp[0])] = lenmatremovetemp[(neighborlisttemp[0],neighborlisttemp[1])]
 						# do something for neighbor 1
 						if parentlistremovetemp.has_key(neighborlisttemp[0]):
 							if node in parentlistremovetemp[neighborlisttemp[0]]:
@@ -337,8 +349,9 @@ def writefile(result):
 							del parentlistremovetemp[node]
 						if neighborlistremovetemp.has_key(node):
 							del neighborlistremovetemp[node]
+						
 
-		return nodelistremovetemp,parentlistremovetemp,neighborlistremovetemp
+		return nodelistremovetemp,parentlistremovetemp,neighborlistremovetemp, lenmatremovetemp
 		
 		
 		
@@ -350,37 +363,49 @@ def writefile(result):
 	nodelistlastori=list(bestlasttree.rx2('NodeList'))	
 	parentlistlastori =bestlasttree.rx2('ParentList')	
 	neighborlistlastori=bestlasttree.rx2('NeighbourList')
-	nodelistbest, parentlistbest,neighborlistbest =  removehidden(nodelist=nodelistbestori,parentlist=parentlistbestori,neighborlist=neighborlistbestori)
-	nodelistlast, parentlistlast,neighborlistlast =  removehidden(nodelist=nodelistlastori,parentlist=parentlistlastori,neighborlist=neighborlistlastori)
-
+	if ('lenmat' in bestres.names):
+		lenmatbestori = bestres.rx2('lenmat')
+	else:
+		lenmatbestori = 'nolength'
+	if ('lenmat' in bestlastres.names):
+		lenmatlastori = bestlastres.rx2('lenmat')
+	else:
+		lenmatlastori = 'nolength'
+	nodelistbest, parentlistbest,neighborlistbest, lenmatbest =  removehidden(nodelist=nodelistbestori,parentlist=parentlistbestori,neighborlist=neighborlistbestori, lenmat = lenmatbestori)
+	nodelistlast, parentlistlast,neighborlistlast,lenmatlast =  removehidden(nodelist=nodelistlastori,parentlist=parentlistlastori,neighborlist=neighborlistlastori, lenmat = lenmatlastori)
+	#print ('hidden removed')
 	# net file
-	bestnet = treetonet(nodelist=nodelistbest,parentlist =parentlistbest,lenmat=lenmat)
-	writestr(outfolder,'besttree.net',bestnet)
-	bestlastnet = treetonet(nodelist=nodelistlast,parentlist =parentlistlast,lenmat=lenmat)
-	writestr(outfolder,'bestlasttree.net',bestlastnet)
 
+	bestnet = treetonet(nodelist=nodelistbest,parentlist =parentlistbest,lenmat=lenmatbest)
+	writestr(outfolder,'besttree.net',bestnet)
+	bestlastnet = treetonet(nodelist=nodelistlast,parentlist =parentlistlast,lenmat=lenmatlast)
+	writestr(outfolder,'bestlasttree.net',bestlastnet)
+	#print ('net saved')
 	
 	# newick file
-	bestnewick = treetonewick(neighborlist=neighborlistbest,nodelist=nodelistbest,lenmat=lenmat)
-	lastnewick = treetonewick(neighborlist=neighborlistlast,nodelist=nodelistlast,lenmat=lenmat)
+	bestnewick = treetonewick(neighborlist=neighborlistbest,nodelist=nodelistbest,lenmat=lenmatbest)
+	#print (bestnewick )
+	lastnewick = treetonewick(neighborlist=neighborlistlast,nodelist=nodelistlast,lenmat=lenmatlast)
+	#print (lastnewick)
 	writestr(outfolder,'besttree.tre',bestnewick)
 	writestr(outfolder,'bestlasttree.tre',lastnewick)	
-	
+	#print ('newick saved')
 	# matrix file
 	bestmatrix = treetomatrix(neighborlist=neighborlistbest,nodelist=nodelistbest)
 	bestlastmatrix = treetomatrix(neighborlist=neighborlistlast,nodelist=nodelistlast)
 	writestr(outfolder,'besttree.matrix',bestmatrix)
 	writestr(outfolder,'bestlasttree.matrix',bestlastmatrix)
-
+	#print ('matrix saved')
 	# dot file
-	bestdot = treetodot(nodelist=nodelistbest,parentlist =parentlistbest,lenmat=lenmat)
-	bestlastdot = treetodot(nodelist=nodelistlast,parentlist =parentlistlast,lenmat=lenmat)
+	bestdot = treetodot(nodelist=nodelistbest,parentlist =parentlistbest,lenmat=lenmatbest)
+	bestlastdot = treetodot(nodelist=nodelistlast,parentlist =parentlistlast,lenmat=lenmatlast)
 	writestr(outfolder,'besttree.dot',bestdot)
 	writestr(outfolder,'bestlasttree.dot',bestlastdot)
-
+	#print ('dot saved')
 	# log file
 	logstr = writelog(iternow=iternow, itertime=itertime, iterationrunres=iterationrunres, bestruntmp=bestruntmp, bestlastruntmp=bestlastruntmp)
 	writestr(outfolder,'log',logstr)
+
 
 	# plot dot file to png
 	dot2png(outfolder, 'besttree.dot')

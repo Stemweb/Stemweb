@@ -2,11 +2,11 @@
 from local import lstrings
 import os
 import sys
-import logging
+#import logging
 
-sys.path.insert(0, '/Users/slinkola/Library/Python/2.7/lib/python/site-packages/')
-import djcelery
-djcelery.setup_loader()
+#sys.path.insert(0, '/Users/slinkola/Library/Python/2.7/lib/python/site-packages/')
+#import djcelery
+#djcelery.setup_loader()
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -139,8 +139,8 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     
     # Testing concurrency in webpage
-    'concurrent_server',
-    'djcelery',
+    #'concurrent_server',
+    #'djcelery',
     # For tasking the algorithm runs
     'third_party_apps.recaptcha_works',
     'third_party_apps.registration',
@@ -195,7 +195,7 @@ RECAPTCHA_OPTIONS = {
 CONCURRENT_RANDOM_DELAY = True
 
 # TODO: remove when in production
-DJANGOTASK_DAEMON_THREAD = False
+#DJANGOTASK_DAEMON_THREAD = False
 
 ROOT_LOG_DIR = os.path.join(SITE_ROOT, 'logs')
 if not os.path.exists(ROOT_LOG_DIR):

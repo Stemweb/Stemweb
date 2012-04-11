@@ -213,6 +213,7 @@ def writestr(outfolder, filename, outstr):
 		f.close()
 		os.chmod(file_path, 0644)
 	except:
+		
 		pass
 	
 

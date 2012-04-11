@@ -19,22 +19,27 @@ else:
 
 class Semstem(StoppableAlgorithm):
 	'''
-		Concurrent implementation of Semsep where temporary results are writed
+		Concurrent implementation of Semstem where temporary results are writed
 		into file at algorithms run time and all observers are notified of new 
 		results.
 		
 		Check documentation of StoppableAlgorithm for details.
 	'''
 	def __init__(self, *args, **kwargs):
-		super(Semstem, self).__init__(*args, **kwargs)
+		StoppableAlgorithm.__init__(self, *args, **kwargs)
 		self.iteration_name = 'iteri'
 		self.score_name = 'score'
 		self.algorithm_run.score = -float('Inf')
-		self.algorithm_run.image = os.path.join(self.run_args['runfolder'], 'besttree.png')
+		self.algorithm_run.image = os.path.join(self.run_args['url_base'], 'besttree.png')
 		self.algorithm_run.save()
 		
 	
 	def __algorithm__(self, run_args = None):
+		if run_args['learnlength'] == True:
+			run_args['learlength'] = 'TRUE'
+		else:
+			run_args['learlength'] = 'FALSE'
+		
 		# assign parameters
 		infile = run_args['infile']
 		runmax = run_args['runmax']
@@ -42,6 +47,7 @@ class Semstem(StoppableAlgorithm):
 		approximation = 0 
 		outfolder = run_args['outfolder']
 		source = run_args['source']
+		learnlength = run_args['learnlength']
 		# load R functions
 		R = robjects.r
 		R.source(source) 
@@ -52,7 +58,7 @@ class Semstem(StoppableAlgorithm):
 		findbestlastrun = R['findbestlastrun']
 	
 		# initiation
-		initiationrunres = initiationrun(runmax=runmax, itermax=itermaxin, filein=infile, approximation=approximation)
+		initiationrunres = initiationrun(runmax=runmax, itermax=itermaxin, filein=infile, approximation=approximation,learnlength=learnlength)
 		iterationrunres = initiationrunres
 		itertime = []
 		itertime.append(sum(iterationrunres.rx2('itertime'))/len(iterationrunres.rx2('itertime')))
@@ -83,7 +89,7 @@ class Semstem(StoppableAlgorithm):
 			if self._stop.value == 0:
 				#print (iteri)
 				if iteri != int(math.ceil(itermaxin*0.1+3)):
-					iterationrunres = iterationrun(runmax=runmax, approximation=approximation, runres = iterationrunres.rx2('runres'), bestres = iterationrunres.rx2('bestres'), iter = iteri, converge = iterationrunres.rx2('converge'))
+					iterationrunres = iterationrun(runmax=runmax, approximation=approximation, runres = iterationrunres.rx2('runres'), bestres = iterationrunres.rx2('bestres'), iter = iteri, converge = iterationrunres.rx2('converge'),learnlength=learnlength)
 					bestruntmp1 = findbestrun(iterationrunres=iterationrunres, runmax=runmax)
 					bestruntmp = bestruntmp1.rx2('bestruntmp')
 					if bestqscore < bestruntmp1.rx2('bestqscore')[0]:#if qscore inceased output
@@ -125,8 +131,9 @@ if __name__ == '__main__':
 					'runmax'    : 2, 
 					'infile'    : 'test.nex', 
 					'outfolder' : './temp',
-					'source':'/Users/slinkola/STAM/Stemweb/algorithms/semsep_stop_len/allunilen.r'})
-	
+					'source':'/Users/slinkola/STAM/Stemweb/algorithms/semsep_stop_len/allunilen.r',
+					'learnlength': 'FALSE'})# TRUE FOR WITH EDGE LENGTH, FALSE FOR WITHOUT EDGE LENGTH
+
 	
 	
 	testrun = Semstem(run_args)	

@@ -6,7 +6,7 @@ import os
 from django import forms
 from Stemweb.settings import SITE_ROOT
 
-from .semstem import Semstem
+from .semsep_stop_len.semstem import Semstem
 from .neighbour_joining.nj_class import NJ
 import validators
 
