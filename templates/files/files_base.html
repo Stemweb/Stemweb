@@ -4,6 +4,9 @@
 	{{ site.name }} - files
 {% endblock %}
 
+{% block menu_home %}{% endblock %}
+{% block menu_files %}active{% endblock %}
+
 {% block script_and_css %}
 	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/algorithms.css" /> 
 	<script src="{{ MEDIA_URL }}javascript/files.js" type="text/javascript"></script>
@@ -13,7 +16,7 @@
 
 {% block subpage_index %}
 
-	<div id="all_files_tabs" class="file_tabs intro">  
+	<div id="all_files_tabs" class="file_tabs">  
 	  
 		<ul class="tabnav">    
 			<li><a href="#user_files">Files</a></li>  
@@ -24,17 +27,15 @@
 			<table id="user_files_table" class="file_table">
 				<thead>
 					<tr>
-						<th>Name</th>
-						{# <th>Upload Time</th> #}
-						<th>Last Access</th>
+						<th class="last_access">Last Access</th>
+						<th class="file_name">Name</th>
 					</tr>
 				</thead>
 				<tbody>
 					{% for f in user_files %}
 					<tr class="row">
-						<td><a href="/files/{{ f.id }}/">{{ f.name }}</a></td>
-						{# <td>{{ f.upload_time|date:"d.m.y H:i" }}</td> #}
-						<td>{{ f.last_access|date:"d.m.y H:i" }}</td>
+						<td class="last_access">{{ f.last_access|date:"d.m.y H:i" }}</td>
+						<td class="file_name"><a href="/files/{{ f.id }}/">{{ f.name }}</a> &gt;&nbsp;</td>
 					</tr>
 					{% endfor %}
 				</tbody>
@@ -43,7 +44,7 @@
 		</div>  
 		  
 		<div id="upload" class="file_tab">  
-		 	<form id="upload_form" action="/files/upload/" enctype="multipart/form-data" method="post">
+		 	<form class="centered" id="upload_form" action="/files/upload/" enctype="multipart/form-data" method="post">
 				{% csrf_token %}
 				{{ form.as_p }}
 				<input type="submit" value="Upload" />
@@ -53,10 +54,9 @@
 	
 {% endblock %}
 
+{% block subpage_main_header %} User Files {% endblock %}
 
 {% block subpage_content %}
-
-	<h1>User Files</h1>
 
 	<div id="files_home_tabs" class="file_tabs">  
 	  

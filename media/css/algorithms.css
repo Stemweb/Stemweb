@@ -1,52 +1,68 @@
-h1.shading
+#algorithm_table_body td
 {
-
-}
-
-td.algorithm_name 
-{
-	width: 95%;
+	width: 100%;
+	text-align: right;
+	display: block;
 	
 }
 
 td.algorithm_name a, td.algorithm_name a:hover, td.algorithm_name a:visited
 {
 	text-decoration: none;
-	color: #186666;
+	text-align: right;
+	color: rgba(248, 245, 244, 0.9);
 }
 
-tbody.algorithm_table_body
+#algorithm_table_body
 {
 	width: 100%;
 	display: block;
+	float: right;
 	
 }
 
 tr.algorithm_table_row
 {
-	width: 95%;
+	overflow: hidden;
+	width: 100%;
+	text-align: right;
+	margin-right: 1px;
 	display: block;
 	border-bottom: 1px solid #CDCBCB;
 }
 
 tr.algorithm_table_row:hover
 {
-	background: rgba(222,219,193, 0.5);
+	background: #D1DDDD;
 	cursor: pointer;
 }
 
-#previous_runs td, #previous_runs th, #user_files td
+#previous_runs td, #user_files td
 {
-	/*width: 20%; */
+	padding-top: 2px;
+	padding-bottom: 2px;
 	padding-left: 6px;
 	padding-right: 6px;
+	min-width: 100px;
 	font-size: 0.9em;
 	text-align: center;
 }
 
+#previous_runs .delete_run 
+{
+	min-width: 30px;
+}
+
+#previous_runs th
+{
+	padding-right: 10px;
+	font-size: 0.9em;
+}
+
 #previous_runs_div
 {
-	display: inline-block;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 #user_files_table
@@ -55,8 +71,7 @@ tr.algorithm_table_row:hover
 	
 }
 
-#previous_runs a, #previous_runs a:hover, #previous_runs a:visited,
-#user_files a, #user_files a:hover, #user_files a:visited
+#previous_runs a, #previous_runs a:hover, #previous_runs a:visited
 {
 	text-decoration: none;
 	color: black;
@@ -64,7 +79,7 @@ tr.algorithm_table_row:hover
 
 tr.row:hover
 {
-	background: rgba(222,219,193, 0.5);
+	background-color: #D1DDDD;
 	cursor:pointer;
 }
 
@@ -73,39 +88,25 @@ tr.row
 	border-bottom: 1px solid #CDCBCB;
 }
 
-th.header { 
+th.header 
+{ 
     background-image: url(../img/bg.gif);     
     cursor: pointer; 
     background-repeat: no-repeat; 
     background-position: center right; 
-    padding-right: 20px; 
-    border-right: 1px solid #dad9c7; 
-    margin-left: -1px; 
+    padding-right: 10px;  
 }
 
 th.headerSortUp
 {
 	background-image: url(../img/asc.gif);
-	background-color: rgba(222,219,193, 0.5);	
+	background-color: #D1DDDD;	
 }
 
 th.headerSortDown
 {
 	background-image: url(../img/desc.gif);
-	background-color: rgba(222,219,193, 0.5);	
-}
-
-#algorithm_tabs 
-{
-	margin-left: 30px;
-	margin-right: 30px;
-	height: 100%;
-}
-
-.algorithm_tab
-{
-	margin-left: auto;
-	margin-right: auto;
+	background-color: #D1DDDD;	
 }
 
 #algorithm_result_list

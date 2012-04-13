@@ -4,6 +4,9 @@
 	{{ site.name }} - algorithms
 {% endblock %}
 
+{% block menu_home %}{% endblock %}
+{% block menu_algo %} active {% endblock %}
+
 {% block script_and_css %}
 	<!--  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/file_management.css" /> -->
 	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/algorithms.css" />
@@ -19,14 +22,14 @@
 
 {% block subpage_index %}
 	{% block subpage_index_title %}
-		<h1>Available algorithms</h1>
+		<h1 class="subpage_index_title">Available algorithms</h1>
 	{% endblock%}
 	<table id="subpage_index_table" class="file_table">
-		<tbody class="algorithm_table_body">
+		<tbody id="algorithm_table_body">
 		 {% for algo in all_algorithms %}
 		 	<tr class="algorithm_table_row">
 		 		<td class="algorithm_name">
-		 			<a href="{% url algorithms_details_url algo_id=algo.id %}">{{ algo.name }}</a>
+		 			<a href="{% url algorithms_details_url algo_id=algo.id %}">{{ algo.name }} &gt;&nbsp;</a>
 				</td>
 			</tr>
 		 {% endfor %}
@@ -34,17 +37,18 @@
 	 </table>
 {% endblock %}
 
+{% block subpage_main_header %} Algorithms in Stemmatology {% endblock %}
+
 {% block subpage_content %}
-	  
+	 <!--  
 	<div id="subpage_navigation">
 		<div id="prev" onclick="prev()">Prev</div>
 		<div id="next" onclick="next()">Next</div>
 	</div>
-	
+	-->
 
 	{% block algorithms_content %}
 		<div class="intro">
-			<h1>Algorithms in stemmatology</h1>
 			
 			<p class='input_needed'>
 				Input needed: Some general info about algorithms in stemmatology:<br>

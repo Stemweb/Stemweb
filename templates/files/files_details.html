@@ -1,8 +1,8 @@
 {% extends "files_base.html" %}
 
-{% block subpage_content %}
+{% block subpage_main_header %} {{ file.name }} {% endblock %}
 
-	<h1>{{ file.name|upper }}, last accessed {{ file.last_access|date:"d.m.y H:i" }}</h1>
+{% block subpage_content %}
 
 	<div id="one_file_tabs" class="file_tabs">  
 	  
@@ -13,10 +13,11 @@
 		</ul>  
 		  
 		<div id="file_about" class="file_tab">  
+			Last access: {{ file.last_access|date:"d.m.y H:i" }}<br>
 			Something about this file. Also sneak peek of the whole file incase user has forgotten which is which.
 		</div>
 		
-		<div id="file_new_run" class="file_tab">  
+		<div id="file_new_run" class="file_tab centered">  
 			List all the algorithms that can be runned with this file. Possibly could join this to 'About'-tab 
 			for quickness of use.
 		</div>

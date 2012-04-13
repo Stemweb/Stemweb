@@ -142,11 +142,12 @@ function load_previous_runs_table() {
 $(document).ready(function() {  
     $('#algorithm_tabs').tabs({ fx: { height: 'toggle', opacity: 'toggle' } });  
 }); 
-
+/*
 $(document).ready(function () {
     $("#algorithm_tabs").bind('tabsselect', function(event, ui) {
         window.location.href=ui.tab;
     });
 });
+*/
 
 

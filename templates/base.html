@@ -8,6 +8,7 @@
     	</title>
     	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/stemweb.css" />
+    	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/algorithms.css" />
     	
 		<!-- 
 			Let google handle jQuery source's for faster page viewing. 
@@ -93,15 +94,16 @@
 			
 				<table id="menu_table">
 				<tr>
-					<td class="menu_item"><a class="menu_link" href="/home">Home</a></td>
-					<td class="menu_item"><a class="menu_link" href="{% url algorithms_base_url %}">Algorithms</a></td>
-					<td class="menu_item"><a class="menu_link" href="{% url files_base_url %}">Files</a></td>
-					<td class="menu_item"><a class="menu_link">Groups</a></td>
+					{# Add same kind of block for your subpage and declare "active" inside it in your subpages base.html #}
+					<td class="menu_item"><a class="menu_link {% block menu_home %}{% endblock %}" href="/home">home</a></td>
+					<td class="menu_item "><a class="menu_link {% block menu_algo %}{% endblock %}" href="{% url algorithms_base_url %}">algorithms</a></td>
+					<td class="menu_item "><a class="menu_link {% block menu_files %}{% endblock %}" href="{% url files_base_url %}">files</a></td>
+					{# <td class="menu_item"><a class="menu_link">groups</a></td> #}
 					
 					{% if user.is_authenticated %}
-					<td class="menu_item"><a class="menu_link" href={% url auth_logout %}>Logout</a></td>
+					<td class="menu_item"><a class="menu_link {% block menu_logout %}{% endblock %}" href={% url auth_logout %}>logout</a></td>
 					{% else %}
-					<td class="menu_item"><a class="menu_link" href={% url auth_login %}>Login</a></td>
+					<td class="menu_item"><a class="menu_link {% block menu_login %}{% endblock %}" href={% url auth_login %}>login</a></td>
 					{% endif %}
 				</tr>
 				</table>
@@ -110,9 +112,14 @@
 			</div>
 		{% endblock %}		
 		</div>
-			
-		<div id="main_content">
+		
+		<!-- 
 		<div id="main_banner_and_menu_padding"></div>
+		-->
+		
+		<div id="main_content" class="box-sizing_border">
+		
+		
 		
 		{% block main_content %}
 		

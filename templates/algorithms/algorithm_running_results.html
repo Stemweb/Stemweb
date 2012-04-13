@@ -21,17 +21,21 @@
 	
 {% endblock %}
 
+{% block subpage_main_header %}
+	{% if not algorithm_run.finished %}
+		Current results of {{ algorithm_run.algorithm.name }} using {{ algorithm_run.input_file.name }}	
+	{% else %}
+		Final results of {{ algorithm_run.algorithm.name }} using {{ algorithm_run.input_file.name }}
+	{% endif %}
+{% endblock %}
+
+
 {% block subpage_content %}
 	{% if not algorithm_run.finished %}
 	<script type="text/javascript">
 		window.setTimeout("location.reload(true);", 10000);
 	</script>
-	<h1>Current results of {{ algorithm_run.algorithm.name }} using {{ algorithm_run.input_file.name }}</h1>
-	
 	<p>Page will refresh in 10 second periods.</p>
-	
-	{% else %}
-	<h1>Final results of {{ algorithm_run.algorithm.name }} using {{ algorithm_run.input_file.name }}</h1>
 	{% endif %}
 
 	<div id="algorithm_result_div">

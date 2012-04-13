@@ -33,7 +33,8 @@ def details(request, algo_id, form = None):
 	algorithm = Algorithm.objects.get(id = algo_id)
 	c_dict = {'algorithm': algorithm}
 	''' If we have been given a form don't build it. '''
-	if form is None: form = algorithm.build_form(user = request.user)
+	if form is None:
+		form = algorithm.args_form(user = request.user, post = None)
 	''' Don't render form if it's none. '''
 	if form is not None: c_dict['form'] = form
 	algorithm_runs = None
@@ -81,7 +82,7 @@ def run(request, algo_id):
 	'''
 	if request.method == 'POST':
 		algorithm = Algorithm.objects.get(pk = algo_id)
-		form = algorithm.build_form(user = request.user, post = request.POST)
+		form = algorithm.args_form(user = request.user, post = request.POST)
 		if form.is_valid():
 			run_args = utils.build_args(form, algorithm_id = algo_id, request = request)
 			if run_args is None: return HttpResponseRedirect('/server_error')

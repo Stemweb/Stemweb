@@ -6,6 +6,7 @@ from django.db import models
 from django.contrib.auth.models import User, AnonymousUser
 from django import forms
 
+from forms import DynamicArgs
 from Stemweb.files.models import InputFile
 from .settings import ARG_VALUE_CHOICES, ARG_VALUE_FIELD_TYPE_KEYS, ARG_VALUE_FIELD_TYPE_VALIDATORS
 from .settings import ALGORITHMS_CALLING_DICT as call_dict
@@ -109,13 +110,13 @@ class Algorithm(models.Model):
 		return algo_callable
 	
 
-	def build_form(self, user = AnonymousUser, post = None):
+	def args_form(self, user = AnonymousUser, post = None):
 		'''
 			Build form from args of this algorithm instance. The form is build
 			again for each call of this function and is not stored to this model 
 			itself. 
 			
-			Returns subclass of form.Form which has algorithm's keyword 
+			Returns instance of DynamicArgs form which has algorithm's keyword 
 			arguments as fields. If there are no arguments in args then returns
 			None.
 			
@@ -126,44 +127,10 @@ class Algorithm(models.Model):
 					can be called. Don't use this if you expect user's to 
 					populate the fields.
 		'''
-		if len(self.args.all()) == 0:
-			return None
+		if len(self.args.all()) == 0: return None
+		return DynamicArgs(arguments = self.args, user = user, post = post)
 		
-		ftypes =  ARG_VALUE_FIELD_TYPE_KEYS
-		field_validators = ARG_VALUE_FIELD_TYPE_VALIDATORS
 		
-		form = forms.Form()
-		for arg in self.args.all():
-			key, value, name = arg.key, arg.value, arg.verbose_name
-			kwargs = {'label': name, 'validators': field_validators[value]}
-			if value == 'input_file':
-				''' 
-					Input File fields are populated dynamically from users 
-				 	input files 
-				'''
-				if user.is_authenticated():
-					kwargs['queryset'] = InputFile.objects.filter(user__exact = user)
-					form.fields[key] = ftypes[value](**kwargs)			
-					'''
-						TODO: add AnonymousUser logic here
-					'''
-			if value == 'boolean':
-				kwargs['required'] = False
-					
-			else:			
-				form.fields[key] = ftypes[value](**kwargs)
-		'''
-			If there is request, we change form's fields to correspond request's
-			key values.
-			
-			TODO: do this populating somewhere else.
-		'''				
-		if post is not None:
-			for key in post.keys():
-				form.data[key] = post[key]
-			form.is_bound = True
-		return form
-	
 	class Meta:
 		ordering = ['name']
 

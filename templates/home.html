@@ -1,56 +1,63 @@
 {% extends "base.html" %}
 
+{% load pagination_tags %}
+
 {% block title %} Stemweb - home {% endblock %}
+
+{% block menu_home %} active {% endblock %}
 
 {# Main content of the site. Leaves banner/menu and footer untouched. #}
 {% block main_content %}
 
-	<div id="subpage_index">
+	<div id="subpage_index" class="box-sizing_border">
 	{% block subpage_index %}
 	
 		{% if user.is_authenticated %}
 			{% block subpage_index_title %}
-			<h1>Uploaded files</h1>
+			<h1>Recent activity</h1>
 			{% endblock%}
 		
-			{% if files|length == 0 %}
-				<p class="no_files">No uploaded files.</p>
+			{% if not recent_activities %}
+				<p class="no_files">No activities.</p>
 			{% else %}
 				
 				{% block subpage_index_table %}
-				<table id="subpage_index_table">
-					<tr>
-						<td class="subpage_index_header">User</td>
-						<td class="subpage_index_header">Time</td>
-						<td class="subpage_index_header">Name</td>
-					</tr>
-				
-					{% for f in files %}
+				{% autopaginate recent_activities 10 %}
+				<div>{% paginate %}</div>
+				<table id="recent_activities_table">
+					{% for r in recent_activities %}
 						<tr>
-							<td>{{ f.user }}</td>
-							<td>{{ f.time|date:"d.m.y H:i" }}</td>
-							<td><a href="/runparams/{{ f.id }}/" target="_blank">{{ f.name }}</a></td>
+							<td><a href="{{ r.url }}">{{ r.time|date:"d.m.y H:i" }}&nbsp;&nbsp;&nbsp;&nbsp;<br>{{ r.message }} &gt;&nbsp;</a></td>
 						</tr>
 					{% endfor %}
 				</table>
 				{% endblock %}
+				
 			{% endif %}
+		{% else %}	
+				<h1>New user?</h1>
+				<div class="intro">
+					<a href={% url registration_register %}>Register</a> yourself now to run the 
+					<a href={% url algorithms_base_url %}>algorithms</a>.	
+				</div> 	
 		{% endif %}
 			
-		<p class="development_note">
-		I was thinking to use this left-hand div as news section. File management will be in
-		user's own 'Files'-tab later. There will be option to keep files open to
-		'public', 'group' or 'private' (or atleast if it can be done easily enough).
-		</p>
 	{% endblock %}
 	</div>
 
-	<div id="subpage_content">
+	<div id="content_wrapper" class="box-sizing_border">
+	
+	<div id="subpage_main_header_wrapper" class="box-sizing_border">
+		<h1 id="subpage_main_header">
+			{% block subpage_main_header %} Home {% endblock %}
+		</h1>
+	</div>
+	
+	<div id="subpage_content" class="box-sizing_border">
 	{% block subpage_content %}
 	
-		<div class="intro">
 			{% block intro %}
-			<h1>Home</h1>
+			
 			<p>
 				This is <a href="http://cosco.hiit.fi/Projects/STAM/">STAM's</a> web project Stemweb (workname).
 			</p>
@@ -66,7 +73,6 @@
 				Please be sure that your file is in the right <a href=#>format</a> (deadlink).
 			</p>
 			{% endblock %}
-		</div>
 		
 		{% if not user.is_authenticated %}
 		<div class="pro_tip">
@@ -78,6 +84,7 @@
 	
 		
 	{% endblock %}
+	</div>
 	</div>
 		
 {% endblock %}			

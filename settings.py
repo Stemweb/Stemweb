@@ -115,9 +115,18 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'third_party_apps.pagination.middleware.PaginationMiddleware',
 )
 
 ROOT_URLCONF = lstrings.root_urls
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+	"django.core.context_processors.auth",
+	"django.core.context_processors.debug",
+	"django.core.context_processors.i18n",
+	"django.core.context_processors.media",
+	"django.core.context_processors.request"
+)
 
 TEMPLATE_DIRS = template_dirs = ( 
     os.path.join(SITE_ROOT, 'templates/'),
@@ -140,11 +149,12 @@ INSTALLED_APPS = (
     
     # Testing concurrency in webpage
     #'concurrent_server',
-    #'djcelery',
     # For tasking the algorithm runs
+    #'djcelery',
+    
     'third_party_apps.recaptcha_works',
     'third_party_apps.registration',
-    #'third_party_apps.djangotasks',
+    'third_party_apps.pagination',
     
     # Own apps
     'home',

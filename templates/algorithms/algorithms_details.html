@@ -1,11 +1,14 @@
 {% extends "algorithms_base.html" %}
 
+{% block subpage_main_header %} {{ algorithm.name }}  {% endblock %}
+
 {% block algorithms_content %}
 
-
+	<!-- 
 	<div id="algorithm_base" class="intro">
-		<h1>{{ algorithm.name }}</h1>
+
 	</div>
+	-->
 	
 	<div id="algorithm_tabs" class="algorithm_tabs">
 		<ul class="tabnav">  
@@ -61,10 +64,10 @@
 				<table id="previous_runs_table" class="file_table centered">
 					<thead>
 						<tr>
-							<th>End Time</th>
-							<th>Start Time</th>
-							<th>Score</th>
-							<th>File</th>
+							<th>end time</th>
+							<th>start time</th>
+							<th>score</th>
+							<th>file</th>
 							<th class="delete_run"></th>
 						</tr>
 					</thead>
@@ -80,9 +83,7 @@
 						{% endfor %}
 					</tbody>
 				</table>
-				<div id="delete_runs_button_div" class="centered">
-					<input type="button" id="delete_runs_button" onClick=delete_runs() name='Delete selected' value='Delete selected' />
-				</div>
+					<input class="centered" type="button" id="delete_runs_button" onClick=delete_runs() name='Delete selected' value='Delete selected' />
 			</div>
 
 			{% else %}

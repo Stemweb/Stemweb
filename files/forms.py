@@ -21,5 +21,5 @@ class UploadFile(forms.Form):
 	'''
 	upfile = forms.FileField(label='', 
                              max_length=30, 
-                             widget=forms.ClearableFileInput(attrs={'size': 30, 'class': 'file_input'}))
-	captcha = RecaptchaField(label='', required=True)
+                             widget=forms.ClearableFileInput(attrs={'size': 23, 'class': 'file_input'}))
+	#captcha = RecaptchaField(label='', required=True)
