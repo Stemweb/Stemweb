@@ -23,9 +23,9 @@
 
 {% block subpage_main_header %}
 	{% if not algorithm_run.finished %}
-		Current results of {{ algorithm_run.algorithm.name }} using {{ algorithm_run.input_file.name }}	
+		Current results of {{ algorithm_run.algorithm.name }} with {{ algorithm_run.input_file.name }}	
 	{% else %}
-		Final results of {{ algorithm_run.algorithm.name }} using {{ algorithm_run.input_file.name }}
+		Final results of {{ algorithm_run.algorithm.name }} with {{ algorithm_run.input_file.name }}
 	{% endif %}
 {% endblock %}
 
@@ -43,7 +43,8 @@
 	<img id="run_result_image" src="{{ algorithm_run.image.url }}" 
 		 alt="{{ algorithm_run.image.url }}" />	 
 	{% else %}
-		No image for this run.
+		No image for this run, <br>
+		though something might linger in {{ algorithm_run.folder }}.
 	{% endif %}
 	</div>
 

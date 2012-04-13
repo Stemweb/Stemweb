@@ -8,6 +8,7 @@ from Stemweb.settings import SITE_ROOT
 
 from .semstem.semstem import Semstem
 from .neighbour_joining.nj_class import NJ
+from .neighbour_net.neighbornet_class import NN
 import validators
 
 # How many runs can be active by one user.
@@ -28,7 +29,11 @@ ALGORITHMS_CALLING_DICT = {
 	},
 	'3': {
 		'callable': NJ,
+	},
+	'4': {
+		'callable': NN,
 	}
+		
 }
 
 '''

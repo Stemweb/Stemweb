@@ -162,9 +162,9 @@ class AlgorithmRun(models.Model):
 					  so only store runs which are made by registered users.
 					  
 		image		: Image of this run's resulting graph of best scored 
-					  network structure.
+					  network structure (if available).
 					  
-		score		: Score for this run. If algorithm doesn't have score's 
+		score		: Score for this run. If algorithm doesn't have score
 					  this is null. Algorithms which have score must set this 
 					  value to other than null when initiating run. Otherwise
 					  it can cause rendering issues in browser.

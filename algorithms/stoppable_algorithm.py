@@ -193,6 +193,7 @@ class StoppableAlgorithm():
 		
 		# TODO: Fix me st000pid busy wait.
 		while self._stop.value == 0:
+			if not self._algorithm_thread.isAlive(): break
 			self._read_from_results_()	
 		
 		self._finalize_()
@@ -264,7 +265,7 @@ class StoppableAlgorithm():
 			except:
 				self.logger('AlgorithmRun %s:%s writing to file failed in %s' % (self.algorithm_run.algorithm.name, self.algorithm_run.id, self.run_args['outfolder']))
 			
-			time.sleep(0.01)
+			time.sleep(0.1)
 
 			
 	def _write_in_file_(self, result):
