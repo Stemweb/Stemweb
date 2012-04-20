@@ -3,9 +3,11 @@ Created on Apr 10, 2012
 
 @author: slinkola
 '''
+import os
 import sys
 import logging
 from Stemweb.algorithms.stoppable_algorithm import StoppableAlgorithm
+
 
 # node structure for storing the tree
 class Node:
@@ -21,10 +23,11 @@ class NJ(StoppableAlgorithm):
 	
 	def __init__(self, *args, **kwargs):
 		StoppableAlgorithm.__init__(self, *args, **kwargs)
-		print self.run_args
+		self.algorithm_run.image = os.path.join(self.run_args['url_base'], 'nj.svg')
+		self.algorithm_run.save()
 	
-	
-	def __algorithm__(self, run_args = None):	          
+	def __algorithm__(self, run_args = None):	
+		outfolder = run_args['outfolder']
 		d={}                  # observed distances between pairs
 		gd={}                 # distances between groups
 		nodes={}              # created tree nodes (used to store NJ tree structure)
@@ -98,24 +101,40 @@ class NJ(StoppableAlgorithm):
 		   
 		   
 		# tree output subroutine, called recursively
-		def _printtree(node):
-		    if node.left != None:
-		        sys.stdout.write("(")
-		        _printtree(node.left)
-		        sys.stdout.write(",")
-		        _printtree(node.right)
-		        sys.stdout.write(")")
-		    else:
-		        sys.stdout.write(node.label)
-		    if node.len != 0.0:
-		        sys.stdout.write(":{}".format(node.len))
-		
+		def _printtree(node, nw = ""):
+			newick = nw
+			if node.left != None or node.right != None:
+				newick += "("
+				newick += _printtree(node.left, nw = '')
+				newick += ","
+				newick += _printtree(node.right, nw = '')
+				newick += ")"
+			else:
+				newick += "%s" % (node.label)
+			if node.len != 0.0:
+				newick += ":{}".format(node.len)
+			return newick
+			
 		
 		# tree output
-		def printtree(node):
-		    _printtree(node)
-		    print
+		def save_tree(node):
+			newick = _printtree(node, nw = '') + ";"
+			nw_path = os.path.join(outfolder, 'nj.nw')
+			print newick
+			f = None
+			try: 
+				f = open(nw_path, 'w')
+				f.write(newick)
+				f.close()
+			except:
+				logger = logging.getLogger('stemweb.algorithm_run')
+				logger.error('AlgorithmRun %s:%s could\'t write in file %s.' % (self.algorithm_run.algorithm.name, self.algorithm_run.id, run_args['input_file']))
+				return -1 
 			
+			from Stemweb.algorithms.utils import newick2svg
+			newick2svg(nw_path, os.path.join(outfolder, 'nj.svg'), branch_length = False, radial = True)
+			
+				
 		# initialize tree structure and distances
 		for tax1 in tax:
 		    nodes[tuple([tax1])] = Node(tax1,None,None)
@@ -152,8 +171,8 @@ class NJ(StoppableAlgorithm):
 			# pick pair of nodes with minimum distance
 			p=min(njd,key=njd.get) 
 			# adjust edge lengths of the combined nodes
-			nodes[p[0]].len = .5*(getgd(p[0],p[1]) + r[p[0]] - r[p[1]])
-			nodes[p[1]].len = .5*(getgd(p[0],p[1]) + r[p[1]] - r[p[0]])
+			nodes[p[0]].len = abs(.5*(getgd(p[0],p[1]) + r[p[0]] - r[p[1]]))
+			nodes[p[1]].len = abs(.5*(getgd(p[0],p[1]) + r[p[1]] - r[p[0]]))
 			# create a new node for the pair
 			new=p[0]+p[1]
 			# update tree structure by adding node with two children
@@ -167,7 +186,7 @@ class NJ(StoppableAlgorithm):
 			# ...and to the list of taxa
 			S=Snew+[new]
 			
-		printtree(nodes[tuple(new)])
+		save_tree(nodes[tuple(new)])
 		
 		self._stop.value = 1
 		

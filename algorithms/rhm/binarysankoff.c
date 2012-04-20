@@ -32,6 +32,7 @@ struct node_st {
 };
 
 char *outfolder = "output-directory";
+int imax;
 FILE *fout;
 struct node_st *tree;
 char **names;
@@ -1417,12 +1418,13 @@ int main(int argc, char *argv[])
 
   read_file(argv[1]);
   outfolder = argv[2];
+  imax = atoi(argv[3]);
   strap = atoi(argv[4]);
   for (boot = 0; boot < strap; boot++)
   {
     init_bootstrap();
     init_tree();
-    optimize_tree(atoi(argv[3]));
+    optimize_tree(imax);
     free_tree(tree);
   }
   free_mem();
@@ -1438,7 +1440,7 @@ PyObject* py_main(PyObject* self, PyObject* args)
 	PyObject* run_args = NULL;
 	PyObject* p_outfolder = PyString_FromString("outfolder");
 	PyObject* p_infolder = PyString_FromString("infolder");
-	PyObject* p_itermaxin = PyString_FromString("itermaxin");
+	PyObject* p_imax = PyString_FromString("imax");
 	PyObject* p_strap = PyString_FromString("strap");
 	
 	PyArg_UnpackTuple(args, "ref", 1, 1, &run_args);
@@ -1450,14 +1452,14 @@ PyObject* py_main(PyObject* self, PyObject* args)
 	
 	outfolder = PyString_AsString(PyDict_GetItem(run_args, p_outfolder));
 	strap = (int)PyInt_AsLong(PyDict_GetItem(run_args, p_strap));
-	itermaxin = (int)PyInt_AsLong(PyDict_GetItem(run_args, p_itermaxin));	
+	imax = (int)PyInt_AsLong(PyDict_GetItem(run_args, p_imax));	
 	read_file(PyString_AsString(PyDict_GetItem(run_args, p_infolder)));
 	
 	for (boot = 0; boot < strap; boot++)
   	{
     	init_bootstrap();
     	init_tree();
-   		optimize_tree(itermaxin);
+   		optimize_tree(imax);
     	free_tree(tree);
   	}
   	//free_mem();

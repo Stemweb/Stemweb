@@ -53,6 +53,28 @@
   			"description": "Must be .nex"
   		}
   	},
+  	
+  	{
+  		"model": "algorithms.algorithmarg",
+  		"pk": 6,
+  		"fields": {
+  			"key": "infolder",
+  			"value": "input_file",
+  			"verbose_name": "Input File",
+  			"description": "Must be .csv"
+  		}
+  	},
+  	
+  	 {
+  		"model": "algorithms.algorithmarg",
+  		"pk": 7,
+  		"fields": {
+  			"key": "imax",
+  			"value": "positive_integer",
+  			"verbose_name": "Iterations",
+  			"description": ""
+  		}
+  	},
 
 	{
     	"model": "algorithms.algorithm",
@@ -74,7 +96,8 @@
       		"name": "RHM",
       		"source": "/Users/slinkola/algorithms/rhm/binarysankoff_python.c",
       		"desc": "Another short desc, now about RHM. Also comes from database.",
-      		"url": "http://"
+      		"url": "http://",
+      		"args": [6, 7]
     	}
   	},
   	

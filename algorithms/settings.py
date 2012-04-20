@@ -9,6 +9,7 @@ from Stemweb.settings import SITE_ROOT
 from .semstem.semstem import Semstem
 from .neighbour_joining.nj_class import NJ
 from .neighbour_net.neighbornet_class import NN
+from .rhm.binary_sankoff import RHM
 import validators
 
 # How many runs can be active by one user.
@@ -24,8 +25,7 @@ ALGORITHMS_CALLING_DICT = {
 		'source': os.path.join(SITE_ROOT, 'algorithms/semstem/allunilen.r'),
 	},
 	'2': {
-		'callable': None,
-		'source': None,
+		'callable': RHM,
 	},
 	'3': {
 		'callable': NJ,

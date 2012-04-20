@@ -30,7 +30,7 @@ class Semstem(StoppableAlgorithm):
 		self.iteration_name = 'iteri'
 		self.score_name = 'score'
 		self.algorithm_run.score = -float('Inf')
-		self.algorithm_run.image = os.path.join(self.run_args['url_base'], 'besttree.png')
+		self.algorithm_run.image = os.path.join(self.run_args['url_base'], 'besttree.svg')
 		self.algorithm_run.save()
 		
 	

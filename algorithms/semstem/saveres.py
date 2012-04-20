@@ -234,6 +234,15 @@ def dot2png(outfolder, filename):
 	os.system('neato -Tpng -Gstart=rand ' + file_path + '> ' + png_path)
 	os.chmod(file_path, 0644)
 	os.chmod(png_path, 0644)
+	
+def dot2svg(outfolder, filename):
+	file_path = os.path.join(outfolder, filename)
+	os.chmod(file_path, 0777)
+	svg_name = os.path.splitext(filename)[0] + '.svg'	# Change .dot to .svg				
+	svg_path = os.path.join(outfolder, svg_name)
+	os.system('neato -Tsvg -Gstart=rand ' + file_path + '> ' + svg_path)
+	os.chmod(file_path, 0644)
+	os.chmod(svg_path, 0644)
 
 
 def writefile(result):
@@ -407,9 +416,9 @@ def writefile(result):
 	writestr(outfolder,'log',logstr)
 
 
-	# plot dot file to png
-	dot2png(outfolder, 'besttree.dot')
-	dot2png(outfolder, 'bestlasttree.dot')
+	# plot dot file to svg
+	dot2svg(outfolder, 'besttree.dot')
+	dot2svg(outfolder, 'bestlasttree.dot')
 
 
 def writefilelite(result):

@@ -13,6 +13,20 @@ from Stemweb.files.models import InputFile
 
 from django.template.defaultfilters import slugify
 
+def newick2svg(newick, filepath, branch_length = True, radial = True, width = 800):
+	'''
+		Create svg file from given newick file.
+	'''
+	nw_display = os.path.join(settings.SITE_ROOT, 'shell_scripts', 'nw_display')
+	bl = ''
+	if branch_length is False: bl = ' -b \'visibility:hidden\' '
+	r = ''
+	if radial is True: r = ' -r '	
+	opt_arg = "%s %s" % (r, bl)
+	cmd = "%s -s -R 50 -S %s -w %s %s > %s" % (nw_display, opt_arg, width, newick, filepath)
+	os.system(cmd)
+	
+	
 def id_generator(size=8, chars=string.ascii_uppercase + string.digits):
 	''' Semiunique ID generator -- copypaste code.
 
