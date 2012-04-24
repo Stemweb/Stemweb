@@ -180,8 +180,8 @@ class StoppableAlgorithm():
 			good reason to do so. 
 		'''
 		self.logger = logging.getLogger('stemweb.algorithm_run')
-		self.algorithm_run.pid = os.getpid()	
-		self.algorithm_run.save()
+		#self.algorithm_run.pid = os.getpid()	
+		#self.algorithm_run.save()
 		self.logger.info('AlgorithmRun started: %s:%s output:%s ' % (self.algorithm_run.algorithm.name, 
 																	self.algorithm_run.id, 
 																	self.algorithm_run.folder))
@@ -214,8 +214,7 @@ class StoppableAlgorithm():
 			self.algorithm_run = AlgorithmRun.objects.get(pk=self.algorithm_run.id)
 			self.algorithm_run.finished = True
 			self.algorithm_run.end_time = datetime.datetime.now()
-			self.algorithm_run.pid = -1
-			self.algorithm_run.process = None
+			#self.algorithm_run.pid = -1
 			self.algorithm_run.save()
 		else:
 			self.logger.info('Unknown %s AlgorithmRun ended' % (type(self)))

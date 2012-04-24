@@ -273,7 +273,7 @@ char **get_names(const char *fname, int leafs)
     ptr = ptr0;
     while (*ptr && *ptr != '\t' && *ptr != '\n') ptr++;
     names[i] = (char *) malloc(sizeof(char) * (ptr-ptr0+1));
-    strncpy(names[i], ptr0, ptr-ptr0);
+    strlcpy(names[i], ptr0, ptr-ptr0+1); //strcpy((char *)((long)names[i]+(long)(ptr-ptr0)),"");
     ptr0 = ptr;
     if (*ptr0) ptr0++;
   }

@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User, AnonymousUser
 
 from Stemweb.files.models import InputFile
-from .settings import ARG_VALUE_CHOICES, ARG_VALUE_FIELD_TYPE_KEYS, ARG_VALUE_FIELD_TYPE_VALIDATORS
+from .settings import ARG_VALUE_FIELD_TYPE_KEYS, ARG_VALUE_FIELD_TYPE_VALIDATORS
 import validators as val
 
 field_types =  {'positive_integer': forms.IntegerField(),
@@ -58,10 +58,8 @@ class DynamicArgs(forms.Form):
 			else:		
 				self.fields[key] = ftypes[value](**kwargs)
 		'''
-			If there is request, we change form's fields to correspond request's
+			If there is request, we change form's data to correspond request's
 			key values.
-			
-			TODO: do this populating somewhere else.
 		'''				
 		if post is not None:
 			for key in post.keys():

@@ -4,6 +4,8 @@ import random
 import os
 import copy
 
+
+
 def createnode(treedic,node):
 	treedic[node]={}
 	treedic[node]['parent']=[]
@@ -528,6 +530,7 @@ def semuniform (inputfile, iterationmax):
 		os.makedirs(resfoldertree)
 
 	for iteration in range(iterationmax):
+		print iteration
 		#print (time.gmtime())
 		#if (iteration % 100) ==0:
 		#	print (iteration)
@@ -579,6 +582,7 @@ def semuniform (inputfile, iterationmax):
 				#print ('stop at' + str(iteration) + '\n')						
 				break	
 
+		print "Scores current: %s old: %s" % (qscore, qscoreold)
 		if qscore > qscoreold:
 			treedicold = treedic
 			nodeorderold = nodeorder
@@ -606,4 +610,9 @@ def semuniform (inputfile, iterationmax):
 	file.write(logstr)
 	file.close()
 	return (qscoreold, bestiteration)
+
+if __name__ == "__main__":
+	from sys import argv
+	print argv[1]
+	semuniform(argv[1], int(argv[2]))
 

@@ -19,6 +19,7 @@ class RHM(StoppableAlgorithm):
 	def __init__(self, *args, **kwargs):
 		StoppableAlgorithm.__init__(self, *args, **kwargs)
 		self.algorithm_run.image = os.path.join(self.run_args['url_base'], 'rhm.svg')
+		self.algorithm_run.newick = os.path.join(self.run_args['url_base'], 'rhm_0.tre')
 		self.algorithm_run.save()
 	
 	def __algorithm__(self, run_args = None):
@@ -27,7 +28,6 @@ class RHM(StoppableAlgorithm):
 		binarysankoff.main(run_args)
 		nw_path = os.path.join(self.run_args['outfolder'], 'rhm_0.tre')
 		svg_path = os.path.join(self.run_args['outfolder'], 'rhm.svg')
-		
 		
 		from Stemweb.algorithms.utils import newick2svg
 		newick2svg(nw_path, svg_path)

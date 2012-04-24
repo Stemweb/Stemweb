@@ -6,7 +6,8 @@ import os
 from django import forms
 from Stemweb.settings import SITE_ROOT
 
-from .semstem.semstem import Semstem
+#from .semstem.semstem import Semstem
+from .semstempython.semstem import Semstem
 from .neighbour_joining.nj_class import NJ
 from .neighbour_net.neighbornet_class import NN
 from .rhm.binary_sankoff import RHM
@@ -22,7 +23,7 @@ THREADS = {}
 ALGORITHMS_CALLING_DICT = { 
 	'1': { 
 		'callable': Semstem,	
-		'source': os.path.join(SITE_ROOT, 'algorithms/semstem/allunilen.r'),
+		#'source': os.path.join(SITE_ROOT, 'algorithms/semstem/allunilen.r'),
 	},
 	'2': {
 		'callable': RHM,

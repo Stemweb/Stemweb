@@ -27,13 +27,15 @@
 			</p>
 			{% endif %}
 			
+			<!--
 			<div id="algorithm_desc">
 				<h1>Short description / tooltip text</h1>
 				{{ algorithm.desc }}
 			</div>
+			-->
 			
 			<div id="algorithm_template"> 
-				<h1>Long description / template</h1>
+				{#<h1>Long description / template</h1>#}
 				{% if algorithm.template %} 
 					{% include algorithm.template %} 
 				{% endif %}

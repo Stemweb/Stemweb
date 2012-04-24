@@ -84,7 +84,7 @@
       		"source": "/Users/slinkola/algorithms/semsep_stop_len/allunilen.r",
       		"desc": "Short tooltip text of semstem",
       		"url": "http://",
-      		"args": [1,2,3,4],
+      		"args": [1,2],
       		"template": "semstem_about.html"
     	}
   	},

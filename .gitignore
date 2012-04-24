@@ -16,3 +16,4 @@ logs/
 *.so
 *.dylib
 *.nex
+tmp.gz

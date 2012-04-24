@@ -4,11 +4,10 @@ import logging
 
 from django.db import models
 from django.contrib.auth.models import User, AnonymousUser
-from django import forms
 
 from forms import DynamicArgs
 from Stemweb.files.models import InputFile
-from .settings import ARG_VALUE_CHOICES, ARG_VALUE_FIELD_TYPE_KEYS, ARG_VALUE_FIELD_TYPE_VALIDATORS
+from .settings import ARG_VALUE_CHOICES
 from .settings import ALGORITHMS_CALLING_DICT as call_dict
 
 	
@@ -39,7 +38,7 @@ class AlgorithmArg(models.Model):
 	description = models.CharField(max_length = 2000, blank = True)
 	
 	class Meta:
-		ordering = ['key', 'value']
+		ordering = ['value', 'key', 'verbose_name']
 		
 	
 class Algorithm(models.Model):
@@ -71,6 +70,8 @@ class Algorithm(models.Model):
 				
 		stoppable:	Are this algorithm's instances subclasses of 
 					StoppableAlgorithm.
+					
+		newick:	Does this algorithm have newick tree output. 
 			
 	'''
 	desc = models.CharField(max_length = 2000, blank = True)
@@ -129,8 +130,7 @@ class Algorithm(models.Model):
 		'''
 		if len(self.args.all()) == 0: return None
 		return DynamicArgs(arguments = self.args, user = user, post = post)
-		
-		
+			
 	class Meta:
 		ordering = ['name']
 
@@ -174,7 +174,7 @@ class AlgorithmRun(models.Model):
 	start_time = models.DateTimeField(auto_now_add = True)
 	end_time = models.DateTimeField(auto_now_add = False, null = True)
 	finished = models.NullBooleanField(default = False)
-	pid = models.IntegerField(default = -1)
+	#pid = models.IntegerField(default = -1)
 	algorithm = models.ForeignKey(Algorithm)        
 	input_file = models.ForeignKey(InputFile)   
 	folder = models.CharField(max_length = 200) 
@@ -182,22 +182,13 @@ class AlgorithmRun(models.Model):
 	image = models.ImageField(upload_to = folder, null = True) 
 	score = models.FloatField(null = True, verbose_name = "Score")
 	current_iteration = models.PositiveIntegerField(null = True)
+	newick = models.URLField(blank = True, default = '')
 	#task = models.ForeignKey(djangotasks.Task, null = True)
 	
 	''' 
 		Really we will be wanting to have this as PickleField.
 	'''
 	#results = dict()
-	
-	def start(self):
-		return 0
-		'''
-		logger = logging.getLogger('stemweb.algorithm_run')
-		logger.info('in start nowwww')
-		self.kwargs['algorithm_run'] = self
-		ALGORITHM_CALLABLES["%s" % self.algorithm.id](**self.kwargs).run()
-		return 0
-		'''
 	
 	def delete(self):
 		'''	

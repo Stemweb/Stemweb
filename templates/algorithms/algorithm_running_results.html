@@ -10,6 +10,12 @@
 		<li>Iteration: {% if algorithm_run.current_iteration %}{{ algorithm_run.current_iteration }}{% else %}---{% endif %} </li>
 	</ul>
 	
+	<p>
+		{% if algorithm_run.newick %}
+			{{ algorithm_run.newick }}
+		{% endif %}
+	</p>
+	
 	{% if run_arguments %}
 	<h1>Run arguments</h1>
 	<ul id="algorithm_result_list">

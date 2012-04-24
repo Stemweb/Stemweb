@@ -1,7 +1,13 @@
-'''
-Created on Apr 10, 2012
+#!/usr/bin/python
 
-@author: slinkola
+'''
+Neighbor-Joining algorithm
+implementation by Teemu Roos, March 2012
+reads sequences in Nexus format from input
+and prints out NJ tree in Newick format
+
+Changed to subclass implementation of StoppableAlgorithm by Simo Linkola
+in April 2012.
 '''
 import os
 import sys
@@ -23,7 +29,8 @@ class NJ(StoppableAlgorithm):
 	
 	def __init__(self, *args, **kwargs):
 		StoppableAlgorithm.__init__(self, *args, **kwargs)
-		self.algorithm_run.image = os.path.join(self.run_args['url_base'], 'nj.svg')
+		self.algorithm_run.image = os.path.join(self.run_args['url_base'], '%s_nj.svg' % (os.path.splitext(os.path.basename(self.run_args['input_file']))[0]))
+		self.algorithm_run.newick = os.path.join(self.run_args['url_base'], '%s_nj.tre' % (os.path.splitext(os.path.basename(self.run_args['input_file']))[0]))
 		self.algorithm_run.save()
 	
 	def __algorithm__(self, run_args = None):	
@@ -119,7 +126,7 @@ class NJ(StoppableAlgorithm):
 		# tree output
 		def save_tree(node):
 			newick = _printtree(node, nw = '') + ";"
-			nw_path = os.path.join(outfolder, 'nj.nw')
+			nw_path = os.path.join(outfolder, '%s_nj.tre' % (os.path.splitext(os.path.basename(run_args['input_file']))[0]))
 			print newick
 			f = None
 			try: 
@@ -128,11 +135,12 @@ class NJ(StoppableAlgorithm):
 				f.close()
 			except:
 				logger = logging.getLogger('stemweb.algorithm_run')
-				logger.error('AlgorithmRun %s:%s could\'t write in file %s.' % (self.algorithm_run.algorithm.name, self.algorithm_run.id, run_args['input_file']))
+				logger.error('AlgorithmRun %s:%s could\'t write in file %s.' % (self.algorithm_run.algorithm.name, self.algorithm_run.id, nw_path))
 				return -1 
 			
 			from Stemweb.algorithms.utils import newick2svg
-			newick2svg(nw_path, os.path.join(outfolder, 'nj.svg'), branch_length = False, radial = True)
+			svg_path = os.path.join(outfolder, '%s_nj.svg' % (os.path.splitext(os.path.basename(run_args['input_file']))[0]))
+			newick2svg(nw_path, svg_path, branch_length = False, radial = True)
 			
 				
 		# initialize tree structure and distances
