@@ -96,10 +96,10 @@ def run(request, algo_id):
 			# with "static" arguments (like separate files, which are machine
 			# dependent).
 			call = algorithm.get_callable(kwargs)
-			instance = call(**kwargs)
-			run = threading.Thread(target=instance.run())
-			run.start()
-			print run.isAlive()
+			instance = call.delay(**kwargs)
+			#run = threading.Thread(target=instance.run())
+			#run.start()
+			#print run.isAlive()
 			return HttpResponseRedirect('/algorithms/results/%s' % (current_run.id))
 	else:
 		form = None

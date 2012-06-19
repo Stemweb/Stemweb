@@ -6,10 +6,7 @@ from Queue import Queue, Empty
 import multiprocessing as mp
 import threading as th
 import datetime
-import os
 import logging
-
-
 
 def synchronized(lock):
 	''' Synchronization decorator. '''
@@ -26,7 +23,7 @@ def synchronized(lock):
 
 class Observer():
 	'''
-		Small test class to demonstrate StoppableAlgorithm's observers
+		Small test class to demonstrate AlgorithmTask's observers
 		implementation. You don't need to subclass this for observers but 
 		be sure to add update -method with similar behaviour.
 	'''
@@ -47,7 +44,7 @@ class Observer():
 		self.listening_to.file_lock.release()
 
 		
-class StoppableAlgorithm():
+class AlgorithmTask():
 	'''
 		Super class of all algorithms that are going to be stoppable from 
 		webpage's user interface. 
@@ -176,12 +173,10 @@ class StoppableAlgorithm():
 				
 	def run(self):
 		'''
-			Called with instance.start(). Don't override unless you have very 
-			good reason to do so. 
+			Called when task is getting executed. Don't override unless you 
+			have very good reason to do so. 
 		'''
 		self.logger = logging.getLogger('stemweb.algorithm_run')
-		#self.algorithm_run.pid = os.getpid()	
-		#self.algorithm_run.save()
 		self.logger.info('AlgorithmRun started: %s:%s output:%s ' % (self.algorithm_run.algorithm.name, 
 																	self.algorithm_run.id, 
 																	self.algorithm_run.folder))
@@ -214,7 +209,6 @@ class StoppableAlgorithm():
 			self.algorithm_run = AlgorithmRun.objects.get(pk=self.algorithm_run.id)
 			self.algorithm_run.finished = True
 			self.algorithm_run.end_time = datetime.datetime.now()
-			#self.algorithm_run.pid = -1
 			self.algorithm_run.save()
 		else:
 			self.logger.info('Unknown %s AlgorithmRun ended' % (type(self)))
@@ -282,24 +276,4 @@ class StoppableAlgorithm():
 		'''
 		for o in self._observers:
 			o.update(self)
-		
-		
-if __name__ == '__main__':
-	from semstem.semstem import Semstem
-	
-	run_args = dict({
-					'itermaxin' :100, 
-					'runmax'    : 2, 
-					'infile'    : './semsep_stop_len/test.nex', 
-					'outfolder' : './temp',
-					'source':'/Users/slinkola/STAM/Stemweb/algorithms/semsep_stop_len/allunilen.r'})
-	
-	
-	
-	testrun = Semstem(run_args)	
-	testrun.start()
-	time.sleep(2)
-	testrun.stop()
-	testrun.join()
-	
 	

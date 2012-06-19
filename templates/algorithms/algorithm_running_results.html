@@ -10,12 +10,6 @@
 		<li>Iteration: {% if algorithm_run.current_iteration %}{{ algorithm_run.current_iteration }}{% else %}---{% endif %} </li>
 	</ul>
 	
-	<p>
-		{% if algorithm_run.newick %}
-			{{ algorithm_run.newick }}
-		{% endif %}
-	</p>
-	
 	{% if run_arguments %}
 	<h1>Run arguments</h1>
 	<ul id="algorithm_result_list">
@@ -45,13 +39,19 @@
 	{% endif %}
 
 	<div id="algorithm_result_div">
-	{% if algorithm_run.image %}	
-	<img id="run_result_image" src="{{ algorithm_run.image.url }}" 
-		 alt="{{ algorithm_run.image.url }}" />	 
-	{% else %}
-		No image for this run, <br>
-		though something might linger in {{ algorithm_run.folder }}.
-	{% endif %}
+		{% if algorithm_run.newick %}
+		<p>
+			<a href="{{ MEDIA_URL }}{{ algorithm_run.newick }}">Download newick tree</a>
+		</p>
+		{% endif %}
+		
+		{% if algorithm_run.image %}	
+		<img id="run_result_image" src="{{ algorithm_run.image.url }}" 
+			 alt="{{ algorithm_run.image.url }}" />	 
+		{% else %}
+			No image for this run, <br>
+			though something might linger in {{ algorithm_run.folder }}.
+		{% endif %}
 	</div>
 
 

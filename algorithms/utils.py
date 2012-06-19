@@ -78,7 +78,7 @@ def build_args(form = None, algorithm_id = None, request = None):
 				logger = logging.getLogger('stemweb.algorithm_run')
 				logger.warning("Could not build args for AlgorithmRun because request.user %s was not InputFile.user %s" % (request.user, input_file.user))
 				return None
-			run_args[key] = input_file.path
+			run_args[key] = input_file.file.path
 			run_args['%s_id' % (key)] = input_file.id
 			run_args['file_id'] = input_file.id	# TODO: Hack, use upper line.
 			input_file.save() # Save it to change last_access

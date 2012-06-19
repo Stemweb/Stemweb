@@ -15,18 +15,18 @@ if __name__ == '__main__':
 	sys.path.insert(0, '/Users/slinkola/STAM/Stemweb/algorithms')
 	from stoppable_algorithm import *
 else:
-	from Stemweb.algorithms.stoppable_algorithm import StoppableAlgorithm	
+	from Stemweb.algorithms.stoppable_algorithm import AlgorithmTask	
 
-class Semstem(StoppableAlgorithm):
+class Semstem(AlgorithmTask):
 	'''
 		Concurrent implementation of Semstem where temporary results are writed
 		into file at algorithms run time and all observers are notified of new 
 		results.
 		
-		Check documentation of StoppableAlgorithm for details.
+		Check documentation of AlgorithmTask for details.
 	'''
 	def __init__(self, *args, **kwargs):
-		StoppableAlgorithm.__init__(self, *args, **kwargs)
+		AlgorithmTask.__init__(self, *args, **kwargs)
 		self.iteration_name = 'iteri'
 		self.score_name = 'score'
 		self.algorithm_run.score = -float('Inf')

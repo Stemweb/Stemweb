@@ -1,5 +1,5 @@
 '''
-	Neighbor net algorithm implementation as child class of StoppableAlgorithm.
+	Neighbor net algorithm implementation as child class of AlgorithmTask.
 '''
 
 #!/usr/bin/python
@@ -19,16 +19,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from Stemweb.algorithms.stoppable_algorithm import StoppableAlgorithm
+from Stemweb.algorithms.tasks import AlgorithmTask
 
 
-class NN(StoppableAlgorithm):
+class NN(AlgorithmTask):
 	
-	def __init__(self, *args, **kwargs):
-		StoppableAlgorithm.__init__(self, *args, **kwargs)
-		self.algorithm_run.score = 0
-		self.algorithm_run.image = os.path.join(self.run_args['url_base'], 'nn.svg')
-		self.algorithm_run.save()
+	def __init_run__(self, *args, **kwargs):
+		AlgorithmTask.__init_run__(self, *args, **kwargs)
+		if self.algorithm_run:
+			self.algorithm_run.score = 0
+			self.algorithm_run.image = os.path.join(self.run_args['url_base'], 'nn.svg')
+			self.algorithm_run.save()
 		self.score_name = 'score'
 	
 	def __algorithm__(self, run_args = None):

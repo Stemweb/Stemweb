@@ -4,9 +4,9 @@ import os
 import sys
 #import logging
 
-#sys.path.insert(0, '/Users/slinkola/Library/Python/2.7/lib/python/site-packages/')
-#import djcelery
-#djcelery.setup_loader()
+sys.path.insert(0, '/Users/slinkola/Library/Python/2.7/lib/python/site-packages/')
+import djcelery
+djcelery.setup_loader()
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -147,10 +147,10 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     
-    # Testing concurrency in webpage
-    #'concurrent_server',
     # For tasking the algorithm runs
-    #'djcelery',
+    'djcelery',
+    # Storing the celery's tasks to django db.
+	"djkombu",
     
     'third_party_apps.recaptcha_works',
     'third_party_apps.registration',
@@ -163,7 +163,8 @@ INSTALLED_APPS = (
     'files',
 )
 
-# Django-celerey configurations
+BROKER_BACKEND = "djkombu.transport.DatabaseTransport"
+# Django-celery configurations
 BROKER_HOST = "localhost"
 BROKER_PORT = 5672
 BROKER_USER = "guest"
@@ -176,8 +177,8 @@ ACCOUNT_ACTIVATION_DAYS = 2
 LOGIN_REDIRECT_URL = '/home'
 
 # Lets not send any emails yet. Change this later to: 
-#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # E-mail settings. Needed for user registrations' confirmation.
 # Later the site will probably send mails when algorithms runs

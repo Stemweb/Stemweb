@@ -6,16 +6,17 @@ import copy
 import sys
 import logging
 
-from Stemweb.algorithms.stoppable_algorithm import StoppableAlgorithm
+from Stemweb.algorithms.tasks import AlgorithmTask
 
-class Semstem(StoppableAlgorithm):
+class Semstem(AlgorithmTask):
 	
-	def __init__(self, *args, **kwargs):
-		StoppableAlgorithm.__init__(self, *args, **kwargs)
-		self.algorithm_run.image = os.path.join(self.run_args['url_base'], 'tree', 'treebest.svg')
+	def __init_run__(self, *args, **kwargs):
+		AlgorithmTask.__init_run__(self, *args, **kwargs)
+		if self.algorithm_run:
+			self.algorithm_run.image = os.path.join(self.run_args['url_base'], 'tree', 'treebest.svg')
+			self.algorithm_run.save()
 		self.score_name = 'qscore'
 		#self.iteration_name = 'iter'
-		self.algorithm_run.save()
 		
 	def __algorithm__(self, run_args):
 
@@ -523,9 +524,6 @@ class Semstem(StoppableAlgorithm):
 		
 			for iteration in range(iterationmax):
 				print iteration
-				#print (time.gmtime())
-				#if (iteration % 100) ==0:
-				#	print (iteration)
 				weightmatrix = zeros((len(nodeorder),len(nodeorder)))
 				weightmatrixwithnoise = zeros((len(nodeorder),len(nodeorder)))
 				weightmatrixindex = list(nodeorder)
@@ -562,7 +560,6 @@ class Semstem(StoppableAlgorithm):
 				qscore = 0.0
 				for nodei in nodeorder[0:(-1)]:
 					weight = weightmatrix[weightmatrixindex.index(nodei),weightmatrixindex.index(treedic[nodei]['parent'][0])]
-					print "%s->%s: %s" % (weightmatrixindex.index(treedic[nodei]['parent'][0]), weightmatrixindex.index(nodei), weight)
 					qscore = qscore + weight
 			
 				logvector[0].append(iteration)
@@ -576,7 +573,7 @@ class Semstem(StoppableAlgorithm):
 					else:
 						sigma = 0
 		
-				print "sigma: %s \t current: %s \t old: %s" % (sigma, qscore, qscoreold)
+				#print "sigma: %s \t current: %s \t old: %s" % (sigma, qscore, qscoreold)
 				if qscore > qscoreold:
 					
 					treedicold = treedic
@@ -591,7 +588,7 @@ class Semstem(StoppableAlgorithm):
 							
 			treedicbest,nodehiddenbest = removehidden(nodehidden,treedicold)
 			treetodot(treedicbest ,treedicbest.keys(),nodehiddenbest, resfoldertree,'treebest')
-			 
+			
 			logstr = logstr + 'End at'+ str (time.gmtime()) + '\n' + 'best iteration is ' + str(bestiteration) +'\n' + 'best qscore is ' + str(qscoreold) + '\n\n\n'
 			inumber = len(logvector)
 			jnumber = len(logvector[0])
@@ -611,4 +608,4 @@ class Semstem(StoppableAlgorithm):
 		self._put_in_results_({'qscore': qscore})
 		self._stop.value = 1
 		
-		
+

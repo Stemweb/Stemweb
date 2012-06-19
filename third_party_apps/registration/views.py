@@ -17,9 +17,9 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth import REDIRECT_FIELD_NAME, login as auth_login
 from django.contrib.sites.models import get_current_site
 
-from registration.forms import AuthenticationFormWithReCaptcha
+from Stemweb.third_party_apps.registration.forms import AuthenticationFormWithReCaptcha
 # Register view needs this for recaptcha-field.
-from recaptcha_works.decorators import fix_recaptcha_remote_ip
+from Stemweb.third_party_apps.recaptcha_works.decorators import fix_recaptcha_remote_ip
 
 from registration.backends import get_backend
 

@@ -6,13 +6,13 @@ implementation by Teemu Roos, March 2012
 reads sequences in Nexus format from input
 and prints out NJ tree in Newick format
 
-Changed to subclass implementation of StoppableAlgorithm by Simo Linkola
+Changed to subclass implementation of AlgorithmTask by Simo Linkola
 in April 2012.
 '''
 import os
 import sys
 import logging
-from Stemweb.algorithms.stoppable_algorithm import StoppableAlgorithm
+from Stemweb.algorithms.tasks import AlgorithmTask
 
 
 # node structure for storing the tree
@@ -24,14 +24,15 @@ class Node:
         self.right = right
 
 
-class NJ(StoppableAlgorithm):
+class NJ(AlgorithmTask):
 	
 	
-	def __init__(self, *args, **kwargs):
-		StoppableAlgorithm.__init__(self, *args, **kwargs)
-		self.algorithm_run.image = os.path.join(self.run_args['url_base'], '%s_nj.svg' % (os.path.splitext(os.path.basename(self.run_args['input_file']))[0]))
-		self.algorithm_run.newick = os.path.join(self.run_args['url_base'], '%s_nj.tre' % (os.path.splitext(os.path.basename(self.run_args['input_file']))[0]))
-		self.algorithm_run.save()
+	def __init_run__(self, *args, **kwargs):
+		AlgorithmTask.__init_run__(self, *args, **kwargs)
+		if self.algorithm_run:
+			self.algorithm_run.image = os.path.join(self.run_args['url_base'], '%s_nj.svg' % (os.path.splitext(os.path.basename(self.run_args['input_file']))[0]))
+			self.algorithm_run.newick = os.path.join(self.run_args['url_base'], '%s_nj.tre' % (os.path.splitext(os.path.basename(self.run_args['input_file']))[0]))
+			self.algorithm_run.save()
 	
 	def __algorithm__(self, run_args = None):	
 		outfolder = run_args['outfolder']

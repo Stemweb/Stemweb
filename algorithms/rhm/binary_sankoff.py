@@ -7,20 +7,18 @@ import os
 import sys
 from time import sleep
 import logging
-from Stemweb.algorithms.stoppable_algorithm import StoppableAlgorithm
-
+from Stemweb.algorithms.tasks import AlgorithmTask
 
 import binarysankoff
 
-
-class RHM(StoppableAlgorithm):
+class RHM(AlgorithmTask):
 	
-	
-	def __init__(self, *args, **kwargs):
-		StoppableAlgorithm.__init__(self, *args, **kwargs)
-		self.algorithm_run.image = os.path.join(self.run_args['url_base'], 'rhm.svg')
-		self.algorithm_run.newick = os.path.join(self.run_args['url_base'], 'rhm_0.tre')
-		self.algorithm_run.save()
+	def __init_run__(self, *args, **kwargs):
+		AlgorithmTask.__init_run__(self, *args, **kwargs)
+		if self.algorithm_run:
+			self.algorithm_run.image = os.path.join(self.run_args['url_base'], 'rhm.svg')
+			self.algorithm_run.newick = os.path.join(self.run_args['url_base'], 'rhm_0.tre')
+			self.algorithm_run.save()
 	
 	def __algorithm__(self, run_args = None):
 		run_args['strap'] = 1
