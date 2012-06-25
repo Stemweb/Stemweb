@@ -28,6 +28,7 @@ def removeedge(treedic,parent,child):
 def removehidden(nodehiddenori,treedicori):
 	treedic = copy.deepcopy(treedicori)
 	nodehidden = list(nodehiddenori)
+
 	finnish = 0
 	while (finnish == 0):
 		finnish = 1
@@ -42,14 +43,14 @@ def removehidden(nodehiddenori,treedicori):
 					removeedge(treedic,nodei,childi)
 					removeedge(treedic,nodei,childj)
 					del treedic[nodei]
-					
-				if len(treedic[nodei]['child'])==1: # not root
-					childi = treedic[nodei]['child'][0]
-					parenti = treedic[nodei]['parent'][0]
-					addedge(treedic,parenti ,childi)
-					removeedge(treedic,nodei,childi)
-					removeedge(treedic,parenti ,nodei)
-					del treedic[nodei]
+				if nodei in treedic.keys():	
+					if len(treedic[nodei]['child'])==1: # not root
+						childi = treedic[nodei]['child'][0]
+						parenti = treedic[nodei]['parent'][0]
+						addedge(treedic,parenti ,childi)
+						removeedge(treedic,nodei,childi)
+						removeedge(treedic,parenti ,nodei)
+						del treedic[nodei]
 			else:		
 				if len(treedic[nodei]['neighbor'])==1:
 					finnish = 0
@@ -78,9 +79,11 @@ def readfile(inputfile):
 	for i in range(len(nexdata)):
 		if len(re.findall(r'matrix',nexdata[i].lower()))>0:
 			startline = i+1
+		
 	for i in range(len(nexdata)-1,-1,-1):
 		if len(re.findall(r'end',nexdata[i].lower()))>0:
-			endline = i	
+			endline = i
+		
 	nexdata = nexdata[startline:endline]
 
 	namelist = {}
@@ -251,7 +254,21 @@ def	njtree (textdata):
 	
 	return (treeroot, nodeorder, nodehidden, nodeleaf, treedic)
 
-	
+def nohiddeninitial(textdata):
+	namelist = list(textdata.keys())
+	treeroot = namelist[0]
+	nodeleaf = [namelist[-1]]
+	nodehidden = []
+	nodeorder = [treeroot]
+	treedic = {}
+	createnode(treedic,treeroot)
+	for i in range(len(namelist)-1):
+		createnode(treedic,namelist[i+1])
+		addedge(treedic, namelist[i], namelist[i+1])
+		nodeorder[0:0] = [namelist[i+1]]
+	return (treeroot, nodeorder, nodehidden, nodeleaf, treedic)
+
+
 def mst(weightmatrix,weightmatrixindex):
 	import math
 
@@ -305,7 +322,7 @@ def mst(weightmatrix,weightmatrixindex):
 def messagepassingu(treeroot, nodeorder, nodehidden, nodeleaf, treedic, textbyline, linerepeat,namelist ):
 	#import operator
 	#reduce(operator.mul, (3, 4, 5))
-	probsame = 0.95
+	probsame = 0.9
 	
 	textbylinearray = array(list(textbyline))
 	linenumber = len(textbyline)
@@ -512,10 +529,11 @@ def semuniform (inputfile, iterationmax):
 	# step 1 read file
 	namelist ,datadic, textdata = readfile(inputfile)
 	# step 2 initiation by nj tree
-	treeroot, nodeorder, nodehidden, nodeleaf, treedic = njtree (textdata)
+	#treeroot, nodeorder, nodehidden, nodeleaf, treedic = njtree (textdata)
+	treeroot, nodeorder, nodehidden, nodeleaf, treedic = nohiddeninitial(textdata)
 	# step 3 calculate weight matrix
 	logstr = 'Start at'+ str (time.gmtime()) + '\n'
-	sigma = 0
+	sigma = 0.0
 	rho = 0.001**(1/float(iterationmax-8))
 	qscoreold = float(-Inf)
 	bestiteration = -1
@@ -532,8 +550,8 @@ def semuniform (inputfile, iterationmax):
 	for iteration in range(iterationmax):
 		print iteration
 		#print (time.gmtime())
-		#if (iteration % 100) ==0:
-		#	print (iteration)
+#		if (iteration % 100) ==0:
+#			print (iteration)
 		weightmatrix = zeros((len(nodeorder),len(nodeorder)))
 		weightmatrixwithnoise = zeros((len(nodeorder),len(nodeorder)))
 		weightmatrixindex = list(nodeorder)
@@ -588,12 +606,19 @@ def semuniform (inputfile, iterationmax):
 			nodeorderold = nodeorder
 			qscoreold = qscore
 			bestiteration = iteration
-			treetodot(treedic,nodeorder,nodehidden, resfoldertree, str(iteration).zfill(4))
-		if iteration >= 6:
-			sigma = sigma*rho
-		elif iteration == 5:
-			sigma = 0.1* max(abs(weightmatrix.min()),abs(weightmatrix.max()))
-					
+
+		treedicremoved,nodehiddenremoved = removehidden(nodehidden,treedic)
+		treetodot(treedicremoved,treedicremoved.keys(),nodehiddenremoved, resfoldertree, str(iteration).zfill(4))
+
+		if iteration >= 2:
+			sigma = float(sigma0)*((1.0-float(iteration)/float(iterationmax))**2.0)
+		elif iteration == 1:
+			sigma0 = 1.0* max(abs(weightmatrix.min()),abs(weightmatrix.max()))
+			sigma = sigma0
+
+	treediclast,nodehiddenlast =  removehidden(nodehidden,treedic)
+	treetodot(treediclast ,treediclast.keys(),nodehiddenlast, resfoldertree,'treelast')
+
 	treedicbest,nodehiddenbest = removehidden(nodehidden,treedicold)
 	treetodot(treedicbest ,treedicbest.keys(),nodehiddenbest, resfoldertree,'treebest')
 	 
@@ -615,4 +640,5 @@ if __name__ == "__main__":
 	from sys import argv
 	print argv[1]
 	semuniform(argv[1], int(argv[2]))
+
 

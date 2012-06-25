@@ -267,6 +267,19 @@ class Semstem(AlgorithmTask):
 			
 			return (treeroot, nodeorder, nodehidden, nodeleaf, treedic)
 		
+		def nohiddeninitial(textdata):
+			namelist = list(textdata.keys())
+			treeroot = namelist[0]
+			nodeleaf = [namelist[-1]]
+			nodehidden = []
+			nodeorder = [treeroot]
+			treedic = {}
+			createnode(treedic,treeroot)
+			for i in range(len(namelist)-1):
+				createnode(treedic,namelist[i+1])
+				addedge(treedic, namelist[i], namelist[i+1])
+				nodeorder[0:0] = [namelist[i+1]]
+			return (treeroot, nodeorder, nodehidden, nodeleaf, treedic)			
 			
 		def mst(weightmatrix,weightmatrixindex):
 			import math
@@ -501,16 +514,16 @@ class Semstem(AlgorithmTask):
 		
 		
 		def semuniform (inputfile, iterationmax):
-		
+
 			# step 1 read file
 			namelist ,datadic, textdata = readfile(inputfile)
 			# step 2 initiation by nj tree
-			treeroot, nodeorder, nodehidden, nodeleaf, treedic = njtree (textdata)
+			#treeroot, nodeorder, nodehidden, nodeleaf, treedic = njtree (textdata)
+			treeroot, nodeorder, nodehidden, nodeleaf, treedic = nohiddeninitial(textdata)
 			# step 3 calculate weight matrix
 			logstr = 'Start at'+ str (time.gmtime()) + '\n'
 			sigma = 0
-			rho = 0.001**(1/float(iterationmax-8))
-			qscoreold = float('-Inf')
+			qscoreold = float(-Inf)
 			bestiteration = -1
 			treedicold = treedic
 			nodeorderold = nodeorder
@@ -524,6 +537,9 @@ class Semstem(AlgorithmTask):
 		
 			for iteration in range(iterationmax):
 				print iteration
+				#print (time.gmtime())
+		#		if (iteration % 100) ==0:
+		#			print (iteration)
 				weightmatrix = zeros((len(nodeorder),len(nodeorder)))
 				weightmatrixwithnoise = zeros((len(nodeorder),len(nodeorder)))
 				weightmatrixindex = list(nodeorder)
@@ -559,33 +575,38 @@ class Semstem(AlgorithmTask):
 				
 				qscore = 0.0
 				for nodei in nodeorder[0:(-1)]:
-					weight = weightmatrix[weightmatrixindex.index(nodei),weightmatrixindex.index(treedic[nodei]['parent'][0])]
-					qscore = qscore + weight
-			
+					qscore = qscore + weightmatrix[weightmatrixindex.index(nodei),weightmatrixindex.index(treedic[nodei]['parent'][0])]
+		
+		
+				
 				logvector[0].append(iteration)
 				logvector[1].append(sigma)
 				logvector[2].append(qscore)
 			
-				if iteration > float(iterationmax)*0.9:
+				if iteration > 10:
 					if (abs(logvector[2][-2] - logvector[2][-3]) < 0.001) and (abs(logvector[2][-1] - logvector[2][-2])< 0.001):
 						#print ('stop at' + str(iteration) + '\n')						
 						break	
-					else:
-						sigma = 0
 		
-				#print "sigma: %s \t current: %s \t old: %s" % (sigma, qscore, qscoreold)
+				print "Scores current: %s old: %s" % (qscore, qscoreold)
 				if qscore > qscoreold:
-					
 					treedicold = treedic
 					nodeorderold = nodeorder
 					qscoreold = qscore
 					bestiteration = iteration
-					treetodot(treedic,nodeorder,nodehidden, resfoldertree, str(iteration).zfill(4))
-				if iteration >= 6:
-					sigma = sigma*rho
-				elif iteration == 5:
-					sigma = 0.1* max(abs(weightmatrix.min()),abs(weightmatrix.max()))
-							
+		
+				treedicremoved,nodehiddenremoved = removehidden(nodehidden,treedic)
+				treetodot(treedicremoved,treedicremoved.keys(),nodehiddenremoved, resfoldertree, str(iteration).zfill(4))
+		
+				if iteration >= 2:
+					sigma = float(sigma0)*((1.0-float(iteration)/float(iterationmax))**2.0)
+				elif iteration == 1:
+					sigma0 = 1.0* max(abs(weightmatrix.min()),abs(weightmatrix.max()))
+					sigma = sigma0
+		
+			treediclast,nodehiddenlast =  removehidden(nodehidden,treedic)
+			treetodot(treediclast ,treediclast.keys(),nodehiddenlast, resfoldertree,'treelast')
+		
 			treedicbest,nodehiddenbest = removehidden(nodehidden,treedicold)
 			treetodot(treedicbest ,treedicbest.keys(),nodehiddenbest, resfoldertree,'treebest')
 			
