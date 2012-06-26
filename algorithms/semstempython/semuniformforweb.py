@@ -529,8 +529,8 @@ def semuniform (inputfile, iterationmax):
 	# step 1 read file
 	namelist ,datadic, textdata = readfile(inputfile)
 	# step 2 initiation by nj tree
-	#treeroot, nodeorder, nodehidden, nodeleaf, treedic = njtree (textdata)
-	treeroot, nodeorder, nodehidden, nodeleaf, treedic = nohiddeninitial(textdata)
+	treeroot, nodeorder, nodehidden, nodeleaf, treedic = njtree (textdata)
+	#treeroot, nodeorder, nodehidden, nodeleaf, treedic = nohiddeninitial(textdata)
 	# step 3 calculate weight matrix
 	logstr = 'Start at'+ str (time.gmtime()) + '\n'
 	sigma = 0.0
