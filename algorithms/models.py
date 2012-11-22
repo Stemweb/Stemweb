@@ -10,7 +10,17 @@ from Stemweb.files.models import InputFile
 from .settings import ARG_VALUE_CHOICES
 from .settings import ALGORITHMS_CALLING_DICT as call_dict
 
-	
+
+class GetOrNoneManager(models.Manager):
+	"""Adds get_or_none method to objects
+    """
+	def get_or_none(self, **kwargs):
+		try:
+			return self.get(**kwargs)
+		except self.model.DoesNotExist:
+			return None
+
+
 class AlgorithmArg(models.Model):
 	'''
 		All algorithms running arguments. 
@@ -91,7 +101,8 @@ class Algorithm(models.Model):
 					source:		%s
 					args:		%s
 					stoppable:	%s	
-				''' % (self.name, self.desc, self.template, self.source, self.args, self.stoppable)
+				''' % (self.name, self.desc, self.template, self.source, \
+					self.args, self.stoppable)
 				
 	
 	def get_callable(self, kwargs):
@@ -133,6 +144,8 @@ class Algorithm(models.Model):
 			
 	class Meta:
 		ordering = ['name']
+	
+	objects = GetOrNoneManager()
 
 			
 class AlgorithmRun(models.Model):
@@ -177,7 +190,7 @@ class AlgorithmRun(models.Model):
 	#pid = models.IntegerField(default = -1)
 	algorithm = models.ForeignKey(Algorithm)        
 	input_file = models.ForeignKey(InputFile)   
-	folder = models.CharField(max_length = 200) 
+	folder = models.CharField(max_length = 300) 
 	user = models.ForeignKey(User)
 	image = models.ImageField(upload_to = folder, null = True) 
 	score = models.FloatField(null = True, verbose_name = "Score")
@@ -210,9 +223,11 @@ class AlgorithmRun(models.Model):
 					shutil.rmtree(os.path.join(root, d))
 			os.rmdir(root)
 		except:
+			# If there is an exception log it (and probably inform admins about 
+			# it), but still delete run for end users convenience.
 			logger = logging.getLogger('stemweb.algorithm_run')
-			logger.error('AlgorithmRun could not delete files: %s:%s folder:%s' % (self.algorithm.name, self.id, self.folder))
-			return -1
+			logger.error('AlgorithmRun could not delete files: %s:%s folder:%s' \
+				% (self.algorithm.name, self.id, self.folder))
 			
 		models.Model.delete(self)
 	
@@ -221,12 +236,12 @@ class AlgorithmRun(models.Model):
 		for name in self._meta.get_all_field_names():
 			retval += "%s: %s \n" % (name, self.__getattribute__(name))
 			
-		#if self.kwargs:
-		#	for k, v in self.kwargs.items():
-		#		retval += "%s: %s \n" % (k, v)
 		return retval
 	
 	class Meta:
 		ordering = ['finished', '-end_time', '-start_time']
+	
+	objects = GetOrNoneManager()
+	
 	
 	

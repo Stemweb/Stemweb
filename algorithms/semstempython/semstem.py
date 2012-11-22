@@ -9,6 +9,7 @@ import logging
 from Stemweb.algorithms.tasks import AlgorithmTask
 
 class Semstem(AlgorithmTask):
+	name = "Semstem"
 	
 	def __init_run__(self, *args, **kwargs):
 		AlgorithmTask.__init_run__(self, *args, **kwargs)

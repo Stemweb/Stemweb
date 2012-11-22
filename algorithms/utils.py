@@ -6,16 +6,27 @@ import string
 import random
 import logging
 
-from Stemweb.algorithms.models import Algorithm
-from forms import field_types
+from models import Algorithm
+from .settings import ARG_VALUE_FIELD_TYPE_KEYS as field_types
 from Stemweb import settings
 from Stemweb.files.models import InputFile
 
 from django.template.defaultfilters import slugify
+from django.shortcuts import get_object_or_404
 
 def newick2svg(newick, filepath, branch_length = True, radial = True, width = 800):
 	'''
 		Create svg file from given newick file.
+		
+		newick			absolute path to newick tree file
+		
+		filepath		absolute path to svg file to be created
+		
+		branch_length	boolean, if true shows branch lengths in numeric form
+		
+		radial			boolean, if true draws radial graph instead of "normal".
+		
+		width			width of the resulting svg file in pixels. 
 	'''
 	nw_display = os.path.join(settings.SITE_ROOT, 'shell_scripts', 'nw_display')
 	bl = ''
@@ -46,38 +57,28 @@ def build_run_folder(user, input_file_id, algorithm_name):
 		runfile:	 Absolute path to file to use as input_file for a run.
 		run_id:		 ID of the R_runs db-table's entry
 
-		Returns path to run's storage folder if it has been succesfully created. 
-		Otherwise returns -1
+		Returns path to run's storage folder. All runs' storage folders have 
+		structure: 'users', user.username, 'runs', algorithm_name, input_file_id,
+		id_generator(). Algorithm name is slugified in the process. 
 	'''
 	uppath = os.path.join('users')
 	uppath = os.path.join(uppath, user.username)
 	uppath = os.path.join(uppath, 'runs')
-	uppath = os.path.join(uppath, slugify(algorithm_name))    # Refactor with actual script's name
+	uppath = os.path.join(uppath, slugify(algorithm_name))
 	uppath = os.path.join(uppath, '%s' % input_file_id)
 	uppath = os.path.join(uppath, id_generator())
 	return uppath
 
 
 def build_args(form = None, algorithm_id = None, request = None):
-	''' Generate dynamic running args from given form.
+	''' Generate running args from given DynamicArgs-form.
 		
-		Returns dictionary with running arguments. If form has id of InputFile 
-		model instance which is not owned by request.user returns None.
+		Returns dictionary with running arguments. 
 	'''
 	run_args = {}
 	for key in form.cleaned_data.keys():
-		if type(form.fields[key]) == type(field_types['input_file']):
-			'''
-				Some how the input files get "corrupted" in cleaned data and 
-				show the text that was visible to user, not the id it should.
-				
-				TODO: fix this!
-			'''
-			input_file = InputFile.objects.get(id = form.data[key])	
-			if input_file.user != request.user:
-				logger = logging.getLogger('stemweb.algorithm_run')
-				logger.warning("Could not build args for AlgorithmRun because request.user %s was not InputFile.user %s" % (request.user, input_file.user))
-				return None
+		if type(form.fields[key]) == field_types['input_file']:
+			input_file = form.cleaned_data[key]
 			run_args[key] = input_file.file.path
 			run_args['%s_id' % (key)] = input_file.id
 			run_args['file_id'] = input_file.id	# TODO: Hack, use upper line.
@@ -86,11 +87,20 @@ def build_args(form = None, algorithm_id = None, request = None):
 			run_args[key] = form.cleaned_data[key]
 	
 	''' Build run folder based on input file's id and algorithm's name. '''		
-	run_folder = build_run_folder(request.user, run_args['file_id'], Algorithm.objects.get(pk = algorithm_id).name)
+	run_folder = build_run_folder(request.user, run_args['file_id'], \
+		Algorithm.objects.get(pk = algorithm_id).name)
 	abs_folder = os.path.join(settings.MEDIA_ROOT, run_folder) 
-	try: os.makedirs(abs_folder)
-	except: print "noononnono"
+	os.makedirs(abs_folder)
 	run_args['url_base'] = run_folder	# TODO: Hack, fix this
 	run_args['outfolder']  = abs_folder
 	return run_args
+
+
+def register(algorithm = None, name = None):
+	if type(algorithm) is not Algorithm:
+		raise TypeError('Algorithms cannot register type: %s' % type(algorithm))
+	
+	if name is None and algorithm.name is None:
+		name = algorithm.__class__
+
 			

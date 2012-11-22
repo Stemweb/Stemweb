@@ -26,7 +26,7 @@ consult a specific backend's documentation for details.
 from django.conf.urls.defaults import *
 
 from django.contrib.auth import views as auth_views
-from registration.views import login as registration_login
+from .views import login as registration_login
 
 urlpatterns = patterns('',
                        url(r'^login/$',

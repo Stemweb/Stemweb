@@ -23,6 +23,7 @@ from Stemweb.algorithms.tasks import AlgorithmTask
 
 
 class NN(AlgorithmTask):
+	name = "Neighbour Net"
 	
 	def __init_run__(self, *args, **kwargs):
 		AlgorithmTask.__init_run__(self, *args, **kwargs)

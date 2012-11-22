@@ -56,7 +56,7 @@ def upload(request):
                                    user = request.user, 
                                    file = f)  
 			input_file.save() # Save to be sure input_file.id is created                                      
-			return HttpResponseRedirect('/files/%s' % (input_file.id))    # And redirect to run_script that file
+			return HttpResponseRedirect('/files/%s' % (input_file.id))
 		else:
 			form = UploadFile()
 	context = RequestContext(request)            

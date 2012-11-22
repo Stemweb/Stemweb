@@ -32,6 +32,8 @@ struct node_st {
 };
 
 char *outfolder = "output-directory";
+char *filename = "input_file_name";
+char gfilepath[512];
 int imax;
 FILE *fout;
 struct node_st *tree;
@@ -273,7 +275,8 @@ char **get_names(const char *fname, int leafs)
     ptr = ptr0;
     while (*ptr && *ptr != '\t' && *ptr != '\n') ptr++;
     names[i] = (char *) malloc(sizeof(char) * (ptr-ptr0+1));
-    strlcpy(names[i], ptr0, ptr-ptr0+1); //strcpy((char *)((long)names[i]+(long)(ptr-ptr0)),"");
+    strncpy(names[i], ptr0, ptr-ptr0+1);
+    strcpy((char *)((long)names[i]+(long)(ptr-ptr0)),"");
     ptr0 = ptr;
     if (*ptr0) ptr0++;
   }
@@ -400,7 +403,8 @@ int read_file(const char *target_path)
 
 	bufpos1 = 0;
 	// open temporary gzip file for writing compressed data
-	gfile = gzopen("tmp.gz", "wb");
+	sprintf(gfilepath, "%s/tmp.gz", outfolder);
+	gfile = gzopen(gfilepath, "wb");
 	for (line = 0; !ferror(f1) && !feof(f1) && line < chunksize; line++)
 	{
 	  if (bufpos1 > 0 && buf[bufpos1-1] == '\n')
@@ -444,10 +448,11 @@ int read_file(const char *target_path)
 	  gzflush(gfile, Z_PARTIAL_FLUSH);
 	
 	  Kx[f1i*chunks+ch] = 
-	    (int) gzoffset(gfile) - GZIP_HEADER;
+      (int) gzoffset(gfile) - GZIP_HEADER;
 	  //fprintf(stderr, "%sKx=%d\n", buf,Kx[f1i * chunks + ch]);
 	  gzclose(gfile);
-	  gfile = gzopen("tmp.gz", "wb");
+	  sprintf(gfilepath, "%s/tmp.gz", outfolder);
+	  gfile = gzopen(gfilepath, "wb");
 	}
 
 	if (dir && f2 == f1)
@@ -872,7 +877,7 @@ void print_subtree(struct node_st *node)
 void open_output()
 {
   char fname[256];
-  sprintf(fname, "%s/rhm_%d.tre", outfolder, boot);
+  sprintf(fname, "%s/%s_rhm.tre", outfolder, filename);
   fout = fopen(fname, "w+");
 }
 
@@ -1436,12 +1441,12 @@ int main(int argc, char *argv[])
  */
 PyObject* py_main(PyObject* self, PyObject* args)
 {
-	int itermaxin;
 	PyObject* run_args = NULL;
 	PyObject* p_outfolder = PyString_FromString("outfolder");
 	PyObject* p_infolder = PyString_FromString("infolder");
 	PyObject* p_imax = PyString_FromString("imax");
 	PyObject* p_strap = PyString_FromString("strap");
+	PyObject* p_filename = PyString_FromString("file_name");
 	
 	PyArg_UnpackTuple(args, "ref", 1, 1, &run_args);
 	
@@ -1450,10 +1455,13 @@ PyObject* py_main(PyObject* self, PyObject* args)
 	
 	set_random_seed();
 	
+	filename = PyString_AsString(PyDict_GetItem(run_args, p_filename));
 	outfolder = PyString_AsString(PyDict_GetItem(run_args, p_outfolder));
 	strap = (int)PyInt_AsLong(PyDict_GetItem(run_args, p_strap));
 	imax = (int)PyInt_AsLong(PyDict_GetItem(run_args, p_imax));	
 	read_file(PyString_AsString(PyDict_GetItem(run_args, p_infolder)));
+	
+	sprintf(gfilepath, "%s/tmp.gz", outfolder);
 	
 	for (boot = 0; boot < strap; boot++)
   	{
@@ -1463,6 +1471,10 @@ PyObject* py_main(PyObject* self, PyObject* args)
     	free_tree(tree);
   	}
   	//free_mem();
+  	
+  	// Remove temp-file after the run.
+  	if (remove(gfilepath) != 0)
+  		return PyInt_FromLong(-1);
   	
   	return PyInt_FromLong(0);	
 }

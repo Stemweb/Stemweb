@@ -147,9 +147,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     
-    # For tasking the algorithm runs
     'djcelery',
-    # Storing the celery's tasks to django db.
 	"djkombu",
     
     'third_party_apps.recaptcha_works',
@@ -163,7 +161,7 @@ INSTALLED_APPS = (
     'files',
 )
 
-BROKER_BACKEND = "djkombu.transport.DatabaseTransport"
+BROKER_BACKEND = "django"
 # Django-celery configurations
 BROKER_HOST = "localhost"
 BROKER_PORT = 5672
@@ -173,12 +171,12 @@ BROKER_VHOST = "/"
 
 # registration apps own setting. Configures how many days
 # user has to activate account before it expires.
-ACCOUNT_ACTIVATION_DAYS = 2
-LOGIN_REDIRECT_URL = '/home'
+ACCOUNT_ACTIVATION_DAYS = 7
+LOGIN_REDIRECT_URL = '/'
 
 # Lets not send any emails yet. Change this later to: 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # E-mail settings. Needed for user registrations' confirmation.
 # Later the site will probably send mails when algorithms runs
@@ -189,6 +187,8 @@ EMAIL_HOST_USER = lstrings.email_host_user
 EMAIL_HOST_PASSWORD = lstrings.email_host_pwd
 EMAIL_PORT = lstrings.email_port
 EMAIL_USE_TLS = lstrings.email_tls
+#DEFAULT_FROM_EMAIL = "slinkola@cs.helsinki.fi"
+#SERVER_EMAIL = "slinkola@cs.helsinki.fi"
 
 # Recaptcha_works options
 RECAPTCHA_PUBLIC_KEY  = lstrings.recaptcha_public_key
@@ -205,9 +205,6 @@ RECAPTCHA_OPTIONS = {
 # TODO: change when in production to False
 CONCURRENT_RANDOM_DELAY = True
 
-# TODO: remove when in production
-#DJANGOTASK_DAEMON_THREAD = False
-
 ROOT_LOG_DIR = os.path.join(SITE_ROOT, 'logs')
 if not os.path.exists(ROOT_LOG_DIR):
 	os.mkdir(ROOT_LOG_DIR);
@@ -215,8 +212,6 @@ if not os.path.exists(ROOT_LOG_DIR):
 ALGORITHMS_LOG_DIR = os.path.join(ROOT_LOG_DIR, 'algorithms')
 if not os.path.exists(ALGORITHMS_LOG_DIR):
 	os.makedirs(ALGORITHMS_LOG_DIR);
-
-#TASKS_LOG_FILE = os.path.join(ROOT_LOG_DIR, 'tasks.log')
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

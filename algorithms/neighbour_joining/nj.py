@@ -76,7 +76,6 @@ for line in sys.stdin:
     data[tax[-1]]=line.strip().split()[-1]
     if data[tax[-1]][-1]==';': data[tax[-1]]=data[tax[-1]][0:-1]; break
 
-taxa=len(tax)         # number of taxa
 d={}                  # observed distances between pairs
 gd={}                 # distances between groups
 nodes={}              # created tree nodes (used to store NJ tree structure)
@@ -105,6 +104,10 @@ if example==2:
     d['A','B']=7; d['A','C']=11; d['A','D']=14
     d['B','C']=6; d['B','D']=9
     d['C','D']=7
+
+taxa=len(tax)         # number of taxa
+
+
 
 # initialize tree structure and distances
 for tax1 in tax:

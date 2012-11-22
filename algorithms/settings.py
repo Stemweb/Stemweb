@@ -1,29 +1,28 @@
 '''
 	Settings for algorithms-application. 
 '''
-import os
-
 from django import forms
-from Stemweb.settings import SITE_ROOT
+
+from Stemweb.files import forms as files_forms
 
 #from .semstem.semstem import Semstem
 from .semstempython.semstem import Semstem
-from .neighbour_joining.nj_class import NJ
+from .neighbour_joining.njc import NJ
 from .neighbour_net.neighbornet_class import NN
 from .rhm.binary_sankoff import RHM
 import validators
 
-# How many runs can be active by one user.
-USER_RUNS = 2
-# How many runs can be active at all times.
-ALL_RUNS = 8
+URL_PREFIX = 'algorithms'
 
-THREADS = {}
-
+'''
+	Dictionary mapping Algorithm models' ids to dictionaries which contain 
+	atleast 'callable' keyword and possible other entries. 'callable' should 
+	refer to actual subclass of AlgorithmTask and other entries are passed 
+	inside run_args dictionary to that callable.
+'''
 ALGORITHMS_CALLING_DICT = { 
 	'1': { 
 		'callable': Semstem,	
-		#'source': os.path.join(SITE_ROOT, 'algorithms/semstem/allunilen.r'),
 	},
 	'2': {
 		'callable': RHM,
@@ -33,8 +32,7 @@ ALGORITHMS_CALLING_DICT = {
 	},
 	'4': {
 		'callable': NN,
-	}
-		
+	},	
 }
 
 '''
@@ -59,7 +57,7 @@ ARG_VALUE_FIELD_TYPE_KEYS =  {
 	'integer': forms.IntegerField,
 	'float': forms.FloatField,
 	'string': forms.CharField,
-	'input_file': forms.ModelChoiceField,
+	'input_file': files_forms.InputFileChoiceField,
 	'boolean': forms.BooleanField
 }
 
@@ -76,3 +74,5 @@ ARG_VALUE_FIELD_TYPE_VALIDATORS = {
    	'input_file': [],
    	'boolean': [] 
 }
+
+#ALGORITHM_RUN_STATES = 

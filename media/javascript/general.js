@@ -113,7 +113,10 @@ var go_to_results = function go_to_results(e) {
 }
 
 $(document).ready(function() { 
-	$("#previous_runs_table").tablesorter( { headers: { 4: { sorter: false} }}); 
+	$("#previous_runs_table").tablesorter( { locale: 'eu', 
+											headers: { 0: { sorter: 'shortDate' },
+													   1: { sorter: 'shortDate' },
+													   4: { sorter: false} }}); 
 	
 	/* Little bit hacky solution */
 	var table = returnObjById("previous_runs_table");

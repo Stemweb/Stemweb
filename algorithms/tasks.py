@@ -9,6 +9,8 @@ import datetime
 import os
 import logging
 
+from django.template.defaultfilters import slugify
+
 from celery.task import Task
 from celery.registry import tasks 
 
@@ -50,8 +52,7 @@ class Observer():
 		
 class AlgorithmTask(Task):
 	'''
-		Super class of all algorithms that are going to be stoppable from 
-		webpage's user interface. 
+		Super class of all algorithms.
 		
 		Call start() to run algorithm and stop() to.... stop. You can add 
 		observers by attach(observer) method which are notified when algorithm
@@ -63,37 +64,77 @@ class AlgorithmTask(Task):
 		When subclassing pay close attention that stop()-method works correctly
 		and algorithm writes final results into file. You probably only need 
 		to override methods __algorithm__ and _write_in_file_, but read 
-		documentation carefully.
+		documentation carefully. 
 	'''
 	
-	# Always subclass this class for any algorithm takss.
-	#abstract = True
+	# API - changeable elements
+		
+	# Human readable name of this algorithm. This name is used for celery's 
+	# task registering and in future we will be syncing database models and 
+	# callables together with this name. Override in subclass.
+	name = None
 	
-	# Running arguments given for this algorithm when instance was created.
+	# Does this algorithm have resulting image. 
+	has_image = False
+	
+	# Does this algorithm have resulting newick tree.
+	has_newick = False
+	
+	# Name of the key in result-dictionary that is intercepted and stored in 
+	# self.algorithm_run.score at run time (database is updated with the new 
+	# value). Intercepted value needs to be float or site might not render 
+	# properly in browser.
+	score_name = None
+
+	# Name of the key in result-dictionary that is intercepted and stored in 
+	# self.algorithm_run.current_iteration at run time (database is updated with 
+	# the new value). Intercepted value needs to be float or site might not 
+	# render properly in browser.
+	iteration_name = None
+	
+	# Input file's key in run_args. This is the key to main input data that 
+	# algorithm uses and should be same as the input file's key in 
+	# AlgorithmArgs-table. 
+	input_file_key = 'input_file'
+	
+	# API - accessable elements
+	
+	# Main running arguments given for this algorithm when instance was created.
+	# This is a dictionary which has (atleast) keys for this algorithms 
+	# arguments as described in AlgorithmArgs-table. This dictionary is passed 
+	# in **kwargs to overrided __algorithm__ method.
 	run_args = None
+	
+	# Images absolute path. This is automatically created when __init_run__ is
+	# called if has_image is True. Use this path when you want to create 
+	# resulting image for the algorithm run. 
+	image_path = None 
+	
+	# Newicks absolute path. This is automatically created when __init_run__ is
+	# called if has_newick is True. Use this path when you want to create 
+	# resulting newick tree for the algorithm run. 
+	newick_path = None
 	
 	# AlgorithmRun model instance this algorithm is referencing.
 	algorithm_run = None
 	
-	# Name of the key in result-dictionary that is intercepted and stored in 
-	# self.algorithm_run.score at run time. This needs to be float or errors 
-	# happen.
-	score_name = None
-
-	# Name of the key in result-dictionary that is intercepted and stored in 
-	# self.algorithm_run.current_iteration at run time. This needs to be 
-	# positive integer or errors happen.
-	iteration_name = None
+	### You don't probably need any of the following. ###
+	
+	# Always subclass this class for any algorithm tasks.
+	abstract = True
 	
 	# Queue where new results are put before they are written to file.
 	# This should be only accessed via algorithm instance itself.
 	_results_queue = Queue()
+	
 	# Stop sign for algorithm. It's shared value because algorithm is ran in 
 	# different thread. __algorihm__ should stop it's run in short future 
 	# when this value changes to 1.
 	_stop = mp.Value('b', 0)
+	
 	# Child process where __algorithm__ is run.
 	_algorithm_thread = None
+	
 	# Observers which are notified when new results are written to file. 
 	_observers = []
 	
@@ -101,19 +142,39 @@ class AlgorithmTask(Task):
 	# operations considering file reading/writing, manipulating _observers or
 	# _results_queue
 	
-	# Lock for file reading and writing operations..
-	file_lock = mp.Lock()
+	# Lock for file reading and writing operations.
+	file_lock = th.Lock()
 	# Lock for manipulating _observers
 	observer_lock = th.Lock()
 	# Lock for _results_queue. 
 	result_lock = th.Lock()
 			
 	def __init_run__(self, *args, **kwargs):
+		''' Celery calls __init__ only once when it is started for every task.
+			So we need to use this mock up init to initialize all the runs 
+			separately. Method initializes algorithms thread locks and results
+			queue and sets up image and newick path.
+			
+		'''
 		self.run_args = kwargs.pop('run_args', None)
 		run_id = kwargs.pop('algorithm_run', None)
 		if run_id is not None:
 			from Stemweb.algorithms.models import AlgorithmRun
 			self.algorithm_run = AlgorithmRun.objects.get(pk = run_id)
+			slug_name = slugify(self.algorithm_run.algorithm.name)
+			file_name = os.path.splitext(os.path.basename(self.run_args[self.input_file_key]))[0]
+			self.input_file_name = file_name
+			if self.has_image:
+				self.algorithm_run.image = os.path.join(self.run_args['url_base'], \
+					'%s_%s.svg' % (file_name, slug_name))
+				self.image_path = os.path.join(self.run_args['outfolder'], \
+					'%s_%s.svg' % (file_name, slug_name))
+			if self.has_newick:
+				self.algorithm_run.newick = os.path.join(self.run_args['url_base'],\
+				'%s_%s.tre' % (file_name, slug_name))
+				self.newick_path = os.path.join(self.run_args['outfolder'],\
+				'%s_%s.tre' % (file_name, slug_name))
+			self.algorithm_run.save()
 		obs = kwargs.pop('observers', None)
 	
 		self._stop = mp.Value('b', 0)
@@ -174,6 +235,8 @@ class AlgorithmTask(Task):
 			Algorithm should add any results that are going to be written in
 			file to _results_queue. It's advised to acquire lock for this
 			before actually using the queue.
+			
+			Remember to set self._stop.value = 1 before method returns.
 		'''
 
 				
@@ -185,9 +248,9 @@ class AlgorithmTask(Task):
 		self.__init_run__(*args, **kwargs)
 		
 		self.logger = logging.getLogger('stemweb.algorithm_run')
-		self.logger.info('AlgorithmRun started: %s:%s output:%s ' % (self.algorithm_run.algorithm.name, 
-																	self.algorithm_run.id, 
-																	self.algorithm_run.folder))
+		self.logger.info('AlgorithmRun started: %s:%s output:%s ' % \
+			(self.algorithm_run.algorithm.name, self.algorithm_run.id, \
+			self.algorithm_run.folder))
 
 		self._algorithm_thread = th.Thread(target = self.__algorithm__, 
 										args = (self.run_args,), 
@@ -222,7 +285,8 @@ class AlgorithmTask(Task):
 		else:
 			self.logger.info('Unknown %s AlgorithmRun ended' % (type(self)))
 
-		self.logger.info('AlgorithmRun ended: %s:%s' % (self.algorithm_run.algorithm.name, self.algorithm_run.id))
+		self.logger.info('AlgorithmRun ended: %s:%s' % \
+			(self.algorithm_run.algorithm.name, self.algorithm_run.id))
 		
 	@synchronized(result_lock)
 	def _put_in_results_(self, value):
@@ -254,24 +318,36 @@ class AlgorithmTask(Task):
 				if self.score_name in result.keys() and self.algorithm_run is not None:
 					self.algorithm_run.score = result[self.score_name]
 					self.algorithm_run.save()
-					self.logger.info("AlgorithmRun %s:%s got better score %s" % (self.algorithm_run.algorithm.name, self.algorithm_run.id, result[self.score_name]))
+					self.logger.info("AlgorithmRun %s:%s got better score %s" % \
+						(self.algorithm_run.algorithm.name, self.algorithm_run.id, \
+						result[self.score_name]))
 				if self.iteration_name in result.keys() and self.algorithm_run is not None:
 					self.algorithm_run.current_iteration = result[self.iteration_name]
 					self.algorithm_run.save()
-					self.logger.info("AlgorithmRun %s:%s advanced to %s iteration" % (self.algorithm_run.algorithm.name, self.algorithm_run.id, result[self.iteration_name]))	
+					self.logger.info("AlgorithmRun %s:%s advanced to %s iteration" % \
+						(self.algorithm_run.algorithm.name, self.algorithm_run.id, \
+						result[self.iteration_name]))	
 						
 				self._write_in_file_(result)
 				#self._notify_()
 			except Empty:
 				pass	
 			except:
-				self.logger('AlgorithmRun %s:%s writing to file failed in %s' % (self.algorithm_run.algorithm.name, self.algorithm_run.id, self.run_args['outfolder']))
+				self.logger('AlgorithmRun %s:%s writing to file failed in %s' % \
+					(self.algorithm_run.algorithm.name, self.algorithm_run.id, \
+					self.run_args['outfolder']))
 			
 			time.sleep(0.1)
 
 			
 	def _write_in_file_(self, result):
-		''' Override in subclass. Write result object to given output path. '''
+		''' Override in subclass. Write result object to given output paths 
+			(usually self.image_path and self.newick_path). 
+		
+			If the subclass writes only the final results then you don't have 
+			to use this and you can instead write the results in the overrided
+			__algorithm__ method.
+		'''
 		self.file_lock.acquire()
 		# Do your file writing between the acquire and release.
 		self.file_lock.release()
@@ -286,4 +362,3 @@ class AlgorithmTask(Task):
 		for o in self._observers:
 			o.update(self)
 	
-tasks.register(AlgorithmTask)	

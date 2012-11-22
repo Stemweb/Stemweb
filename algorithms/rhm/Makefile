@@ -4,8 +4,8 @@ binarysankoff:
 NCD:
 	gcc -lz NCD.c -o NCD
 	
-binarysankoff_python_osx:
-	gcc -dynamiclib -I/usr/include/python2.7/ -lpython2.7 -lz -o binarysankoff.dylib binarysankoff.c 
+rhm_osx:
+	gcc -dynamiclib -Wall -I/usr/include/python2.7/ -lpython2.7 -lz -o binarysankoff.dylib binarysankoff.c 
 	mv ./binarysankoff.dylib ./binarysankoff.so
 
 binarysankoff_python:

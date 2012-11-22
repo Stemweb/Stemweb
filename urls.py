@@ -6,7 +6,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
 	(r'^', include('home.urls')),
 	(r'^files/', include('files.urls')),
-	(r'^algorithms/', include('algorithms.urls')),
+	(r'^', include('algorithms.urls')),
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve',{'document_root': settings.MEDIA_ROOT}, name='stemweb_media_root_url'),
     
     # These are the registration apps own urls. Check documentation for the usage.
