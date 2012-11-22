@@ -6,7 +6,7 @@ from django import forms
 from Stemweb.files import forms as files_forms
 
 #from .semstem.semstem import Semstem
-from .semstempython.semstem import Semstem
+from .semstempython.semstemprob import Semstem
 from .neighbour_joining.njc import NJ
 from .neighbour_net.neighbornet_class import NN
 from .rhm.binary_sankoff import RHM
