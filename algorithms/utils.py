@@ -14,7 +14,7 @@ from Stemweb.files.models import InputFile
 from django.template.defaultfilters import slugify
 from django.shortcuts import get_object_or_404
 
-nw_display = os.path.join(settings.SITE_ROOT, 'requirements', 'stemenv', 'bin', 'nw_display')
+nw_display = os.path.join(settings.SITE_ROOT, 'shell_scripts', 'nw_display')
 
 def newick2svg(newick, filepath, branch_length = True, radial = True, width = 800):
 	'''
