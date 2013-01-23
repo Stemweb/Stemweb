@@ -1,0 +1,60 @@
+[
+	{
+  		"model": "algorithms.algorithmarg",
+  		"pk": 1,
+  		"fields": {
+  			"key": "infile",
+  			"value": "input_file",
+  			"verbose_name": "Input File",
+  			"description": "Algorithm currently accepts only .nex files"
+  		}
+  	},
+  	
+	{
+  		"model": "algorithms.algorithmarg",
+  		"pk": 2,
+  		"fields": {
+  			"key": "itermaxin",
+  			"value": "positive_integer",
+  			"verbose_name": "Iterations",
+  			"description": ""
+  		}
+  	},
+  	
+  	{
+  		"model": "algorithms.algorithmarg",
+  		"pk": 3,
+  		"fields": {
+  			"key": "input_file",
+  			"value": "input_file",
+  			"verbose_name": "Input File",
+  			"description": "Must be .nex"
+  		}
+  	},
+
+	{
+    	"model": "algorithms.algorithm",
+    	"pk": 1,
+    	"fields": {
+      		"name": "Semstem",
+      		"source": "/Users/slinkola/algorithms/semsep_stop_len/allunilen.r",
+      		"desc": "Short tooltip text of semstem",
+      		"url": "http://",
+      		"args": [1,2],
+      		"template": "semstem_about.html"
+    	}
+  	},
+  	
+  	{
+    	"model": "algorithms.algorithm",
+    	"pk": 2,
+    	"fields": {
+      		"name": "Neighbour Joining",
+      		"source": "sumting",
+      		"desc": "Neighbour joining algorithm",
+      		"url": "http://",
+      		"args": [3]
+    	}
+  	}
+  
+]

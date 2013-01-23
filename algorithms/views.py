@@ -85,9 +85,7 @@ def run(request, algo_id):
 	if request.method == 'POST':
 		algorithm = get_object_or_404(Algorithm, pk = algo_id)
 		form = algorithm.args_form(user = request.user, post = request.POST)
-		print "Pluu"
 		if form.is_valid():
-			print "ploo"
 			run_args = utils.build_args(form, algorithm_id = algo_id, request = request)
 			current_run = AlgorithmRun.objects.create(input_file = InputFile.objects.get(id = run_args['file_id']),
 													algorithm = Algorithm.objects.get(id = algo_id), 

@@ -21,7 +21,7 @@ from Stemweb.third_party_apps.registration.forms import AuthenticationFormWithRe
 # Register view needs this for recaptcha-field.
 from Stemweb.third_party_apps.recaptcha_works.decorators import fix_recaptcha_remote_ip
 
-from registration.backends import get_backend
+from Stemweb.third_party_apps.registration.backends import get_backend
 
 def activate(request, backend,
              template_name='registration/activate.html',
