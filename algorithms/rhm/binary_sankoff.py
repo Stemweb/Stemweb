@@ -33,7 +33,7 @@ class RHM(AlgorithmTask):
 		svg_path = os.path.join(self.run_args['outfolder'], 'rhm.svg')
 		
 		from Stemweb.algorithms.utils import newick2svg
-		newick2svg(self.newick_path, self.image_path)
+		newick2svg(self.newick_path, self.image_path, radial = self.radial_image)
 		
 		sleep(0.1)
 		self._stop.value = 1

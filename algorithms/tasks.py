@@ -77,6 +77,9 @@ class AlgorithmTask(Task):
 	# Does this algorithm have resulting image. 
 	has_image = False
 	
+	# Is image layout radial or not.
+	radial_image = False
+	
 	# Does this algorithm have resulting newick tree.
 	has_newick = False
 	
@@ -156,7 +159,7 @@ class AlgorithmTask(Task):
 			queue and sets up image and newick path.
 			
 		'''
-		self.run_args = kwargs.pop('run_args', None)
+		self.run_args = kwargs.pop('run_args', None)			
 		run_id = kwargs.pop('algorithm_run', None)
 		if run_id is not None:
 			from Stemweb.algorithms.models import AlgorithmRun
@@ -175,6 +178,10 @@ class AlgorithmTask(Task):
 				self.newick_path = os.path.join(self.run_args['outfolder'],\
 				'%s_%s.tre' % (file_name, slug_name))
 			self.algorithm_run.save()
+		
+		if self.run_args['radial']:	# Make radial image
+			self.radial_image = True
+			
 		obs = kwargs.pop('observers', None)
 	
 		self._stop = mp.Value('b', 0)
