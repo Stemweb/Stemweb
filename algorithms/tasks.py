@@ -179,7 +179,7 @@ class AlgorithmTask(Task):
 				'%s_%s.tre' % (file_name, slug_name))
 			self.algorithm_run.save()
 		
-		if self.run_args['radial']:	# Make radial image
+		if self.run_args['radial'] == True:	# Make radial image
 			self.radial_image = True
 			
 		obs = kwargs.pop('observers', None)
