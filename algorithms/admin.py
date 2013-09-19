@@ -13,7 +13,7 @@ class AlgorithmAdmin(admin.ModelAdmin):
 	
 class AlgorithmArgAdmin(admin.ModelAdmin):
 	actions = ['add_argument']
-	list_display = ('verbose_name', 'key', 'value')
+	list_display = ('name', 'key', 'value')
 	search_fields = ('value', 'key')
 
 	

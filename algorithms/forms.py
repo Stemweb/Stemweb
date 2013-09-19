@@ -37,7 +37,7 @@ class DynamicArgs(forms.Form):
 		self.input_files = []
 		
 		for arg in arguments.all():
-			key, value, name = arg.key, arg.value, arg.verbose_name
+			key, value, name = arg.key, arg.value, arg.name
 			kwargs = {'label': name, 'validators': field_validators[value]}
 			if value == 'boolean': kwargs['required'] = False
 			if value == 'input_file': 

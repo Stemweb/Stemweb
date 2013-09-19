@@ -287,7 +287,7 @@ class AlgorithmTask(Task):
 			self.algorithm_run = AlgorithmRun.objects.get(pk=self.algorithm_run.id)
 			self.algorithm_run.finished = True
 			self.algorithm_run.end_time = datetime.datetime.now()
-			#self.algorithm_run.pid = -1
+			self.algorithm_run.pid = -1
 			self.algorithm_run.save()
 		else:
 			self.logger.info('Unknown %s AlgorithmRun ended' % (type(self)))

@@ -7,9 +7,13 @@ import os
 import sys
 from time import sleep
 import logging
+import platform
 from Stemweb.algorithms.tasks import AlgorithmTask
 
+
 import binarysankoff
+#else:
+#	import binarysankoff_linux as binarysankoff
 
 class RHM(AlgorithmTask):
 	name = "RHM"

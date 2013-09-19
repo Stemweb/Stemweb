@@ -95,7 +95,7 @@ class NJ(AlgorithmTask):
 			
 			from Stemweb.algorithms.utils import newick2svg
 			newick2svg(self.newick_path, self.image_path, \
-				branch_length = False, radial = self.radial_image)	
+				branch_length = False, radial = False)	
 		
 		f = None
 		try:

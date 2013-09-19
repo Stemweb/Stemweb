@@ -5,8 +5,9 @@
   		"fields": {
   			"key": "infile",
   			"value": "input_file",
-  			"verbose_name": "Input File",
-  			"description": "Algorithm currently accepts only .nex files"
+  			"name": "Input File",
+  			"description": "Must be .nex",
+  			"external": "False"
   		}
   	},
   	
@@ -16,7 +17,7 @@
   		"fields": {
   			"key": "itermaxin",
   			"value": "positive_integer",
-  			"verbose_name": "Iterations",
+  			"name": "Iterations",
   			"description": ""
   		}
   	},
@@ -27,7 +28,7 @@
   		"fields": {
   			"key": "runmax",
   			"value": "positive_integer",
-  			"verbose_name": "Runs",
+  			"name": "Runs",
   			"description": "Number of 'parallel' runs"
   		}
   	},
@@ -38,8 +39,8 @@
   		"fields": {
   			"key": "learnlength",
   			"value": "boolean",
-  			"verbose_name": "Estimate Arc Length",
-  			"description": "tooltip for arc length"
+  			"name": "Estimate Arc Length",
+  			"description": ""
   		}
   	},
   	
@@ -49,8 +50,9 @@
   		"fields": {
   			"key": "input_file",
   			"value": "input_file",
-  			"verbose_name": "Input File",
-  			"description": "Must be .nex"
+  			"name": "Input File",
+  			"description": "Must be .nex",
+  			"external": "False"
   		}
   	},
   	
@@ -60,8 +62,9 @@
   		"fields": {
   			"key": "infolder",
   			"value": "input_file",
-  			"verbose_name": "Input File",
-  			"description": "Must be .csv"
+  			"name": "Input File",
+  			"description": "Must be .csv",
+  			"external": "False"
   		}
   	},
   	
@@ -71,8 +74,20 @@
   		"fields": {
   			"key": "imax",
   			"value": "positive_integer",
-  			"verbose_name": "Iterations",
+  			"name": "Iterations",
   			"description": ""
+  		}
+  	},
+  	
+  	  	 {
+  		"model": "algorithms.algorithmarg",
+  		"pk": 8,
+  		"fields": {
+  			"key": "radial",
+  			"value": "boolean",
+  			"name": "Radial Image Layout",
+  			"description": "",
+  			"external": "False"
   		}
   	},
 
@@ -81,7 +96,7 @@
     	"pk": 1,
     	"fields": {
       		"name": "Semstem",
-      		"source": "/Users/slinkola/algorithms/semsep_stop_len/allunilen.r",
+      		"source": "No source currently available.",
       		"desc": "Short tooltip text of semstem",
       		"url": "http://",
       		"args": [1,2],
@@ -94,10 +109,10 @@
     	"pk": 2,
     	"fields": {
       		"name": "RHM",
-      		"source": "/Users/slinkola/algorithms/rhm/binarysankoff_python.c",
+      		"source": "No source currently available.",
       		"desc": "Another short desc, now about RHM. Also comes from database.",
       		"url": "http://",
-      		"args": [6, 7]
+      		"args": [6, 7, 8]
     	}
   	},
   	
@@ -106,9 +121,9 @@
     	"pk": 3,
     	"fields": {
       		"name": "Neighbour Joining",
-      		"source": "sumting",
+      		"source": "No source currently available.",
       		"desc": "Neighbour joining algorithm",
-      		"url": "http://",
+      		"url": "https://en.wikipedia.org/wiki/Neighbor_joining",
       		"args": [5]
     	}
   	},
@@ -118,9 +133,9 @@
     	"pk": 4,
     	"fields": {
       		"name": "Neighbour Net",
-      		"source": "sumting",
+      		"source": "No source currently available.",
       		"desc": "Neighbour Net algorithm",
-      		"url": "http://",
+      		"url": "https://en.wikipedia.org/wiki/Neighbor-net",
       		"args": [5]
     	}
   	}

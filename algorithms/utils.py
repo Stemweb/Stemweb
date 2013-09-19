@@ -8,6 +8,7 @@ import logging
 
 from models import Algorithm
 from .settings import ARG_VALUE_FIELD_TYPE_KEYS as field_types
+from .settings import TRUSTED_SERVERS
 from Stemweb import settings
 from Stemweb.files.models import InputFile
 
@@ -71,7 +72,7 @@ def build_run_folder(user, input_file_id, algorithm_name):
 
 
 def build_args(form = None, algorithm_id = None, request = None):
-	''' Generate running args from given DynamicArgs-form.
+	''' Generate arguments from given DynamicArgs-form for an algorithm run.
 		
 		Returns dictionary with running arguments. 
 	'''
@@ -102,5 +103,69 @@ def register(algorithm = None, name = None):
 	
 	if name is None and algorithm.name is None:
 		name = algorithm.__class__
+		
+		
+def validate_server(request):
+	addr = request.META['REMOTE_ADDR']
+	port = request.META['SERVER_PORT']
+	trusted_server = False
+	
+	for server in TRUSTED_SERVERS:
+		if server['addr'] == addr and server['port'] == port:
+			trusted_server = True
+	
+	if trusted_server:
+		return (True, None)
+	else:
+		return (False, "%s:%s not in trusted server list" % (addr, port))
+	
+	
+def validate_json(json_data, algo_id):
+	''' Validate that 
+	
+	'''
+	algorithm = Algorithm.objects.get_or_none(pk = algo_id)
+	if algorithm is None: return (False, "No such algorithm id.")
+	
+	userid = json_data.pop('userid', None)
+	if userid is None: return (False, "No userid given.")
+	
+	params = json_data['parameters']
+	
+	args_present = True
+	for arg in algorithm.args.all():
+		if arg.send_to_external:
+			if params.has_key(arg.key):
+				value = params[arg.key]
+				if not validate_parameter(value, arg.value):
+					return (False, "Parameter %s = %s had wrong type. Expected %s." %\
+						(arg.key, value, arg.value))
+			else: 
+				return (False, "No parameter %s present" % (arg.key))
+				
+		
+def validate_parameter(value, param_type):
+	if param_type == "positive_integer":
+		if type(int(value)) == int:
+			return int(value) > 0
+		else: 
+			return False
+	if param_type == "integer":
+		return type(int(value)) == int
+	if param_type == "float":
+		return type(float(value)) == float
+	if param_type == "boolean":
+		if value.lower() == ("false" or "true"):
+			return True
+		else:
+			return False
+	if param_type == "string":
+		return type(str(value)) == str
+	return False
+	
+		
+					
+	
+	
 
 			

@@ -17,3 +17,5 @@ logs/
 *.dylib
 *.nex
 tmp.gz
+notes_for_stemmawed.txt
+lsettings.py

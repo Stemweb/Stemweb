@@ -36,24 +36,26 @@ class AlgorithmArg(models.Model):
 				
 				TODO: write that see
 				
-		verbose_name	Human readable name of the argument presented in browser.
+		name			Human readable name of the argument presented in browser.
 		
 		description		Optional, longer description of this argument.
+		
+		external		Will this argument be sent to external server
 	'''
 	value_choices = ARG_VALUE_CHOICES
 	
 	key = models.CharField(max_length = 50)
 	value = models.CharField(max_length = 50, choices = value_choices)
-	verbose_name = models.CharField(max_length = 100)
+	name = models.CharField(max_length = 100)
 	description = models.CharField(max_length = 2000, blank = True)
+	external = models.BooleanField(default = True)
 	
 	class Meta:
-		ordering = ['value', 'key', 'verbose_name']
+		ordering = ['value', 'key', 'name']
 		
 	
 class Algorithm(models.Model):
-	'''
-		Base model for all algorithms. Contains information like name,
+	''' Base model for all algorithms. Contains information like name,
 		page url, name, source of the code and running arguments. 
 		Add your algorithms here and remember to link the callable algorithm
 		instance into this model. Most likely that will be instance of 
@@ -106,8 +108,7 @@ class Algorithm(models.Model):
 				
 	
 	def get_callable(self, kwargs):
-		'''
-			Update run_args dictionary with all the keys from settings 
+		''' Update run_args dictionary with all the keys from settings 
 			ALGORITHM_CALLING_DICT except 'callable' itself which is returned.
 			
 			Any keys that are present in run_args already are not updated.
@@ -141,6 +142,18 @@ class Algorithm(models.Model):
 		'''
 		if len(self.args.all()) == 0: return None
 		return DynamicArgs(arguments = self.args, user = user, post = post)
+	
+	
+	def get_external_args(self):
+		''' Get all algorithms arguments that will be send to external server. 
+		'''
+		external_args = []
+		for arg in self.args.all():
+			if arg.external:
+				external_args.append(arg)
+				
+		return external_args
+			
 			
 	class Meta:
 		ordering = ['name']
@@ -149,8 +162,7 @@ class Algorithm(models.Model):
 
 			
 class AlgorithmRun(models.Model):
-	'''
-		Base information of all the different runs of algorithms.
+	''' Base information of all the different runs of algorithms.
 		
 		start_time	: When run was started. Basically the time when this instance
 					  was created.
@@ -159,9 +171,6 @@ class AlgorithmRun(models.Model):
 					  by user or it ended normally (converged or not).
 		
 		finished	: Is the run finished already. For quick checking.
-		
-		pid			: Process id of the still running algorithm. When algorithm 
-					  stops value is changed to -1.
 		
 		algorithm	: Algorithm used for this run. Foreign key to Algorithm-
 					  model
@@ -182,12 +191,13 @@ class AlgorithmRun(models.Model):
 					  value to other than null when initiating run. Otherwise
 					  it can cause rendering issues in browser.
 					  
+		newick		: Resulting newick file of the run.
+					  
 		TODO: change images and folder to be in the results, probably.  
 	'''
 	start_time = models.DateTimeField(auto_now_add = True)
 	end_time = models.DateTimeField(auto_now_add = False, null = True)
 	finished = models.NullBooleanField(default = False)
-	#pid = models.IntegerField(default = -1)
 	algorithm = models.ForeignKey(Algorithm)        
 	input_file = models.ForeignKey(InputFile)   
 	folder = models.CharField(max_length = 300) 
@@ -196,11 +206,8 @@ class AlgorithmRun(models.Model):
 	score = models.FloatField(null = True, verbose_name = "Score")
 	current_iteration = models.PositiveIntegerField(null = True)
 	newick = models.URLField(blank = True, default = '')
-	#task = models.ForeignKey(djangotasks.Task, null = True)
 	
-	''' 
-		Really we will be wanting to have this as PickleField.
-	'''
+	#Really we will be wanting to have this as PickleField.
 	#results = dict()
 	
 	def delete(self):
@@ -223,7 +230,7 @@ class AlgorithmRun(models.Model):
 					shutil.rmtree(os.path.join(root, d))
 			os.rmdir(root)
 		except:
-			# If there is an exception log it (and probably inform admins about 
+			# If there is an exception, log it (and probably inform admins about 
 			# it), but still delete run for end users convenience.
 			logger = logging.getLogger('stemweb.algorithm_run')
 			logger.error('AlgorithmRun could not delete files: %s:%s folder:%s' \
@@ -242,6 +249,8 @@ class AlgorithmRun(models.Model):
 		ordering = ['finished', '-end_time', '-start_time']
 	
 	objects = GetOrNoneManager()
+	
+	
 	
 	
 	

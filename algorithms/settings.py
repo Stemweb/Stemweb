@@ -11,6 +11,7 @@ from .neighbour_joining.njc import NJ
 from .neighbour_net.neighbornet_class import NN
 from .rhm.binary_sankoff import RHM
 import validators
+import  lsettings
 
 URL_PREFIX = 'algorithms'
 
@@ -74,5 +75,7 @@ ARG_VALUE_FIELD_TYPE_VALIDATORS = {
    	'input_file': [],
    	'boolean': [] 
 }
+
+TRUSTED_SERVERS = lsettings.TRUSTED_SERVERS
 
 #ALGORITHM_RUN_STATES = 

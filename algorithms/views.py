@@ -5,6 +5,7 @@ Created on Mar 28, 2012
 '''
 import time
 import logging
+import json
 
 from django.http import Http404
 from django.http import HttpResponse
@@ -16,12 +17,13 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
+from django.core.serializers import serialize
 from django.contrib.auth.decorators import login_required
 
 #from Stemweb.third_party_apps.djangotasks import task_for_object, run_task
 
 from .models import InputFile
-from .models import Algorithm, AlgorithmRun
+from .models import Algorithm, AlgorithmRun, AlgorithmArg
 from . import utils
 import settings
 
@@ -78,8 +80,7 @@ def delete_runs(request):
 	
 @login_required
 def run(request, algo_id):
-	'''
-		Run's the given algorithm with run_args spesified in request.POST if the
+	''' Run's the given algorithm with run_args spesified in request.POST if the
 		form builded from them is valid.
 	'''
 	if request.method == 'POST':
@@ -117,5 +118,44 @@ def results(request, run_id):
 			return render_to_response('algorithm_running_results.html', c)
 		
 	raise Http404
+
+
+def available(request):
+	''' Returns all available AlgorithmArg and Algorithm model instances in json.
+	'''
+	return HttpResponse(serialize('json', list(AlgorithmArg.objects.all()) +\
+			list(Algorithm.objects.all()), fields = ['pk', 'key', 'value', 'name', 'args']),\
+			mimetype='application/json')
+	
+	
+def process(request, algo_id):
+	''' Process external servers algorithm run. '''
+	ret = utils.validate_server(request)
+	if not ret[0]:
+		error_message = json.dumps({'error': ret[1]})
+		response = HttpResponse(error_message)
+		response.status_code = 403
+		return response
+		
+	if request.method == 'POST':
+		json_data = json.loads(request.body)
+		ret = utils.validate_json(json_data, algo_id)
+		if not ret[0]:
+			# No valid JSON
+			error_message = json.dumps({'error': ret[1]})
+			response = HttpResponse(error_message)
+			response.status_code = 400
+			return response
+		else:
+			return HttpResponse()
+		
+	else: 
+		error_message = json.dumps({'error': 'Please use POST'})
+		response = HttpResponse(error_message)
+		response.status_code = 400
+		return response
+	
+	
+
 
 
