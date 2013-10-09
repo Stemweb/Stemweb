@@ -103,8 +103,7 @@ def run(request, algo_id):
 		resp.status_code = 404
 		return resp
 	
-	return HttpResponseRedirect(reverse('algorithms_details_url', \
-		args = { algo_id }))    
+	return HttpResponseRedirect(reverse('algorithms_details_url', args = { algo_id }))
 
 @login_required
 def results(request, run_id):
