@@ -3,8 +3,8 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 
-from registration import signals
-from registration.forms import RegistrationForm
+from Stemweb.third_party_apps.registration import signals
+from Stemweb.third_party_apps.registration.forms import RegistrationForm
 from Stemweb.third_party_apps.registration.forms import RegistrationFormUniqueEmailWithReCaptcha
 
 class DefaultBackend(object):
