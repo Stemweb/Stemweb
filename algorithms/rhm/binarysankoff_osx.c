@@ -1490,7 +1490,7 @@ static PyMethodDef binarysankoff_methods[] = {
 /*
  *	Python needs this to init module.
  */
-void initbinarysankoff_osx()
+void initbinarysankoff()
 {
 	(void) Py_InitModule("binarysankoff", binarysankoff_methods);
 }

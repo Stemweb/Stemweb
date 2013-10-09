@@ -10,7 +10,7 @@ NCD:
 	
 osx:
 	gcc -dynamiclib -Wall -I/usr/include/python2.7/ -lpython2.7 -lz -o binarysankoff_osx.dylib binarysankoff_osx.c 
-	mv ./binarysankoff_osx.dylib ./binarysankoff_osx.so
+	mv ./binarysankoff_osx.dylib ./binarysankoff.so
 
 linux:
 	gcc -I/home/slinkola/test/stemenv/include/python2.6/ -lpython2.6 -I/home/slinkola/test/stemenv/include -L/home/slinkola/test/stemenv/lib -fPIC -g -Wall -c binarysankoff_linux.c
