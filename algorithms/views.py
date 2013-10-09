@@ -108,6 +108,8 @@ def run(request, algo_id):
 
 @login_required
 def results(request, run_id):
+	''' Results of the algorithm run by run_id. Runs user should be the same as 
+		the one who send the request. '''
 	run = get_object_or_404(AlgorithmRun, id = run_id)
 	
 	if request.user == run.user:
@@ -121,8 +123,8 @@ def results(request, run_id):
 
 
 def available(request):
-	''' Returns all available AlgorithmArg and Algorithm model instances in json.
-	'''
+	''' Returns all available AlgorithmArg and Algorithm model instances in 
+		json-format. '''
 	return HttpResponse(serialize('json', list(AlgorithmArg.objects.all()) +\
 			list(Algorithm.objects.all()), fields = ['pk', 'key', 'value', 'name', 'args']),\
 			mimetype='application/json')
@@ -132,6 +134,7 @@ def process(request, algo_id):
 	''' Process external servers algorithm run. '''
 	ret = utils.validate_server(request)
 	if not ret[0]:
+		# IP not in trusted list
 		error_message = json.dumps({'error': ret[1]})
 		response = HttpResponse(error_message)
 		response.status_code = 403
@@ -147,6 +150,7 @@ def process(request, algo_id):
 			response.status_code = 400
 			return response
 		else:
+			# TODO: Do the actual processing.	
 			return HttpResponse()
 		
 	else: 

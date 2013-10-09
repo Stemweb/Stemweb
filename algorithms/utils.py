@@ -106,6 +106,11 @@ def register(algorithm = None, name = None):
 		
 		
 def validate_server(request):
+	''' Validate, that request is send from trusted server. 
+	
+		Returns true if it is, otherwise false.
+	''' 
+	
 	addr = request.META['REMOTE_ADDR']
 	port = request.META['SERVER_PORT']
 	trusted_server = False
@@ -121,8 +126,12 @@ def validate_server(request):
 	
 	
 def validate_json(json_data, algo_id):
-	''' Validate that 
+	''' Validate that json contains all the needed parameters for external 
+	algorithm run.
 	
+	returns 2-tuple (boolean, error message). If boolean is true, json
+	is valid, otherwise error message should send some light into why the query
+	failed.
 	'''
 	algorithm = Algorithm.objects.get_or_none(pk = algo_id)
 	if algorithm is None: return (False, "No such algorithm id.")
@@ -142,9 +151,12 @@ def validate_json(json_data, algo_id):
 						(arg.key, value, arg.value))
 			else: 
 				return (False, "No parameter %s present" % (arg.key))
+			
+	return (True, "")
 				
 		
 def validate_parameter(value, param_type):
+	''' Validate, that value can be converted safely into param_type. '''
 	if param_type == "positive_integer":
 		if type(int(value)) == int:
 			return int(value) > 0

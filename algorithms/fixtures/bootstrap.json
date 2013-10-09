@@ -124,7 +124,7 @@
       		"source": "No source currently available.",
       		"desc": "Neighbour joining algorithm",
       		"url": "https://en.wikipedia.org/wiki/Neighbor_joining",
-      		"args": [5]
+      		"args": [5, 8]
     	}
   	},
   	
