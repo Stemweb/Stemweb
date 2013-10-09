@@ -155,10 +155,10 @@ INSTALLED_APPS = (
     'Stemweb.third_party_apps.pagination',
     
     # Own apps
-    'home',
-    'local',
-    'algorithms',
-    'files',
+    'Stemweb.home',
+    'Stemweb.local',
+    'Stemweb.algorithms',
+    'Stemweb.files',
 )
 
 BROKER_BACKEND = "django"
