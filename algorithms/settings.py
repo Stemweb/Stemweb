@@ -7,8 +7,8 @@ from Stemweb.files import forms as files_forms
 
 #from .semstem.semstem import Semstem
 from .semstempython.semstemprob import Semstem
+#from .neighbour_net.neighbornet_class import NN
 from .neighbour_joining.njc import NJ
-from .neighbour_net.neighbornet_class import NN
 from .rhm.binary_sankoff import RHM
 import validators
 import  lsettings
@@ -31,9 +31,9 @@ ALGORITHMS_CALLING_DICT = {
 	'3': {
 		'callable': NJ,
 	},
-	'4': {
-		'callable': NN,
-	},	
+#	'4': {
+#		'callable': NN,
+#	},	
 }
 
 '''
