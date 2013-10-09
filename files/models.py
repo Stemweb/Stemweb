@@ -31,6 +31,6 @@ class InputFile(models.Model):
 		ordering = ['name', 'extension', '-last_access']
 
 	def __str__(self):
-		return smart_str('%s uploaded: %s' % (self.name, self.upload_time.strftime('%d.%m.%y %H:%M')))
+		return smart_str('%s uploaded: %s' % (self.file, self.upload_time.strftime('%d.%m.%y %H:%M')))
 	
 	objects = GetOrNoneManager()
