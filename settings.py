@@ -115,7 +115,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'third_party_apps.pagination.middleware.PaginationMiddleware',
+    'Stemweb.third_party_apps.pagination.middleware.PaginationMiddleware',
 )
 
 ROOT_URLCONF = lstrings.root_urls
@@ -150,9 +150,9 @@ INSTALLED_APPS = (
     'djcelery',
 	"djkombu",
     
-    'third_party_apps.recaptcha_works',
-    'third_party_apps.registration',
-    'third_party_apps.pagination',
+    'Stemweb.third_party_apps.recaptcha_works',
+    'Stemweb.third_party_apps.registration',
+    'Stemweb.third_party_apps.pagination',
     
     # Own apps
     'home',
