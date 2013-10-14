@@ -14,8 +14,5 @@ osx:
 
 linux:
 	gcc -I/home/slinkola/test/stemenv/include/python2.6/ -lpython2.6 -I/home/slinkola/test/stemenv/include -L/home/slinkola/test/stemenv/lib -fPIC -g -Wall -c binarysankoff_linux.c
-	gcc -shared -fPIC -Wall -I/home/slinkola/test/stemenv/include -L/home/slinkola/test/stemenv/lib \
-	-Wl,-rpath,/home/slinkola/test/stemenv/lib -Wl,-soname,/home/slinkola/test/zlib-1.2.3.5/libz.so.1 \
-	binarysankoff_linux.o -lz -o binarysankoff.so
-	
+	gcc -shared -fPIC -Wall -I/home/slinkola/test/stemenv/include -L/home/slinkola/test/stemenv/lib binarysankoff_linux.o -o binarysankoff.so -lz	
 	

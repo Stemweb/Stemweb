@@ -13,6 +13,6 @@ urlpatterns = patterns('',
     
     # Following urls are for external algorithm runs.
     url(r'^%s/available/$' % URL_PREFIX, available, name = 'algorithms_available_url'),
-	url(r'^%s/process/(?P<algo_id>\d+)/$' % URL_PREFIX, process, name = 'algorithms_process_url'),
+    url(r'^%s/process/(?P<algo_id>\d+)/$' % URL_PREFIX, process, name = 'algorithms_process_url'),
 
 )
