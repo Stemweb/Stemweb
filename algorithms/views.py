@@ -150,8 +150,11 @@ def process(request, algo_id):
 			response.status_code = 400
 			return response
 		else:
-			# TODO: Do the actual processing.	
-			return HttpResponse()
+			# TODO: Do the actual processing.
+			message = json.dumps({'message': "OK"})	
+			response = HttpResponse(message)
+			response.status_code = 200
+			return response
 		
 	else: 
 		error_message = json.dumps({'error': 'Please use POST'})
