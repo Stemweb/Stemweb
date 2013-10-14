@@ -116,7 +116,7 @@ def validate_server(request):
 	trusted_server = False
 	
 	for server in TRUSTED_SERVERS:
-		if server['addr'] == addr and server['port'] == port:
+		if server['addr'] == addr:
 			trusted_server = True
 	
 	if trusted_server:
