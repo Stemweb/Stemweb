@@ -205,6 +205,11 @@ RECAPTCHA_OPTIONS = {
 # TODO: change when in production to False
 CONCURRENT_RANDOM_DELAY = True
 
+# Absolute path to newick-utils-1.6 base compilation directory (where 
+# nw_display, etc. are located).
+NEWICK_UTILS = lstrings.newick_utils
+
+
 ROOT_LOG_DIR = os.path.join(SITE_ROOT, 'logs')
 if not os.path.exists(ROOT_LOG_DIR):
 	os.mkdir(ROOT_LOG_DIR);

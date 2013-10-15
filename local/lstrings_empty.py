@@ -50,3 +50,7 @@ email_tls = ''          # Does the email server use tls.   True
 
 recaptcha_public_key  = ''
 recaptcha_private_key = ''
+
+# Absolute path to newick-utils-1.6 base compilation directory (where 
+# nw_display, etc. are located).
+newick_utils = ''
