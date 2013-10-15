@@ -20,11 +20,10 @@ from django.core.urlresolvers import reverse
 from django.core.serializers import serialize
 from django.contrib.auth.decorators import login_required
 
-#from Stemweb.third_party_apps.djangotasks import task_for_object, run_task
-
 from .models import InputFile
 from .models import Algorithm, AlgorithmRun, AlgorithmArg
 from . import utils
+from . import execute_algorithm
 import settings
 
 def base(request):
@@ -54,6 +53,11 @@ def details(request, algo_id, form = None):
 	
 @login_required
 def delete_runs(request):
+	''' Delete runs that are present in request.POST in 'runs' paramater.
+	
+	If any of the run id's don't belong to user making the request, does not 
+	delete any of the runs.
+	'''
 	
 	if request.method == 'POST':
 		run_ids = request.POST.get('runs').split()
@@ -64,14 +68,12 @@ def delete_runs(request):
 				logger = logging.getLogger('stemweb.algorithm_run')
 				logger.error('AlgorithmRun %s:%s tried to be removed by wrong user id:%s' \
 				% (r.algorithm.name, r.id, request.user.id))
-				return HttpResponseBadRequest("You are trying to remove runs which are not owned by active user. \n The request could not be completed and has been logged.")
+				return HttpResponseBadRequest("You are trying to remove runs which are not owned by active user.\nThe request could not be completed and has been logged.")
 		
 		for r in runs:
 			#if r.finished == True:
-			'''
-				TODO: prompt that user has to stop the run before it can be 
-				deleted.
-			'''
+			# TODO: prompt that user has to stop the run before it can be 
+			# deleted. 
 			r.delete()
 		
 		return HttpResponse("Runs were deleted succesfully.")	
@@ -87,17 +89,9 @@ def run(request, algo_id):
 		algorithm = get_object_or_404(Algorithm, pk = algo_id)
 		form = algorithm.args_form(user = request.user, post = request.POST)
 		if form.is_valid():
-			run_args = utils.build_args(form, algorithm_id = algo_id, request = request)
-			current_run = AlgorithmRun.objects.create(input_file = InputFile.objects.get(id = run_args['file_id']),
-													algorithm = Algorithm.objects.get(id = algo_id), 
-													user = request.user,
-	                                            	folder = run_args['outfolder'])
-			current_run.save()	
-			kwargs = {'run_args': run_args, 'algorithm_run': current_run.id}
-			call = algorithm.get_callable(kwargs)
-			call.delay(**kwargs)
+			run_id = execute_algorithm.local(form, algo_id, request)
 			return HttpResponseRedirect(reverse('algorithms_run_results_url', \
-				kwargs = { 'run_id': current_run.id }))
+				kwargs = { 'run_id': run_id }))
 	else:
 		resp = render_to_response('404.html')
 		resp.status_code = 404
@@ -154,6 +148,7 @@ def process(request, algo_id):
 			message = json.dumps({'message': "OK"})	
 			response = HttpResponse(message)
 			response.status_code = 200
+			execute_algorithm.external(json_data)
 			return response
 		
 	else: 
