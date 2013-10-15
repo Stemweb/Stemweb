@@ -53,7 +53,7 @@ def id_generator(size=8, chars=string.ascii_uppercase + string.digits):
 
 
 def build_run_folder(user, input_file_id, algorithm_name):  
-	''' Builds unique path for run's result folder.
+	''' Builds unique path for run's result folder. Does not create the folder.
 
 		runfile:	 Absolute path to file to use as input_file for a run.
 		run_id:		 ID of the R_runs db-table's entry
@@ -61,6 +61,7 @@ def build_run_folder(user, input_file_id, algorithm_name):
 		Returns path to run's storage folder. All runs' storage folders have 
 		structure: 'users', user.username, 'runs', algorithm_name, input_file_id,
 		id_generator(). Algorithm name is slugified in the process. 
+		
 	'''
 	if not user.is_authenticated():
 		uppath = os.path.join('external')
@@ -75,7 +76,8 @@ def build_run_folder(user, input_file_id, algorithm_name):
 
 
 def build_args(form = None, algorithm_id = None, request = None):
-	''' Generate arguments from given DynamicArgs-form for an algorithm run.
+	''' Generate arguments from given DynamicArgs-form for an algorithm run and
+		creates preferred directories for output files.
 		
 		Returns dictionary with running arguments. 
 	'''
