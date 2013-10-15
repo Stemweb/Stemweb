@@ -12,9 +12,13 @@ Copy Stemweb/local/lstrings_empty.py into Stemweb/local/lstrings.py and set
 all the relevant settings. See django projects documentation about settings. 
 Stemweb is currently deployed for django 1.3.1 
 
+If you want to be able to use the Stemweb as microservice for other ip:s,
+change algorithm/lsettings.py to present TRUSTED_SERVERS list of dictionaries
+with ("ip", <trusted id>) - key-value pairs. 
+
 3.)
 
-Download and install python 2.7 and set the $PATH variable so that python 2.7
+Download and install python 2.7.5 and set the $PATH variable so that python 2.7.5
 is default python interpreter. Then download and install pip 
 (http://pypi.python.org/pypi/pip/). It's adviced to do these steps in this 
 order as pip gets installed into particular python version and if pip uses
@@ -37,10 +41,10 @@ should come as default in later (10.x?) OSX installations.
 5.a)
 
 Run install.sh. It takes single optional argument which is a path to python
-install. Python version used should be 2.6, but since most of the server 
+install. Python version used should be 2.7.5, but since most of the server 
 technologies don't allow different major/minor versions of python than the
 one the server uses, you have to check which one is the right choice for 
-you. If no path is given "usr/bin/python2.6" is presumed. For example:
+you. If no path is given "usr/bin/python2.7" is presumed. For example:
 
 $ ./install.sh /home/username/.local/bin/python2.6
 
@@ -76,7 +80,7 @@ $ [sudo] pip install [--user] -r requirements.txt
 
 to install all the packages to standard folders. You still need to install 
 matplotlib with all the dependencies manually. Beware that Stemweb uses 
-python 2.7 to be able to run fluently. That's why, if your standard python 
+python 2.7.5 to be able to run fluently. That's why, if your standard python 
 installation is different version, use of virtual environment is highly
 encouraged.
 

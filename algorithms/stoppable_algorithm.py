@@ -46,8 +46,8 @@ class Observer():
 		
 class AlgorithmTask():
 	'''
-		Super class of all algorithms that are going to be stoppable from 
-		webpage's user interface. 
+		Super class of all algorithms that can be stoppable from webpage's user 
+		interface. 
 		
 		Call start() to run algorithm and stop() to.... stop. You can add 
 		observers by attach(observer) method which are notified when algorithm
@@ -252,7 +252,7 @@ class AlgorithmTask():
 					self.logger.info("AlgorithmRun %s:%s advanced to %s iteration" % (self.algorithm_run.algorithm.name, self.algorithm_run.id, result[self.iteration_name]))	
 						
 				self._write_in_file_(result)
-				#self._notify_()
+				self._notify_()
 			except Empty:
 				pass	
 			except:

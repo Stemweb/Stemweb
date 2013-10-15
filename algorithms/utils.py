@@ -62,8 +62,11 @@ def build_run_folder(user, input_file_id, algorithm_name):
 		structure: 'users', user.username, 'runs', algorithm_name, input_file_id,
 		id_generator(). Algorithm name is slugified in the process. 
 	'''
-	uppath = os.path.join('users')
-	uppath = os.path.join(uppath, user.username)
+	if not user.is_authenticated():
+		uppath = os.path.join('external')
+	else:
+		uppath = os.path.join('users')
+		uppath = os.path.join(uppath, user.username)
 	uppath = os.path.join(uppath, 'runs')
 	uppath = os.path.join(uppath, slugify(algorithm_name))
 	uppath = os.path.join(uppath, '%s' % input_file_id)

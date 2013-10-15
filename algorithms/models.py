@@ -94,6 +94,7 @@ class Algorithm(models.Model):
 	source = models.CharField(max_length = 200, null = True)
 	stoppable = models.BooleanField(default = False)
 	args = models.ManyToManyField(AlgorithmArg, blank = True)
+	file_extension = models.CharField(max_length = 5, default = 'nex')
 
 	def __str__(self):
 		return '''
@@ -175,13 +176,16 @@ class AlgorithmRun(models.Model):
 		algorithm	: Algorithm used for this run. Foreign key to Algorithm-
 					  model
 		
-		input_file	: Input file used for this run. Foreign key to InputFile-
-					  model.
+		input_file	: Input file used for this run if the run is not external. 
+					  Foreign key to InputFile-model.
 					  
-		folder		: Absolute path to folder where results are. Max length 200.
+		folder		: Absolute path to folder where results are, is run is not
+					  external. Max length 200.
 		
-		user		: User who started this run. This cannot be AnonymousUser, 
-					  so only store runs which are made by registered users.
+		user		: User who started this run. This cannot be AnonymousUser. 
+					  If no user field is blank, external must be True and ip
+					  should have valid response ip when this algorithm run 
+					  finishes.
 					  
 		image		: Image of this run's resulting graph of best scored 
 					  network structure (if available).
@@ -192,6 +196,13 @@ class AlgorithmRun(models.Model):
 					  it can cause rendering issues in browser.
 					  
 		newick		: Resulting newick file of the run.
+		
+		external	: Boolean, True if external server send this run request, 
+					  false otherwise.
+					  
+		ip			: If algorithm run is external, should have valid response
+					  ip. Probably the same ip the algorithm run request was
+					  made.
 					  
 		TODO: change images and folder to be in the results, probably.  
 	'''
@@ -199,13 +210,15 @@ class AlgorithmRun(models.Model):
 	end_time = models.DateTimeField(auto_now_add = False, null = True)
 	finished = models.NullBooleanField(default = False)
 	algorithm = models.ForeignKey(Algorithm)        
-	input_file = models.ForeignKey(InputFile)   
-	folder = models.CharField(max_length = 300) 
-	user = models.ForeignKey(User)
+	input_file = models.ForeignKey(InputFile, blank = True)   
+	folder = models.CharField(max_length = 300, blank = True) 
+	user = models.ForeignKey(User, blank = True)
 	image = models.ImageField(upload_to = folder, null = True) 
 	score = models.FloatField(null = True, verbose_name = "Score")
 	current_iteration = models.PositiveIntegerField(null = True)
 	newick = models.URLField(blank = True, default = '')
+	external = models.BooleanField(default = False)
+	ip = models.IPAddressField(null = True)
 	
 	#Really we will be wanting to have this as PickleField.
 	#results = dict()

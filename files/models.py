@@ -18,14 +18,20 @@ class GetOrNoneManager(models.Manager):
 			return None
 
 class InputFile(models.Model):
-	''' Basic table for all input files to any of the scripts. '''
+	''' Basic table for all input files to any of the scripts. 
+	
+		user		: User who uploaded the input file. If null, external must
+					  be set to True.
+	
+	'''
 
-	user = models.ForeignKey(User)                  # User who uploaded the file
+	user = models.ForeignKey(User, null = True)     # User who uploaded the file
 	upload_time = models.DateTimeField(auto_now_add = True) # Uploading time 
 	last_access = models.DateTimeField(auto_now = True)
 	extension = models.CharField(max_length = 10, default = 'nex')   # File extension
 	name = models.CharField(max_length = 80)        # Base name of the input file
 	file = models.FileField(upload_to = utils.upload_path)
+	external = models.BooleanField(default = False)
 
 	class Meta:
 		ordering = ['name', 'extension', '-last_access']

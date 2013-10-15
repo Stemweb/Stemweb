@@ -28,11 +28,7 @@ def get_recent_activities(user):
 	return ra
 
 def home(request): 
-	''' 
-    	Mother of all views.
-    	
-    	TODO: put user's recent activities into left tab when user is logged in.
-    '''  
+	''' Mother of all views. '''  
 	recent_activities = None 
 	if request.user.is_authenticated():
 		recent_activities = get_recent_activities(request.user)
