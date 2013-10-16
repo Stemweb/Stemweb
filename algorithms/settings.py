@@ -2,6 +2,7 @@
 	Settings for algorithms-application. 
 '''
 from django import forms
+from django.conf import settings
 
 from Stemweb.files import forms as files_forms
 
@@ -11,12 +12,16 @@ from .semstem.semstemprob import Semstem
 from .neighbour_joining.njc import NJ
 from .rhm.binary_sankoff import RHM
 import validators
-import  lsettings
+import lsettings
 
-URL_PREFIX = 'algorithms'
+ALGORITHM_URL_PREFIX = settings.ALGORITHM_URL_PREFIX if \
+	hasattr(settings, 'ALGORITHM_URL_PREFIX') else 'algorithms'
+ALGORITHM_MEDIA_ROOT = settings.ALGORITHM_MEDIA_ROOT if \
+	hasattr(settings, 'ALGORITHM_MEDIA_ROOT') else settings.MEDIA_ROOT
+TRUSTED_SERVERS = lsettings.TRUSTED_SERVERS
 
 '''
-	Dictionary mapping Algorithm models' ids to dictionaries which contain 
+	Dictionary mapping Algorithm model ids to dictionaries which contain 
 	atleast 'callable' keyword and possible other entries. 'callable' should 
 	refer to actual subclass of AlgorithmTask and other entries are passed 
 	inside run_args dictionary to that callable.
@@ -85,6 +90,6 @@ ARG_VALUE_FIELD_TYPE_VALIDATORS = {
    	'boolean': [] 
 }
 
-TRUSTED_SERVERS = lsettings.TRUSTED_SERVERS
+
 
 #ALGORITHM_RUN_STATES = 

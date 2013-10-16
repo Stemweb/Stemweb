@@ -9,9 +9,10 @@ import logging
 from models import Algorithm
 from .settings import ARG_VALUE_FIELD_TYPE_KEYS as field_types
 from .settings import TRUSTED_SERVERS
-from Stemweb import settings
+from .settings import ALGORITHM_MEDIA_ROOT as algo_media
 from Stemweb.files.models import InputFile
 
+from django.conf import settings
 from django.template.defaultfilters import slugify
 from django.shortcuts import get_object_or_404
 
@@ -84,7 +85,7 @@ def create_run_folder(user, input_file_id, algorithm_name):
 	'''
 	folder_url = __build_run_folder__(user, input_file_id, \
 										algorithm_name)
-	abs_folder = os.path.join(settings.MEDIA_ROOT, folder_url) 
+	abs_folder = os.path.join(algo_media, folder_url) 
 	try:
 		os.makedirs(abs_folder)
 	except:
@@ -94,7 +95,7 @@ def create_run_folder(user, input_file_id, algorithm_name):
 	return folder_url
 
 
-def build_local_args(form = None, algorithm_id = None, request = None):
+def build_local_args(form = None, algorithm_name = None, request = None):
 	''' Generate arguments from given DynamicArgs-form for an algorithm run and
 		creates preferred directories for output files.
 		
@@ -113,15 +114,18 @@ def build_local_args(form = None, algorithm_id = None, request = None):
 	
 	''' Create run folder based on input file's id and algorithm's name. '''		
 	run_args['folder_url'] = create_run_folder(request.user, run_args['file_id'], \
-		Algorithm.objects.get(pk = algorithm_id).name)	
+		algorithm_name)	
 	return run_args
 
 
-def build_external_args(algo_id = None, json_data = None, input_file = None):
-	
-	
-	
-	pass
+def build_external_args(parameters, input_file_key, input_file, \
+					algorithm_name = None, request = None):
+	run_args = {}
+	for key, value in parameters:
+		run_args[key] = value
+	run_args[input_file_key] = input_file.path
+	run_args['folder_url'] = create_run_folder(request.user, input_file.id, algorithm_name)
+	return run_args
 
 
 def register(algorithm = None, name = None):
@@ -167,8 +171,6 @@ def validate_json(json_data, algo_id):
 	if userid is None: return (False, "No userid given.")
 	
 	params = json_data['parameters']
-	
-	args_present = True
 	for arg in algorithm.args.all():
 		if arg.external:
 			if params.has_key(arg.key):

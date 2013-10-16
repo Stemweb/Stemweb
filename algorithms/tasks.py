@@ -287,7 +287,7 @@ class AlgorithmTask(Task):
 		
 		self._finalize_()
 		
-		# Return newick as string for simplier callbacks to external runs.
+		# Return newick as string for simplify callbacks of external runs.
 		if self.has_newick: 
 			nwk = ""
 			with open(self.newick_path, 'r') as f:

@@ -6,6 +6,7 @@ Created on Mar 28, 2012
 import time
 import logging
 import json
+import os
 
 from django.http import Http404
 from django.http import HttpResponse
@@ -26,6 +27,7 @@ from .models import Algorithm, AlgorithmRun, AlgorithmArg
 from . import utils
 from . import execute_algorithm
 from .settings import STATUS_CODES
+from .settings import ALGORITHM_MEDIA_ROOT as algo_media
 
 def base(request):
 	algorithms = Algorithm.objects.all()
@@ -158,6 +160,38 @@ def process(request, algo_id):
 		response = HttpResponse(error_message)
 		response.status_code = 400
 		return response
+	
+	
+def jobstatus(request, run_id):	
+	ret = utils.validate_server(request)
+	if not ret[0]:
+		# IP not in trusted list
+		error_message = json.dumps({'error': ret[1]})
+		response = HttpResponse(error_message)
+		response.status_code = 403
+		return response
+	else: 
+		algo_run = AlgorithmRun.objects.get_or_none(pk = run_id)
+		if algo_run is None: #or not algo_run.external: 
+			error_message = json.dumps({'error': "No external algorithm run with given id"})
+			response = HttpResponse(error_message)
+			response.status_code = 400
+			return response
+		else:
+			msg = {'job_id': run_id, 'status_code': algo_run.status}	
+			if algo_run.status == STATUS_CODES['finished']:
+				if algo_run.newick == '':
+					msg['error'] = "Could not retrieve newick."
+					return HttpResponse(json.dumps(msg))
+				else:	
+					nwk = ""
+					with open(os.path.join(algo_media, algo_run.newick), 'r') as f:
+						nwk = f.readlines()
+					msg['result'] = nwk
+					msg['format'] = 'newick'
+					return HttpResponse(json.dumps(msg))
+			else: 
+				return HttpResponse(json.dumps(msg))
 	
 	
 def processtest(request):
