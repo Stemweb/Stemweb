@@ -129,20 +129,5 @@
       		"args": [5, 8],
       		"file_extension": "nex"
     	}
-  	},
-  	
-  	{
-    	"model": "algorithms.algorithm",
-    	"pk": 4,
-    	"fields": {
-      		"name": "Neighbour Net",
-      		"source": "No source currently available.",
-      		"desc": "Neighbour Net algorithm",
-      		"url": "https://en.wikipedia.org/wiki/Neighbor-net",
-      		"args": [5],
-      		"file_extension": "nex"
-    	}
   	}
-  	
-
 ]
