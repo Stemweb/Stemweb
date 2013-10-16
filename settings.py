@@ -2,9 +2,7 @@
 from local import lstrings
 import os
 import sys
-#import logging
 
-sys.path.insert(0, '/Users/slinkola/Library/Python/2.7/lib/python/site-packages/')
 import djcelery
 djcelery.setup_loader()
 
