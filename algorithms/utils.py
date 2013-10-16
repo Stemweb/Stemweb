@@ -170,7 +170,7 @@ def validate_json(json_data, algo_id):
 	
 	args_present = True
 	for arg in algorithm.args.all():
-		if arg.send_to_external:
+		if arg.external:
 			if params.has_key(arg.key):
 				value = params[arg.key]
 				if not validate_parameter(value, arg.value):
@@ -194,7 +194,7 @@ def validate_parameter(value, param_type):
 	if param_type == "float":
 		return type(float(value)) == float
 	if param_type == "boolean":
-		if value.lower() == ("false" or "true"):
+		if type(value) == bool:
 			return True
 		else:
 			return False

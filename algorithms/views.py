@@ -13,6 +13,8 @@ from django.http import HttpResponseRedirect
 from django.http import HttpResponseNotFound
 from django.http import HttpResponseBadRequest
 
+from django.http import HttpRequest
+
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
@@ -81,8 +83,8 @@ def delete_runs(request):
 	
 @login_required
 def run(request, algo_id):
-	''' Run's the given algorithm with run_args spesified in request.POST if the
-		form builded from them is valid.
+	''' Run's the given algorithm with arguments spesified in request.POST if 
+		the form builded from them is valid for the given algorithm.
 	'''
 	if request.method == 'POST':
 		algorithm = get_object_or_404(Algorithm, pk = algo_id)
@@ -109,6 +111,7 @@ def results(request, run_id):
 		c = RequestContext(request, {'algorithm_run': run})
 		if run.status == STATUS_CODES['finished']:
 			return render_to_response('algorithm_running_results.html', c)
+		# TODO: do different view for non-finished algorithms
 		else:
 			return render_to_response('algorithm_running_results.html', c)
 		
@@ -157,6 +160,18 @@ def process(request, algo_id):
 		return response
 	
 	
-
+def processtest(request):
+	json_data = {
+		'userid': 42,
+		'parameters': {
+			'imax': 1		
+			},
+		'data': 'derp\therp\np\tn'
+		}
+	msg = json.dumps(json_data)
+	request = HttpRequest()
+	request.method = 'POST'
+	request.body = msg
+	
 
 

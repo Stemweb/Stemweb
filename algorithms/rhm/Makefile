@@ -13,6 +13,7 @@ osx:
 	mv ./binarysankoff_osx.dylib ./binarysankoff.so
 
 linux:
-	gcc -I/home/slinkola/test/stemenv/include/python2.6/ -lpython2.6 -I/home/slinkola/test/stemenv/include -L/home/slinkola/test/stemenv/lib -fPIC -g -Wall -c binarysankoff_linux.c
-	gcc -shared -fPIC -Wall -I/home/slinkola/test/stemenv/include -L/home/slinkola/test/stemenv/lib binarysankoff_linux.o -o binarysankoff.so -lz	
+	gcc -I/usr/include/python2.6/ -lpython2.6 -I/usr/include -L/usr/lib -fPIC -g -Wall -c binarysankoff_linux.c
+	gcc -shared -fPIC -Wall -I/usr/include -L/usr/lib binarysankoff_linux.o -o binarysankoff.so -lz
+
 	

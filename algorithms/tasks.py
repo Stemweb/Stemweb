@@ -11,8 +11,10 @@ import logging
 
 from django.template.defaultfilters import slugify
 
-from celery.task import Task
+
+from celery.task import Task, task
 from celery.registry import tasks
+from celery.result import AsyncResult
 
 import settings
 
@@ -199,6 +201,8 @@ class AlgorithmTask(Task):
 		if not obs is None:
 			for o in obs:
 				self.attach(o)
+				
+		print self.request.id
 			
 						
 	def stop(self, request = None):
@@ -282,6 +286,13 @@ class AlgorithmTask(Task):
 			self._read_from_results_()	
 		
 		self._finalize_()
+		
+		# Return newick as string for simplier callbacks to external runs.
+		if self.has_newick: 
+			nwk = ""
+			with open(self.newick_path, 'r') as f:
+				nwk = f.readlines()
+			return nwk
 		
 		
 	def _finalize_(self):
@@ -383,4 +394,32 @@ class AlgorithmTask(Task):
 		'''
 		for o in self._observers:
 			o.update(self)
+	
+
+	
+	
+
+@task
+def external_algorithm_run_error(uuid, run_id):
+	''' Callback task in case external algorithm run fails. '''
+	print run_id, uuid
+	result = AsyncResult(uuid)
+	exc = result.get(propagate=False)
+	trace = result.traceback
+	logger = logging.getLogger('stemweb.algorithm_run')
+	logger.error("AlgorithmRun %r/Task %r raised error: %r\n%r" %\
+				(run_id, uuid, exc, trace))
+	
+	from Stemweb.algorithms.models import AlgorithmRun
+	algorun = AlgorithmRun.objects.get(pk = run_id)
+	algorun.status = settings.STATUS_CODES['failure']
+	algorun.save()
+	
+	
+	
+@task
+def external_algorithm_run_finished(newick, run_id):
+	''' Callback task in case external algorithm run finishes succesfully. '''
+	print run_id, newick
+	
 	

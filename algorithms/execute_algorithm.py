@@ -7,7 +7,11 @@ from django.shortcuts import get_object_or_404
 from .models import InputFile, Algorithm, AlgorithmRun
 
 from Stemweb.settings import MEDIA_ROOT
+
+from tasks import external_algorithm_run_error
+from tasks import external_algorithm_run_finished
 import utils
+
 
 def local(form, algo_id, request):
 	''' Make a local algorithm run for logged in user.
@@ -16,16 +20,17 @@ def local(form, algo_id, request):
 	'''
 	algorithm = get_object_or_404(Algorithm, pk = algo_id)
 	
-	
 	run_args = utils.build_local_args(form, algorithm_id = algo_id, request = request)
 	current_run = AlgorithmRun.objects.create(input_file = InputFile.objects.get(id = run_args['file_id']),
 											algorithm = Algorithm.objects.get(id = algo_id), 
 											user = request.user,
                                         	folder = os.path.join(MEDIA_ROOT, run_args['folder_url']))
 	current_run.save()	# Save to ensure that id generation is not delayed.
-	kwargs = {'run_args': run_args, 'algorithm_run': current_run.id}
+	rid = current_run.id
+	kwargs = {'run_args': run_args, 'algorithm_run': rid}
 	call = algorithm.get_callable(kwargs)
-	call.delay(**kwargs)
+	call.apply_async(kwargs = kwargs, link = external_algorithm_run_finished.s(rid), \
+					link_error = external_algorithm_run_error.s(rid))
 	return current_run.id
 
 
@@ -47,3 +52,6 @@ def external(form, algo_id, request):
                                     	folder = run_args['outfolder'],
                                     	external = True)
 	pass
+
+
+	
