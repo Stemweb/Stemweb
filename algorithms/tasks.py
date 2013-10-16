@@ -12,7 +12,9 @@ import logging
 from django.template.defaultfilters import slugify
 
 from celery.task import Task
-from celery.registry import tasks 
+from celery.registry import tasks
+
+import settings
 
 def synchronized(lock):
 	''' Synchronization decorator. '''
@@ -167,15 +169,16 @@ class AlgorithmTask(Task):
 			slug_name = slugify(self.algorithm_run.algorithm.name)
 			file_name = os.path.splitext(os.path.basename(self.run_args[self.input_file_key]))[0]
 			self.input_file_name = file_name
+			self.run_args['outfolder'] = self.algorithm_run.folder
 			if self.has_image:
-				self.algorithm_run.image = os.path.join(self.run_args['url_base'], \
+				self.algorithm_run.image = os.path.join(self.run_args['folder_url'], \
 					'%s_%s.svg' % (file_name, slug_name))
-				self.image_path = os.path.join(self.run_args['outfolder'], \
+				self.image_path = os.path.join(self.algorithm_run.folder, \
 					'%s_%s.svg' % (file_name, slug_name))
 			if self.has_newick:
-				self.algorithm_run.newick = os.path.join(self.run_args['url_base'],\
+				self.algorithm_run.newick = os.path.join(self.run_args['folder_url'],\
 				'%s_%s.tre' % (file_name, slug_name))
-				self.newick_path = os.path.join(self.run_args['outfolder'],\
+				self.newick_path = os.path.join(self.algorithm_run.folder,\
 				'%s_%s.tre' % (file_name, slug_name))
 			self.algorithm_run.save()
 		
@@ -245,6 +248,12 @@ class AlgorithmTask(Task):
 			before actually using the queue.
 			
 			Remember to set self._stop.value = 1 before method returns.
+			
+			run_args: 	Running arguments as dictionary,that are passed to the 
+						subclassing algorithm run. run_args always have fixed 
+						key "outfolder" that is the absolute path to the folder
+						where algorithm should store all it's results. It should
+						NOT be changed during the subclassing algorithm's run!
 		'''
 
 				
@@ -264,6 +273,8 @@ class AlgorithmTask(Task):
 										args = (self.run_args,), 
 										name = 'stemweb_algorun')
 		self._algorithm_thread.start()	
+		self.algorithm_run.status = settings.STATUS_CODES['running']
+		self.algorithm_run.save()
 		
 		# TODO: Fix me st000pid busy wait.
 		while self._stop.value == 0:
@@ -286,7 +297,7 @@ class AlgorithmTask(Task):
 			'''
 			from Stemweb.algorithms.models import AlgorithmRun
 			self.algorithm_run = AlgorithmRun.objects.get(pk=self.algorithm_run.id)
-			self.algorithm_run.finished = True
+			self.algorithm_run.status = settings.STATUS_CODES['finished']
 			self.algorithm_run.end_time = datetime.datetime.now()
 			self.algorithm_run.pid = -1
 			self.algorithm_run.save()
@@ -295,6 +306,7 @@ class AlgorithmTask(Task):
 
 		self.logger.info('AlgorithmRun ended: %s:%s' % \
 			(self.algorithm_run.algorithm.name, self.algorithm_run.id))
+	
 		
 	@synchronized(result_lock)
 	def _put_in_results_(self, value):
@@ -309,7 +321,7 @@ class AlgorithmTask(Task):
 	
 	
 	@synchronized(result_lock)	
-	def _get_from_results_(self):
+	def __get_from_results__(self):
 		return self._results_queue.get(block = True, timeout = 0.1)
 
 
@@ -322,7 +334,7 @@ class AlgorithmTask(Task):
 		'''	
 		while not self._results_queue.empty():
 			try:
-				result = self._get_from_results_()	
+				result = self.__get_from_results__()	
 				if self.score_name in result.keys() and self.algorithm_run is not None:
 					self.algorithm_run.score = result[self.score_name]
 					self.algorithm_run.save()
@@ -337,7 +349,7 @@ class AlgorithmTask(Task):
 						result[self.iteration_name]))	
 						
 				self._write_in_file_(result)
-				#self._notify_()
+				self._notify_()
 			except Empty:
 				pass	
 			except:
@@ -349,11 +361,13 @@ class AlgorithmTask(Task):
 
 			
 	def _write_in_file_(self, result):
-		''' Override in subclass. Write result object to given output paths 
-			(usually self.image_path and self.newick_path). 
+		''' Override in subclass. Write result objects to given output paths 
+			usually self.image_path and self.newick_path. Also the 
+			self.algorithm_run.folder is available, but subdirs to that folder
+			need to be created by the subclassing algorithm. 
 		
-			If the subclass writes only the final results then you don't have 
-			to use this and you can instead write the results in the overrided
+			If the subclass writes only the final results then it doesn't have 
+			to use this and it can instead write the results in the overrided
 			__algorithm__ method.
 		'''
 		self.file_lock.acquire()

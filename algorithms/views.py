@@ -20,11 +20,10 @@ from django.core.urlresolvers import reverse
 from django.core.serializers import serialize
 from django.contrib.auth.decorators import login_required
 
-from .models import InputFile
 from .models import Algorithm, AlgorithmRun, AlgorithmArg
 from . import utils
 from . import execute_algorithm
-import settings
+from .settings import STATUS_CODES
 
 def base(request):
 	algorithms = Algorithm.objects.all()
@@ -55,7 +54,7 @@ def details(request, algo_id, form = None):
 def delete_runs(request):
 	''' Delete runs that are present in request.POST in 'runs' paramater.
 	
-	If any of the run id's don't belong to user making the request, does not 
+	If any of the run id's don't belong to the user making the request, does not 
 	delete any of the runs.
 	'''
 	
@@ -108,7 +107,7 @@ def results(request, run_id):
 	
 	if request.user == run.user:
 		c = RequestContext(request, {'algorithm_run': run})
-		if run.finished:
+		if run.status == STATUS_CODES['finished']:
 			return render_to_response('algorithm_running_results.html', c)
 		else:
 			return render_to_response('algorithm_running_results.html', c)
@@ -120,7 +119,7 @@ def available(request):
 	''' Returns all available AlgorithmArg and Algorithm model instances in 
 		json-format. '''
 	return HttpResponse(serialize('json', list(AlgorithmArg.objects.all()) +\
-			list(Algorithm.objects.all()), fields = ['pk', 'key', 'value', 'name', 'args']),\
+			list(Algorithm.objects.all()), fields = ['pk', 'key', 'value', 'name', 'args', 'external']),\
 			mimetype='application/json')
 	
 	

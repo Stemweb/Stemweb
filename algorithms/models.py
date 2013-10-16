@@ -7,7 +7,7 @@ from django.contrib.auth.models import User, AnonymousUser
 
 from forms import DynamicArgs
 from Stemweb.files.models import InputFile
-from .settings import ARG_VALUE_CHOICES
+from .settings import ARG_VALUE_CHOICES, STATUS_CODES
 from .settings import ALGORITHMS_CALLING_DICT as call_dict
 
 
@@ -208,7 +208,7 @@ class AlgorithmRun(models.Model):
 	'''
 	start_time = models.DateTimeField(auto_now_add = True)
 	end_time = models.DateTimeField(auto_now_add = False, null = True)
-	finished = models.NullBooleanField(default = False)
+	status = models.IntegerField(default = STATUS_CODES['not_started'])
 	algorithm = models.ForeignKey(Algorithm)        
 	input_file = models.ForeignKey(InputFile, blank = True)   
 	folder = models.CharField(max_length = 300, blank = True) 
@@ -220,7 +220,7 @@ class AlgorithmRun(models.Model):
 	external = models.BooleanField(default = False)
 	ip = models.IPAddressField(null = True)
 	
-	#Really we will be wanting to have this as PickleField.
+	# Really we will be wanting to have this as PickleField.
 	#results = dict()
 	
 	def delete(self):
@@ -259,7 +259,7 @@ class AlgorithmRun(models.Model):
 		return retval
 	
 	class Meta:
-		ordering = ['finished', '-end_time', '-start_time']
+		ordering = ['status', '-end_time', '-start_time']
 	
 	objects = GetOrNoneManager()
 	

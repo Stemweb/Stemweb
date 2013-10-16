@@ -52,8 +52,9 @@ def id_generator(size=8, chars=string.ascii_uppercase + string.digits):
 	return ''.join(random.choice(chars) for x in range(size))
 
 
-def build_run_folder(user, input_file_id, algorithm_name):  
-	''' Builds unique path for run's result folder. Does not create the folder.
+def __build_run_folder__(user, input_file_id, algorithm_name):  
+	''' Builds unique path for algorithm run's result folder. Does not create 
+		the folder.
 
 		runfile:	 Absolute path to file to use as input_file for a run.
 		run_id:		 ID of the R_runs db-table's entry
@@ -75,7 +76,25 @@ def build_run_folder(user, input_file_id, algorithm_name):
 	return uppath
 
 
-def build_args(form = None, algorithm_id = None, request = None):
+def create_run_folder(user, input_file_id, algorithm_name):
+	''' Create unique folder for algorithm run's results. 
+	
+	Returns folder url for the run, join this path with MEDIA_ROOT to get
+	absolute path of the folder.
+	'''
+	folder_url = __build_run_folder__(user, input_file_id, \
+										algorithm_name)
+	abs_folder = os.path.join(settings.MEDIA_ROOT, folder_url) 
+	try:
+		os.makedirs(abs_folder)
+	except:
+		logger = logging.getLogger("stemweb.algorithm_run")
+		logger.error("Could not create algorithm run folder %s" % abs_folder)
+	
+	return folder_url
+
+
+def build_local_args(form = None, algorithm_id = None, request = None):
 	''' Generate arguments from given DynamicArgs-form for an algorithm run and
 		creates preferred directories for output files.
 		
@@ -92,14 +111,17 @@ def build_args(form = None, algorithm_id = None, request = None):
 		else:
 			run_args[key] = form.cleaned_data[key]
 	
-	''' Build run folder based on input file's id and algorithm's name. '''		
-	run_folder = build_run_folder(request.user, run_args['file_id'], \
-		Algorithm.objects.get(pk = algorithm_id).name)
-	abs_folder = os.path.join(settings.MEDIA_ROOT, run_folder) 
-	os.makedirs(abs_folder)
-	run_args['url_base'] = run_folder	# TODO: Hack, fix this
-	run_args['outfolder']  = abs_folder
+	''' Create run folder based on input file's id and algorithm's name. '''		
+	run_args['folder_url'] = create_run_folder(request.user, run_args['file_id'], \
+		Algorithm.objects.get(pk = algorithm_id).name)	
 	return run_args
+
+
+def build_external_args(algo_id = None, json_data = None, input_file = None):
+	
+	
+	
+	pass
 
 
 def register(algorithm = None, name = None):

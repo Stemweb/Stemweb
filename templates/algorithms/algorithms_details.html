@@ -66,6 +66,7 @@
 				<table id="previous_runs_table" class="file_table centered">
 					<thead>
 						<tr>
+							<th>status</th>
 							<th>end time</th>
 							<th>start time</th>
 							<th>score</th>
@@ -76,7 +77,18 @@
 					<tbody>
 						{% for run in algorithm_runs %}
 						<tr class="row">
-							<td class="run_time">{% if run.end_time %}{{ run.end_time|date:"d.m.y H:i" }}{% else %}running...{% endif %}</td>
+							<td class="score">	{% if run.status == -1  %}not started
+												{% else %}
+													{% if run.status == 1 %}running
+													{% else %}
+														{% if run.status == 0 %}finished
+														{% else %}
+															{% if run.status > 1 %}failure
+															{% endif %}
+														{% endif %}
+													{% endif %}
+												{% endif %}</td>
+							<td class="run_time">{% if run.end_time %}{{ run.end_time|date:"d.m.y H:i" }}{% else %} --- {% endif %}</td>
 							<td class="run_time">{{ run.start_time|date:"d.m.y H:i" }}</td>
 							<td class="score">{% if run.score %}{{ run.score }}{% else %}---{% endif %}</td>  
 							<td class="input_file"><a href="/algorithms/results/{{ run.id }}">{{ run.input_file.name }}</a></td>

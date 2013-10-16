@@ -15,7 +15,7 @@ class Semstem(AlgorithmTask):
 	def __init_run__(self, *args, **kwargs):
 		AlgorithmTask.__init_run__(self, *args, **kwargs)
 		if self.algorithm_run:
-			self.algorithm_run.image = os.path.join(self.run_args['url_base'], 'tree', 'treebest.svg')
+			self.algorithm_run.image = os.path.join(self.run_args['folder_url'], 'tree', 'treebest.svg')
 			self.algorithm_run.save()
 		self.score_name = 'qscore'
 		#self.iteration_name = 'iter'

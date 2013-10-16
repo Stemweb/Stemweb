@@ -22,16 +22,24 @@
 {% endblock %}
 
 {% block subpage_main_header %}
-	{% if not algorithm_run.finished %}
-		Current results of {{ algorithm_run.algorithm.name }} with {{ algorithm_run.input_file.name }}	
-	{% else %}
-		Final results of {{ algorithm_run.algorithm.name }} with {{ algorithm_run.input_file.name }}
+	{% if algorithm_run.status == 1 %}
+		Current results for {{ algorithm_run.algorithm.name }} with {{ algorithm_run.input_file.name }}	
 	{% endif %}
+	{% if algorithm_run.status == 0 %}
+		Final results for {{ algorithm_run.algorithm.name }} with {{ algorithm_run.input_file.name }}
+	{% endif %}
+	{% if algorithm_run.status == 2 %}
+		Run Failed! {{ algorithm_run.algorithm.name }} with {{ algorithm_run.input_file.name }}
+	{% endif %}
+	{% if algorithm_run.status == -1 %}
+		Starting run for {{ algorithm_run.algorithm.name }} with {{ algorithm_run.input_file.name }}
+	{% endif %}
+
 {% endblock %}
 
 
 {% block subpage_content %}
-	{% if not algorithm_run.finished %}
+	{% if algorithm_run.status == 1 or algorithm_run.status == -1 %}
 	<script type="text/javascript">
 		window.setTimeout("location.reload(true);", 10000);
 	</script>
@@ -39,19 +47,26 @@
 	{% endif %}
 
 	<div id="algorithm_result_div">
-		{% if algorithm_run.newick %}
-		<p>
-			<a href="{{ MEDIA_URL }}{{ algorithm_run.newick }}">Download newick tree</a>
-		</p>
+	
+		{% if algorithm_run.status == 0 %}
+			{% if algorithm_run.newick %}
+			<p>
+				<a href="{{ MEDIA_URL }}{{ algorithm_run.newick }}">Download newick tree</a>
+			</p>
+			{% endif %}
+			
+			{% if algorithm_run.image %}	
+			<img id="run_result_image" src="{{ algorithm_run.image.url }}" 
+				 alt="{{ algorithm_run.image.url }}" />	 
+			{% else %}
+				No image for this run. <br>
+			{% endif %}
+		{% else %}
+			{% if algorithm_run.status >= 1 %}
+				Run failed for unexpected reason!
+			{% endif %}
 		{% endif %}
 		
-		{% if algorithm_run.image %}	
-		<img id="run_result_image" src="{{ algorithm_run.image.url }}" 
-			 alt="{{ algorithm_run.image.url }}" />	 
-		{% else %}
-			No image for this run, <br>
-			though something might linger in {{ algorithm_run.folder }}.
-		{% endif %}
 	</div>
 
 
