@@ -291,7 +291,7 @@ class AlgorithmTask(Task):
 		if self.has_newick: 
 			nwk = ""
 			with open(self.newick_path, 'r') as f:
-				nwk = f.readlines()
+				nwk = f.read()
 			return nwk
 		
 		
@@ -400,7 +400,7 @@ class AlgorithmTask(Task):
 	
 
 @task
-def external_algorithm_run_error(uuid, run_id):
+def external_algorithm_run_error(uuid, run_id, user_id, return_url, return_path):
 	''' Callback task in case external algorithm run fails. '''
 	print run_id, uuid
 	result = AsyncResult(uuid)
@@ -417,9 +417,36 @@ def external_algorithm_run_error(uuid, run_id):
 	
 	
 	
+	
+	
 @task
-def external_algorithm_run_finished(newick, run_id):
+def external_algorithm_run_finished(newick, run_id, user_id, return_host, return_path):
 	''' Callback task in case external algorithm run finishes succesfully. '''
 	print run_id, newick
+	
+	from Stemweb.algorithms.models import AlgorithmRun
+	algorun = AlgorithmRun.objects.get(pk = run_id)
+	algorun.status = settings.STATUS_CODES['finished']
+	algorun.save()
+	
+	ret = {
+			'userid': user_id,
+			'jobid': run_id,
+			'status': algorun.status,
+			'algorithm': algorun.algorithm.name,
+			'start_time': str(algorun.start_time),
+			'end_time': str(algorun.end_time),
+			'result': newick,
+			'format': 'newick'
+			}
+	
+	import httplib, urllib, json
+	message = json.dumps(ret, encoding = "utf8")	
+	body = urllib.urlencode({u'json': message}).encode('utf8')
+	conn = httplib.HTTPConnection(return_host)
+	conn.request('POST', return_path, body)
+	response = conn.getresponse()
+	conn.close()
+	print response.status, response.reason, response.read()
 	
 	

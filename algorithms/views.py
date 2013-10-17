@@ -22,8 +22,8 @@ from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
 from django.core.serializers import serialize
 from django.contrib.auth.decorators import login_required
-
 from django.contrib.auth.models import AnonymousUser
+from django.views.decorators.csrf import csrf_exempt
 
 from bs4 import BeautifulSoup as bs
 
@@ -152,14 +152,13 @@ def process(request, algo_id):
 			response.status_code = 400
 			return response
 		else:
-			# TODO: Do the actual processing.
+			# JSON ok, will process the algorithm
 			run_id = execute_algorithm.external(json_data, algo_id, request)
 			message = json.dumps({
-								'job_id': run_id,
+								'jobid': run_id,
 								'status': AlgorithmRun.objects.get_or_none(pk = run_id).status})	
 			response = HttpResponse(message)
-			response.status_code = 200
-			
+			response.status_code = 200		
 			return response
 		
 	else: 
@@ -185,7 +184,7 @@ def jobstatus(request, run_id):
 			response.status_code = 400
 			return response
 		else:
-			msg = {'job_id': run_id, 'status_code': algo_run.status}	
+			msg = {'job_id': run_id, 'status': algo_run.status}	
 			if algo_run.status == STATUS_CODES['finished']:
 				if algo_run.newick == '':
 					msg['error'] = "Could not retrieve newick."
@@ -193,10 +192,13 @@ def jobstatus(request, run_id):
 				else:	
 					nwk = ""
 					with open(os.path.join(algo_media, algo_run.newick), 'r') as f:
-						nwk = f.readlines()
+						nwk = f.read()
 					msg['result'] = nwk
 					msg['format'] = 'newick'
-					return HttpResponse(json.dumps(msg))
+					msg['algorithm'] = algo_run.algorithm.name
+					msg['start_time'] = str(algo_run.start_time)
+					msg['end_time'] = str(algo_run.end_time)
+					return HttpResponse(json.dumps(msg, encoding = "utf8"))
 			else: 
 				return HttpResponse(json.dumps(msg))
 	
@@ -209,6 +211,8 @@ def processtest(request):
 		csv = f.read()
 
 	json_data = {
+		'return_host': '127.0.0.1:8000',
+		'return_path': '/algorithms/testresponse/',
 		'userid': 42,
 		'parameters': {
 			'imax': 1		
@@ -222,7 +226,17 @@ def processtest(request):
 	request.user = AnonymousUser
 	request.META = {}
 	request.META['REMOTE_ADDR'] = '127.0.0.1'
-	request.META['SERVER_PORT'] = 80
+	request.META['SERVER_PORT'] = 8000
 	return process(request, 2)
 
 
+@csrf_exempt
+def testresponse(request):
+	if request.method == "POST":
+		print json.loads(request.POST['json'], encoding = "utf8")
+		
+		return HttpResponse("OK")
+	
+	return HttpResponse("No POST")
+
+	

@@ -51,7 +51,7 @@ def external(json_data, algo_id, request):
 	csv_file = tempfile.NamedTemporaryFile(mode = 'w', delete = False)
 	# First write the file in the temporary file and close it.
 	with codecs.open(csv_file.name, mode = 'w', encoding = 'utf8') as f:
-		f.write(json_data['data'].encode('ascii', 'ignore'))	
+		f.write(json_data['data'].encode('ascii', 'replace'))	
 
 	# Then construct a mock up InMemoryUploadedFile from it for the InputFile
 	mock_file = None
@@ -75,7 +75,7 @@ def external(json_data, algo_id, request):
 	input_file_key = ''
 	for arg in algorithm.args.all():
 		if arg.value == 'input_file':
-			input_file_key = arg.keys
+			input_file_key = arg.key
 	
 	run_args = utils.build_external_args(parameters, input_file_key, input_file,
 			algorithm_name = algorithm.name)
@@ -85,10 +85,13 @@ def external(json_data, algo_id, request):
                                     	external = True)
 	current_run.save()	# Save to ensure that id generation is not delayed.
 	rid = current_run.id
+	user_id = json_data['userid']
+	return_host = json_data['return_host']
+	return_path = json_data['return_path']
 	kwargs = {'run_args': run_args, 'algorithm_run': rid}
 	call = algorithm.get_callable(kwargs)
-	call.apply_async(kwargs = kwargs, link = external_algorithm_run_finished.s(rid), \
-					link_error = external_algorithm_run_error.s(rid))
+	call.apply_async(kwargs = kwargs, link = external_algorithm_run_finished.s(rid, user_id, return_host, return_path), \
+					link_error = external_algorithm_run_error.s(rid, user_id, return_host, return_path))
 	return current_run.id
 
 	
