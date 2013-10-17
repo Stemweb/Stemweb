@@ -184,23 +184,27 @@ def jobstatus(request, run_id):
 			response.status_code = 400
 			return response
 		else:
-			msg = {'job_id': run_id, 'status': algo_run.status}	
+			msg = {
+				'job_id': run_id, 
+				'status': algo_run.status, 
+				'algorithm': algo_run.algorithm.name,
+				'start_time': str(algo_run.start_time)}	
 			if algo_run.status == STATUS_CODES['finished']:
 				if algo_run.newick == '':
 					msg['error'] = "Could not retrieve newick."
-					return HttpResponse(json.dumps(msg))
+					return HttpResponse(json.dumps(msg, encoding = "utf8"))
 				else:	
 					nwk = ""
 					with open(os.path.join(algo_media, algo_run.newick), 'r') as f:
 						nwk = f.read()
 					msg['result'] = nwk
 					msg['format'] = 'newick'
-					msg['algorithm'] = algo_run.algorithm.name
-					msg['start_time'] = str(algo_run.start_time)
 					msg['end_time'] = str(algo_run.end_time)
 					return HttpResponse(json.dumps(msg, encoding = "utf8"))
+			if algo_run.status == STATUS_CODES['failure']:
+				msg['end_time'] = str(algo_run.end_time)
 			else: 
-				return HttpResponse(json.dumps(msg))
+				return HttpResponse(json.dumps(msg, encoding = "utf8"))
 	
 	
 def processtest(request):
@@ -236,7 +240,6 @@ def testresponse(request):
 		print json.loads(request.POST['json'], encoding = "utf8")
 		
 		return HttpResponse("OK")
-	
 	return HttpResponse("No POST")
 
 	
