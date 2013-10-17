@@ -63,6 +63,7 @@ def external(json_data, algo_id, request):
 			
 		input_file = InputFile(name = datetime.now().strftime("%Y%m%d-%H%M%S") + "-" + utils.id_generator() + ".csv", 
                                   file = mock_file)  
+		input_file.extension = 'csv'
 		input_file.save() # Save to be sure input_file.id is created 
 		input_file_id = input_file.id
 	
@@ -74,7 +75,7 @@ def external(json_data, algo_id, request):
 	input_file_key = ''
 	for arg in algorithm.args.all():
 		if arg.value == 'input_file':
-			input_file_key = arg.key
+			input_file_key = arg.keys
 	
 	run_args = utils.build_external_args(parameters, input_file_key, input_file,
 			algorithm_name = algorithm.name)

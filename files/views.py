@@ -57,6 +57,7 @@ def upload(request):
 			input_file = InputFile(name = f.name, 
                                    user = request.user, 
                                    file = f)  
+			input_file.extension = (f.name).rsplit(".", 1)[1]
 			input_file.save() # Save to be sure input_file.id is created                                      
 			return HttpResponseRedirect('/files/%s' % (input_file.id))
 		else:
