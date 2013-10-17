@@ -65,7 +65,7 @@ def __build_run_folder__(user, input_file_id, algorithm_name):
 		id_generator(). Algorithm name is slugified in the process. 
 		
 	'''
-	if not user.is_authenticated():
+	if user is None:
 		uppath = os.path.join('external')
 	else:
 		uppath = os.path.join('users')
@@ -119,12 +119,12 @@ def build_local_args(form = None, algorithm_name = None, request = None):
 
 
 def build_external_args(parameters, input_file_key, input_file, \
-					algorithm_name = None, request = None):
+					algorithm_name = None):
 	run_args = {}
-	for key, value in parameters:
+	for key, value in parameters.items():
 		run_args[key] = value
-	run_args[input_file_key] = input_file.path
-	run_args['folder_url'] = create_run_folder(request.user, input_file.id, algorithm_name)
+	run_args[input_file_key] = input_file.file.path
+	run_args['folder_url'] = create_run_folder(None, input_file.id, algorithm_name)
 	return run_args
 
 
@@ -141,7 +141,6 @@ def validate_server(request):
 	
 		Returns true if it is, otherwise false.
 	''' 
-	
 	addr = request.META['REMOTE_ADDR']
 	port = request.META['SERVER_PORT']
 	trusted_server = False
@@ -167,19 +166,19 @@ def validate_json(json_data, algo_id):
 	algorithm = Algorithm.objects.get_or_none(pk = algo_id)
 	if algorithm is None: return (False, "No such algorithm id.")
 	
-	userid = json_data.pop('userid', None)
-	if userid is None: return (False, "No userid given.")
+	if 'userid' not in json_data: return (False, "No userid given.")
+	if 'data' not in json_data: return (False, "No data key present")
+	if 'parameters' not in json_data: return (False, "No parameters present")
 	
 	params = json_data['parameters']
-	for arg in algorithm.args.all():
-		if arg.external:
-			if params.has_key(arg.key):
-				value = params[arg.key]
-				if not validate_parameter(value, arg.value):
-					return (False, "Parameter %s = %s had wrong type. Expected %s." %\
-						(arg.key, value, arg.value))
-			else: 
-				return (False, "No parameter %s present" % (arg.key))
+	for arg in algorithm.args.all().filter(external = True):
+		if params.has_key(arg.key):
+			value = params[arg.key]
+			if not validate_parameter(value, arg.value):
+				return (False, "Parameter %s = %s had wrong type. Expected %s." %\
+					(arg.key, value, arg.value))
+		else: 
+			return (False, "No parameter %s present" % (arg.key))
 			
 	return (True, "")
 				

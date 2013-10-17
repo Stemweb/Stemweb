@@ -28,8 +28,8 @@ class InputFile(models.Model):
 	user = models.ForeignKey(User, null = True)     # User who uploaded the file
 	upload_time = models.DateTimeField(auto_now_add = True) # Uploading time 
 	last_access = models.DateTimeField(auto_now = True)
-	extension = models.CharField(max_length = 10, default = 'nex')   # File extension
 	name = models.CharField(max_length = 80)        # Base name of the input file
+	extension = models.CharField(max_length = 10, default = str(name).rsplit('.', 1)[1])   # File extension
 	file = models.FileField(upload_to = utils.upload_path)
 	external = models.BooleanField(default = False)
 

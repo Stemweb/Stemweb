@@ -1,6 +1,7 @@
 *.pyc
 lstrings.py
 media/users/
+media/external/
 local/default_commit_message*
 media/javascript/jquery-1.7.1.js
 *.db

@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import patterns, url
 from django.views.generic.simple import direct_to_template
-from views import base, details, delete_runs, run, results, available, process, jobstatus
+from views import base, details, delete_runs, run, results, available, process, jobstatus, processtest
 
 from .settings import ALGORITHM_URL_PREFIX as prefix
 
@@ -15,4 +15,7 @@ urlpatterns = patterns('',
     url(r'^%s/available/$' % prefix, available, name = 'algorithms_available_url'),
     url(r'^%s/process/(?P<algo_id>\d+)/$' % prefix, process, name = 'algorithms_process_url'),
     url(r'^%s/jobstatus/(?P<run_id>\d+)/$' % prefix, jobstatus, name = 'algorithms_jobstatus_url'),
+    
+    # Test URL
+    url(r'^%s/processtest/$' % prefix, processtest, name = 'algorithms_test_url'),
 )

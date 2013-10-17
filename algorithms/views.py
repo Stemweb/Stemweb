@@ -23,6 +23,10 @@ from django.core.urlresolvers import reverse
 from django.core.serializers import serialize
 from django.contrib.auth.decorators import login_required
 
+from django.contrib.auth.models import AnonymousUser
+
+from bs4 import BeautifulSoup as bs
+
 from .models import Algorithm, AlgorithmRun, AlgorithmArg
 from . import utils
 from . import execute_algorithm
@@ -113,7 +117,7 @@ def results(request, run_id):
 		c = RequestContext(request, {'algorithm_run': run})
 		if run.status == STATUS_CODES['finished']:
 			return render_to_response('algorithm_running_results.html', c)
-		# TODO: do different view for non-finished algorithms
+		# TODO: different view for non-finished algorithms
 		else:
 			return render_to_response('algorithm_running_results.html', c)
 		
@@ -139,7 +143,7 @@ def process(request, algo_id):
 		return response
 		
 	if request.method == 'POST':
-		json_data = json.loads(request.body)
+		json_data = json.loads(request.body, encoding = 'utf8')
 		ret = utils.validate_json(json_data, algo_id)
 		if not ret[0]:
 			# No valid JSON
@@ -149,10 +153,13 @@ def process(request, algo_id):
 			return response
 		else:
 			# TODO: Do the actual processing.
-			message = json.dumps({'message': "OK"})	
+			run_id = execute_algorithm.external(json_data, algo_id, request)
+			message = json.dumps({
+								'job_id': run_id,
+								'status': AlgorithmRun.objects.get_or_none(pk = run_id).status})	
 			response = HttpResponse(message)
 			response.status_code = 200
-			execute_algorithm.external(json_data)
+			
 			return response
 		
 	else: 
@@ -195,17 +202,27 @@ def jobstatus(request, run_id):
 	
 	
 def processtest(request):
+	csv_file = "/Users/slinkola/STAM/data_sets/notre2.csv"
+	csv = u""
+	import codecs
+	with codecs.open(csv_file, 'r', encoding = 'utf8') as f:
+		csv = f.read()
+
 	json_data = {
 		'userid': 42,
 		'parameters': {
 			'imax': 1		
 			},
-		'data': 'derp\therp\np\tn'
+		'data': csv
 		}
-	msg = json.dumps(json_data)
+	msg = json.dumps(json_data, encoding = 'utf8')
 	request = HttpRequest()
 	request.method = 'POST'
 	request.body = msg
-	
+	request.user = AnonymousUser
+	request.META = {}
+	request.META['REMOTE_ADDR'] = '127.0.0.1'
+	request.META['SERVER_PORT'] = 80
+	return process(request, 2)
 
 

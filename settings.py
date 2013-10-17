@@ -9,6 +9,8 @@ djcelery.setup_loader()
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+os.environ.LC_ALL = "en_US.UTF8"
+
 # Root folder of the site
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 

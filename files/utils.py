@@ -6,19 +6,19 @@
 import os
 import string
 import random
-import Stemweb.settings as settings
 
-#    Creates file_field and abs_path for Input_files instances.
-#    This method is called anytime Input_files object is created
-#    and it uploaded files associated with file_field into abs_path.
-#
-#    (Though it actually creates first the object into path relative 
-#    to MEDIA_ROOT but abs_path is created just by joinin MEDIA_ROOT
-#    with this upload path.)
+from django.conf import settings
+
 def upload_path(instance, filename):
-	uppath = os.path.join('users', instance.user.username)
+	''' Returns upload path where InputFile -instance with filename should be 
+	    uploaded.
+	'''
+	if instance.user is None:
+		uppath = 'external'
+	else:
+		uppath = os.path.join('users', instance.user.username)
 	uppath = os.path.join(uppath, 'files')
-	uppath = os.path.join(uppath, instance.extension)
+	uppath = os.path.join(uppath, filename.rsplit('.', 1)[1]) # extension
 	uppath = os.path.join(uppath, filename)
 	instance.path = os.path.join(settings.MEDIA_ROOT, uppath)
 	return uppath
