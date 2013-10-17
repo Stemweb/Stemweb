@@ -18,11 +18,14 @@ def get_recent_activities(user):
 		return None
 	
 	for u in uploaded: 
-		ra.append({'time': u.upload_time, 'message': "Uploaded file %s" % (u.name), 'url': '/files/%s' % (u.id)})
+		ra.append({'time': u.upload_time, 'message': "Uploaded file %s" %\
+				 (u.name), 'url': '/files/%s' % (u.id)})
 	for s in started_runs: 
-		ra.append({'time': s.start_time, 'message': "Started %s with %s" % (s.algorithm.name, s.input_file.name), 'url': '/algorithms/results/%s' % (s.id)})
+		ra.append({'time': s.start_time, 'message': "Started %s with %s" %\
+				 (s.algorithm.name, s.input_file.name), 'url': '/algorithms/results/%s' % (s.id)})
 	for s in ended_runs: 
-		ra.append({'time': s.end_time, 'message': "%s run with %s ended" % (s.algorithm.name, s.input_file.name), 'url': '/algorithms/results/%s' % (s.id)})
+		ra.append({'time': s.end_time, 'message': "%s run with %s ended" %\
+				 (s.algorithm.name, s.input_file.name), 'url': '/algorithms/results/%s' % (s.id)})
 	ra = sorted(ra, key = lambda a: a['time'], reverse = True)
 	
 	return ra

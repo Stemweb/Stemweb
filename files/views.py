@@ -5,8 +5,6 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
 
-from django.
-
 from Stemweb.third_party_apps.recaptcha_works.decorators import fix_recaptcha_remote_ip
 
 from models import InputFile
@@ -18,6 +16,8 @@ def details(request, file_id, form = None):
  		Detail view of one of the user's files.
 	'''
 	details_file = InputFile.objects.get(pk = file_id)
+	if details_file.user is None: base(request)
+	
 	if details_file.user != request.user:
 		logger = logging.getLogger('stemweb.auth')
 		logger.warning('Request user %s tried to access file %s which is owned by %s.' % (request.user, details_file.id, details_file.user))
