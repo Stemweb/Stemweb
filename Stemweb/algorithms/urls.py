@@ -1,5 +1,4 @@
 from django.conf.urls.defaults import patterns, url
-from django.views.generic.simple import direct_to_template
 from views import base, details, delete_runs, run, results, available, process, jobstatus, processtest, testresponse
 
 from .settings import ALGORITHM_URL_PREFIX as prefix

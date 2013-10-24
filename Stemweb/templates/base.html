@@ -96,14 +96,14 @@
 				<tr>
 					{# Add same kind of block for your subpage and declare "active" inside it in your subpages base.html #}
 					<td class="menu_item"><a class="menu_link {% block menu_home %}{% endblock %}" href="/home">home</a></td>
-					<td class="menu_item "><a class="menu_link {% block menu_algo %}{% endblock %}" href="{% url algorithms_base_url %}">algorithms</a></td>
-					<td class="menu_item "><a class="menu_link {% block menu_files %}{% endblock %}" href="{% url files_base_url %}">files</a></td>
+					<td class="menu_item "><a class="menu_link {% block menu_algo %}{% endblock %}" href="{% url "algorithms_base_url" %}">algorithms</a></td>
+					<td class="menu_item "><a class="menu_link {% block menu_files %}{% endblock %}" href="{% url "files_base_url" %}">files</a></td>
 					{# <td class="menu_item"><a class="menu_link">groups</a></td> #}
 					
 					{% if user.is_authenticated %}
-					<td class="menu_item"><a class="menu_link {% block menu_logout %}{% endblock %}" href={% url auth_logout %}>logout</a></td>
+					<td class="menu_item"><a class="menu_link {% block menu_logout %}{% endblock %}" href={% url "auth_logout" %}>logout</a></td>
 					{% else %}
-					<td class="menu_item"><a class="menu_link {% block menu_login %}{% endblock %}" href={% url auth_login %}>login</a></td>
+					<td class="menu_item"><a class="menu_link {% block menu_login %}{% endblock %}" href={% url "auth_login" %}>login</a></td>
 					{% endif %}
 				</tr>
 				</table>

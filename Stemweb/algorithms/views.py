@@ -25,7 +25,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser
 from django.views.decorators.csrf import csrf_exempt
 
-from bs4 import BeautifulSoup as bs
+#from bs4 import BeautifulSoup as bs
 
 from .models import Algorithm, AlgorithmRun, AlgorithmArg
 from . import utils

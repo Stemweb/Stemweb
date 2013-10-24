@@ -29,7 +29,7 @@
 		 {% for algo in all_algorithms %}
 		 	<tr class="algorithm_table_row">
 		 		<td class="algorithm_name">
-		 			<a href="{% url algorithms_details_url algo_id=algo.id %}">{{ algo.name }} &gt;&nbsp;</a>
+		 			<a href="{% url "algorithms_details_url" algo_id=algo.id %}">{{ algo.name }} &gt;&nbsp;</a>
 				</td>
 			</tr>
 		 {% endfor %}
