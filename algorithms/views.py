@@ -124,6 +124,7 @@ def results(request, run_id):
 	raise Http404
 
 
+@csrf_exempt
 def available(request):
 	''' Returns all available AlgorithmArg and Algorithm model instances in 
 		json-format. '''
@@ -131,7 +132,8 @@ def available(request):
 			list(Algorithm.objects.all()), fields = ['pk', 'key', 'value', 'name', 'args', 'external']),\
 			mimetype='application/json')
 	
-	
+
+@csrf_exempt	
 def process(request, algo_id):
 	''' Process external servers algorithm run. '''
 	ret = utils.validate_server(request)
@@ -168,6 +170,7 @@ def process(request, algo_id):
 		return response
 	
 	
+@csrf_exempt	
 def jobstatus(request, run_id):	
 	ret = utils.validate_server(request)
 	if not ret[0]:
