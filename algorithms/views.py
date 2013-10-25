@@ -145,7 +145,7 @@ def process(request, algo_id):
 		return response
 		
 	if request.method == 'POST':
-		json_data = json.loads(request.body, encoding = 'utf8')
+		json_data = json.loads(request.body or request.raw_post_data, encoding = 'utf8')
 		ret = utils.validate_json(json_data, algo_id)
 		if not ret[0]:
 			# No valid JSON
