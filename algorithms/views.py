@@ -211,7 +211,7 @@ def jobstatus(request, run_id):
 	
 	
 def processtest(request):
-	csv_file = "/Users/slinkola/STAM/data_sets/notre2.csv"
+	csv_file = "/Users/slinkola/STAM/data_sets/request.json"
 	csv = u""
 	import codecs
 	with codecs.open(csv_file, 'r', encoding = 'utf8') as f:
@@ -226,7 +226,8 @@ def processtest(request):
 			},
 		'data': csv
 		}
-	msg = json.dumps(json_data, encoding = 'utf8')
+	#msg = json.dumps(json_data, encoding = 'utf8')
+	msg = csv
 	request = HttpRequest()
 	request.method = 'POST'
 	request.body = msg
