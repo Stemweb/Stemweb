@@ -9,7 +9,7 @@ import codecs
 from django.shortcuts import get_object_or_404
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
-from bs4 import BeautifulSoup as bs
+#from bs4 import BeautifulSoup as bs
 
 from tasks import external_algorithm_run_error
 from tasks import external_algorithm_run_finished

@@ -12,7 +12,7 @@
 	</p>
 	
 	<p class="no_files">
-		<a href="{% url auth_password_reset %}">Reset password</a>
+		<a href="{% url "auth_password_reset" %}">Reset password</a>
 	</p>
 
 {% endblock %}
@@ -29,8 +29,8 @@
 	</form>
 
 	<p class="development_note">
-		Registered users can upload their own files, etc plaplapla.<br>
-		<a href={% url registration_register %}>Register</a>
+		Registered users can upload their own files, etc.<br>
+		<a href={% url "registration_register" %}>Register</a>
 	</p>
 
 {% endblock %}

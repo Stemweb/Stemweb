@@ -19,7 +19,7 @@ up your own URL patterns for these views instead.
 
 
 from django.conf.urls.defaults import *
-from django.views.generic.simple import direct_to_template
+from django.views.generic import TemplateView
 
 from Stemweb.third_party_apps.registration.views import activate
 from Stemweb.third_party_apps.registration.views import register
@@ -31,8 +31,7 @@ urlpatterns = patterns('',
                            {'backend': 'Stemweb.third_party_apps.registration.backends.default.DefaultBackend'},
                            name='registration_register'),
                        url(r'^register/closed/$',
-                           direct_to_template,
-                           {'template': 'registration/registration_closed.html'},
+                           TemplateView.as_view(template_name="registration_closed.html"),
                            name='registration_disallowed'),
                        (r'', include('Stemweb.third_party_apps.registration.auth_urls')),
                        )
