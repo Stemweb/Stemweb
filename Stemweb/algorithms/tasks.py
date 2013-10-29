@@ -414,7 +414,7 @@ def external_algorithm_run_error(uuid, run_id, user_id, return_host, return_path
 	
 	import httplib, urllib, json
 	message = json.dumps(ret, encoding = "utf8")	
-	body = urllib.urlencode({u'json': message}).encode('utf8')
+	body = urllib.urlencode(message).encode('utf8')
 	conn = httplib.HTTPConnection(return_host)
 	conn.request('POST', return_path, body)
 	response = conn.getresponse()
@@ -448,7 +448,7 @@ def external_algorithm_run_finished(newick, run_id, user_id, return_host, return
 	
 	import httplib, urllib, json
 	message = json.dumps(ret, encoding = "utf8")	
-	body = urllib.urlencode({u'json': message}).encode('utf8')
+	body = urllib.urlencode(message).encode('utf8')
 	conn = httplib.HTTPConnection(return_host)
 	conn.request('POST', return_path, body)
 	response = conn.getresponse()

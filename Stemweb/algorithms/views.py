@@ -145,7 +145,7 @@ def process(request, algo_id):
 		return response
 		
 	if request.method == 'POST':
-		json_data = json.loads(request.body or request.raw_post_data, encoding = 'utf8')
+		json_data = json.loads(request.body, encoding = 'utf8')
 		ret = utils.validate_json(json_data, algo_id)
 		if not ret[0]:
 			# No valid JSON
@@ -211,35 +211,17 @@ def jobstatus(request, run_id):
 	
 	
 def processtest(request):
-<<<<<<< HEAD:algorithms/views.py
 	csv_file = "/home/slinkola/data_sets/request.json"
-=======
-	csv_file = "/Users/slinkola/STAM/data_sets/request.json"
->>>>>>> 272faac7d79baeafc44b63c12c63c3542c830c6c:Stemweb/algorithms/views.py
 	csv = u""
 	import codecs
 	with codecs.open(csv_file, 'r', encoding = 'utf8') as f:
 		csv = f.read()
 
-	json_data = {
-		'return_host': '127.0.0.1:8000',
-		'return_path': '/algorithms/testresponse/',
-		'userid': 42,
-		'parameters': {
-			'imax': 1		
-			},
-		'data': csv
-		}
-<<<<<<< HEAD:algorithms/views.py
 	msg = csv
-	#msg = json.dumps(json_data, encoding = 'utf8')
-=======
-	#msg = json.dumps(json_data, encoding = 'utf8')
-	msg = csv
->>>>>>> 272faac7d79baeafc44b63c12c63c3542c830c6c:Stemweb/algorithms/views.py
 	request = HttpRequest()
 	request.method = 'POST'
-	request.body = msg
+	request.POST = msg
+	request.content_type = "application/json"
 	request.user = AnonymousUser
 	request.META = {}
 	request.META['REMOTE_ADDR'] = '127.0.0.1'
@@ -250,7 +232,7 @@ def processtest(request):
 @csrf_exempt
 def testresponse(request):
 	if request.method == "POST":
-		print json.loads(request.POST['json'], encoding = "utf8")
+		print json.loads(request.body, encoding = "utf8")
 		
 		return HttpResponse("OK")
 	return HttpResponse("No POST")

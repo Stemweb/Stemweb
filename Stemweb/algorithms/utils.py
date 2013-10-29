@@ -11,7 +11,10 @@ from django.template.defaultfilters import slugify
 from django.shortcuts import get_object_or_404
 
 from Bio import Phylo
-import pylab
+import matplotlib
+matplotlib.use('Cairo')
+import matplotlib.pyplot as plt
+
 from threading import Lock
 
 from models import Algorithm
@@ -44,8 +47,8 @@ def newick2svg(newick, filepath, branch_length = True, radial = True, width = 80
 	nwk = Phylo.read(newick, 'newick')
 	Phylo.draw_graphviz(nwk, prog = prog, node_size = 500)
 	#Phylo.draw(nwk, do_show = False)
- 	pylab.savefig(filepath)
-	
+ 	plt.savefig(filepath)
+
 	
 def id_generator(size=8, chars=string.ascii_uppercase + string.digits):
 	''' Semiunique ID generator -- copypaste code.

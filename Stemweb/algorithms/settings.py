@@ -1,4 +1,4 @@
-'''
+''''
 	Settings for algorithms-application. 
 '''
 from django import forms
@@ -6,7 +6,6 @@ from django.conf import settings
 
 from Stemweb.files import forms as files_forms
 
-#from .semstem.semstem import Semstem
 from .semstem.semstemprob import Semstem
 #from .neighbour_net.neighbornet_class import NN
 from .neighbour_joining.njc import NJ
@@ -91,5 +90,3 @@ ARG_VALUE_FIELD_TYPE_VALIDATORS = {
 }
 
 
-
-#ALGORITHM_RUN_STATES = 
