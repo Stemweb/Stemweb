@@ -41,7 +41,7 @@
 {% block subpage_content %}
 	{% if algorithm_run.status == 1 or algorithm_run.status == -1 %}
 	<script type="text/javascript">
-		window.setTimeout("location.reload(true);", 10000);
+		window.setTimeout("location.reload(true);", 5000);
 	</script>
 	<p>Page will refresh in 10 second periods.</p>
 	{% endif %}

@@ -25,7 +25,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser
 from django.views.decorators.csrf import csrf_exempt
 
-from bs4 import BeautifulSoup as bs
+#from bs4 import BeautifulSoup as bs
 
 from .models import Algorithm, AlgorithmRun, AlgorithmArg
 from . import utils
@@ -211,7 +211,11 @@ def jobstatus(request, run_id):
 	
 	
 def processtest(request):
+<<<<<<< HEAD:algorithms/views.py
 	csv_file = "/home/slinkola/data_sets/request.json"
+=======
+	csv_file = "/Users/slinkola/STAM/data_sets/request.json"
+>>>>>>> 272faac7d79baeafc44b63c12c63c3542c830c6c:Stemweb/algorithms/views.py
 	csv = u""
 	import codecs
 	with codecs.open(csv_file, 'r', encoding = 'utf8') as f:
@@ -226,8 +230,13 @@ def processtest(request):
 			},
 		'data': csv
 		}
+<<<<<<< HEAD:algorithms/views.py
 	msg = csv
 	#msg = json.dumps(json_data, encoding = 'utf8')
+=======
+	#msg = json.dumps(json_data, encoding = 'utf8')
+	msg = csv
+>>>>>>> 272faac7d79baeafc44b63c12c63c3542c830c6c:Stemweb/algorithms/views.py
 	request = HttpRequest()
 	request.method = 'POST'
 	request.body = msg

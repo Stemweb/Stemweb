@@ -11,25 +11,12 @@ import logging
 
 from django.template.defaultfilters import slugify
 
-
 from celery.task import Task, task
 from celery.registry import tasks
 from celery.result import AsyncResult
 
 import settings
-
-def synchronized(lock):
-	''' Synchronization decorator. '''
-	def wrap(f):
-		def syncedFunction(*args, **kw):
-			lock.acquire()
-			try: 
-				return f(*args, **kw)
-			finally: 
-				lock.release()
-		return syncedFunction
-	return wrap
-
+from decorators import synchronized
 
 class Observer():
 	'''

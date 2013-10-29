@@ -6,21 +6,29 @@ import string
 import random
 import logging
 
+from django.conf import settings
+from django.template.defaultfilters import slugify
+from django.shortcuts import get_object_or_404
+
+from Bio import Phylo
+import pylab
+from threading import Lock
+
 from models import Algorithm
 from .settings import ARG_VALUE_FIELD_TYPE_KEYS as field_types
 from .settings import TRUSTED_SERVERS
 from .settings import ALGORITHM_MEDIA_ROOT as algo_media
 from Stemweb.files.models import InputFile
+from decorators import synchronized
 
-from django.conf import settings
-from django.template.defaultfilters import slugify
-from django.shortcuts import get_object_or_404
+pylab_lock = Lock()
 
-nw_display = os.path.join(settings.NEWICK_UTILS, 'nw_display')
-
+@synchronized(pylab_lock)
 def newick2svg(newick, filepath, branch_length = True, radial = True, width = 800):
 	'''
-		Create svg file from given newick file.
+		Create svg file from given newick file. This method has it's own lock so 
+		that many newick's cannot be drawn into same figure and thus corrupt resulting
+		image file.
 		
 		newick			absolute path to newick tree file
 		
@@ -32,12 +40,11 @@ def newick2svg(newick, filepath, branch_length = True, radial = True, width = 80
 		
 		width			width of the resulting svg file in pixels. 
 	'''
-	#nw_display = os.path.join(settings.SITE_ROOT, 'shell_scripts', 'nw_display')
-	bl = ' -b \'visibility:hidden\' ' if branch_length is False else ''
-	r = ' -r ' if radial is True else ''	
-	opt_arg = "%s %s" % (r, bl)
-	cmd = "%s -s -R 50 -S %s -w %s %s > %s" % (nw_display, opt_arg, width, newick, filepath)
-	os.system(cmd)
+	prog = 'dot' if radial else 'neato'
+	nwk = Phylo.read(newick, 'newick')
+	Phylo.draw_graphviz(nwk, prog = prog, node_size = 500)
+	#Phylo.draw(nwk, do_show = False)
+ 	pylab.savefig(filepath)
 	
 	
 def id_generator(size=8, chars=string.ascii_uppercase + string.digits):
