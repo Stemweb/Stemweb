@@ -62,7 +62,7 @@
 				No image for this run. <br>
 			{% endif %}
 		{% else %}
-			{% if algorithm_run.status >= 1 %}
+			{% if algorithm_run.status > 1 %}
 				Run failed for unexpected reason!
 			{% endif %}
 		{% endif %}

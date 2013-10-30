@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404
 
 from Bio import Phylo
 import matplotlib
-matplotlib.use('Cairo')
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 from threading import Lock
@@ -27,9 +27,9 @@ from decorators import synchronized
 pylab_lock = Lock()
 
 @synchronized(pylab_lock)
-def newick2svg(newick, filepath, branch_length = True, radial = True, width = 800):
+def newick2img(newick, filepath, branch_length = True, radial = True, width = 800):
 	'''
-		Create svg file from given newick file. This method has it's own lock so 
+		Create image file from given newick file. This method has it's own lock so 
 		that many newick's cannot be drawn into same figure and thus corrupt resulting
 		image file.
 		

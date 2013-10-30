@@ -1,4 +1,5 @@
-These instructions are for linux and OSX. 
+These instructions are for linux and OSX. Currently Stemweb uses python
+2.6/2.7
 
 1.)
 
@@ -8,23 +9,17 @@ tutorials about using any of the mentioned.
 
 2.) 
 
-Copy Stemweb/local/lstrings_empty.py into Stemweb/local/lstrings.py and set 
+Copy Stemweb/local_settings_empty.py into Stemweb/local_settings.py and set 
 all the relevant settings. See django projects documentation about settings. 
-Stemweb is currently deployed for django 1.3.1 
+Stemweb is currently deployed for django 1.5.4 
 
 If you want to be able to use the Stemweb as microservice for other ip:s,
 change algorithm/lsettings.py to present TRUSTED_SERVERS list of dictionaries
-with ("ip", <trusted id>) - key-value pairs. 
+with ("ip", <trusted ip>) - key-value pairs. 
 
 3.)
 
-Download and install python 2.7.5 and set the $PATH variable so that python 2.7.5
-is default python interpreter. Then download and install pip 
-(http://pypi.python.org/pypi/pip/). It's adviced to do these steps in this 
-order as pip gets installed into particular python version and if pip uses
-different interpreter as virtualenv it might cause errors. After you have
-succesfully installed new virtualenv (step 5.a) you should be able to change
-$PATH back (that's the whole reason of virtual environments).
+Download and install pip (http://pypi.python.org/pypi/pip/). 
 
 4) 
 
@@ -41,10 +36,10 @@ should come as default in later (10.x?) OSX installations.
 5.a)
 
 Run install.sh. It takes single optional argument which is a path to python
-install. Python version used should be 2.7.5, but since most of the server 
+install. Python version used should be 2.6/2.7, but since most of the server 
 technologies don't allow different major/minor versions of python than the
 one the server uses, you have to check which one is the right choice for 
-you. If no path is given "usr/bin/python2.7" is presumed. For example:
+you. If no path is given "usr/bin/python2.7" is assumed. For example:
 
 $ ./install.sh /home/username/.local/bin/python2.6
 
@@ -60,14 +55,13 @@ $ deactivate
 
 Read more about virtualenv from: http://www.virtualenv.org/
 
-Newly created virtualenv is then activated (and on linux numpy & matplotlib)
-and all the python packages in 'requirements.txt' are downloaded installed 
-into 'stemenv' virtualenv.
+Newly created virtualenv is then activated and all the python packages 
+in 'requirements.txt' are downloaded installed into 'stemenv' virtualenv.
 
-In OSX you have to activate your virtualenv manually as stated above and 
-install matplotlib 1.1.0 and scipy 0.10.1 (both have numpy 1.5.1 as 
-prerequisite) succesfully in there. This can get a little bit tricky for OSX 
-as matplotlib needs non-python package freetype2. See for example: 
+In OSX you have to manually install matplotlib >1.1.0 and scipy >0.7 
+(both have numpy >1.3.1 as prerequisite) succesfully into the virtualenv. 
+This can get a little bit tricky for OSX as matplotlib needs non-python 
+package freetype2. See for example: 
 
 http://matplotlib.sourceforge.net/users/installing.html
 http://stackoverflow.com/questions/1477144/compile-matplotlib-for-python-on-snow-leopard
@@ -79,10 +73,8 @@ use command:
 $ [sudo] pip install [--user] -r requirements.txt
 
 to install all the packages to standard folders. You still need to install 
-matplotlib with all the dependencies manually. Beware that Stemweb uses 
-python 2.7.5 to be able to run fluently. That's why, if your standard python 
-installation is different version, use of virtual environment is highly
-encouraged.
+matplotlib with all the dependencies manually. But if your standard python 
+installation is not 2.6/2.7, use of virtual environment is highly recommended.
 
 
 

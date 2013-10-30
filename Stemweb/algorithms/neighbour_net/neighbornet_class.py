@@ -16,6 +16,8 @@ import logging
 
 import scipy.optimize
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import networkx as nx
 
@@ -24,15 +26,14 @@ from Stemweb.algorithms.tasks import AlgorithmTask
 
 class NN(AlgorithmTask):
 	name = "Neighbour Net"
+	score_name = 'score'
 	
 	def __init_run__(self, *args, **kwargs):
 		AlgorithmTask.__init_run__(self, *args, **kwargs)
 		if self.algorithm_run:
 			self.algorithm_run.score = 0
-			self.algorithm_run.image = os.path.join(self.run_args['url_base'], 'nn.svg')
 			self.algorithm_run.save()
-		self.score_name = 'score'
-	
+
 	def __algorithm__(self, run_args = None):
 
 		# simple Hamming distance
@@ -372,7 +373,7 @@ class NN(AlgorithmTask):
 		# draw graph
 		nx.draw(G,pos=pos,labels=lab,edge_labels=edg_lab,\
 		            node_size=.1,font_size=8,width=.2,title=c)
-		plt.savefig(os.path.join(run_args['outfolder'], 'nn.svg'), format='svg')
+		plt.savefig(self.image_path)
 		
 		# print diagnostic output
 		d_var=mean([x*x for x in d_obs])

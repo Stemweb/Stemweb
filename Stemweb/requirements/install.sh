@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This script is created to easily(?) install Stemweb on different servers. You need
-# to have pip (requires setuptools) and python 2.7 installed before you can use this 
+# to have pip (requires setuptools) and python 2.6/2.7 installed before you can use this 
 # script. Check details from README.
 #
 # Script takes a single command line argument which is a path to the python 2.7 
@@ -23,19 +23,8 @@ source ./stemenv/bin/activate
 if [ "$OSTYPE" = "darwin11" ]
 then	
 	pip install -r requirements.txt
-	echo
-	echo
-	echo "You are running on OSX. You need to manually download and install"
-	echo "numpy 1.5.1, matplotlib 1.1.0 and scipy 0.10.1 into ./stemenv"
-	echo "virtualenv. Check README for details."
-	echo
-	echo
 elif [ "$OSTYPE" = "linux-gnu" ]
 then
-	# install numpy first because of dependencies in scipy and matplotlib.
-	pip install numpy==1.5.1
-	pip install matplotlib==1.1.0
-    	pip install scipy==0.10.1
 	pip install -r requirements.txt
 else
 	echo 
@@ -46,6 +35,7 @@ else
 fi
 
 # Go to root of Stemweb installation and run database syncing, etc
+cd ..
 cd ..
 python manage.py syncdb
 python manage.py loaddata bootstrap

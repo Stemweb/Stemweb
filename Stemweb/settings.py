@@ -12,10 +12,6 @@ TEMPLATE_DEBUG = DEBUG
 # Root folder of the site
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 
-# Add all third party apps and algorithms into python path.
-#THIRD_PARTY_APPS_DIR = os.path.join(SITE_ROOT, 'third_party_apps')
-#sys.path.insert(0, THIRD_PARTY_APPS_DIR) #
-
 ADMINS = (
     (ls.db_admin, ls.db_email),
 )

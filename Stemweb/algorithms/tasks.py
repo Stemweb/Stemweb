@@ -161,9 +161,9 @@ class AlgorithmTask(Task):
 			self.run_args['outfolder'] = self.algorithm_run.folder
 			if self.has_image:
 				self.algorithm_run.image = os.path.join(self.run_args['folder_url'], \
-					'%s_%s.svg' % (file_name, slug_name))
+					'%s_%s.png' % (file_name, slug_name))
 				self.image_path = os.path.join(self.algorithm_run.folder, \
-					'%s_%s.svg' % (file_name, slug_name))
+					'%s_%s.png' % (file_name, slug_name))
 			if self.has_newick:
 				self.algorithm_run.newick = os.path.join(self.run_args['folder_url'],\
 				'%s_%s.tre' % (file_name, slug_name))

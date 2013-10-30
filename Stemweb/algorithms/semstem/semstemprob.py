@@ -11,11 +11,13 @@ from Stemweb.algorithms.tasks import AlgorithmTask
 class Semstem(AlgorithmTask):
 	name = "Semstem"
 	input_file_key = 'infile'
+	has_image = True
 	
 	def __init_run__(self, *args, **kwargs):
 		AlgorithmTask.__init_run__(self, *args, **kwargs)
 		if self.algorithm_run:
-			self.algorithm_run.image = os.path.join(self.run_args['folder_url'], 'tree', 'treebest.svg')
+			self.algorithm_run.image = os.path.join(self.run_args['folder_url'], 'tree', 'treebest.png')
+			self.image_path = os.path.join(self.run_args['outfolder'], 'tree', 'treebest.png')
 			self.algorithm_run.save()
 		self.score_name = 'qscore'
 		#self.iteration_name = 'iter'
@@ -174,11 +176,10 @@ class Semstem(AlgorithmTask):
 			
 			#filename = os.path.splitext(resultfile)[0]
 			dot_file = os.path.join(resultfolder,resultfile) +'.dot' 
-			svg_file = os.path.join(resultfolder,resultfile) +'.svg'
 			file = open(dot_file,'w')
 			file.write(outstr)
 			file.close()
-			os.system('neato -Tsvg -Gstart=rand ' + dot_file + ' > ' + svg_file)
+			os.system('neato -Tpng -Gstart=rand ' + dot_file + ' > ' + self.image_path)
 		
 		
 		def	njtree (textdata):

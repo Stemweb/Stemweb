@@ -1,5 +1,5 @@
 '''
-Created on Apr 20, 2012
+Python wrapper for binary sankoff's C code.
 
 @author: slinkola
 '''
@@ -10,10 +10,7 @@ import logging
 import platform
 from Stemweb.algorithms.tasks import AlgorithmTask
 
-
 import binarysankoff
-#else:
-#	import binarysankoff_linux as binarysankoff
 
 class RHM(AlgorithmTask):
 	name = "RHM"
@@ -21,23 +18,14 @@ class RHM(AlgorithmTask):
 	has_newick = True
 	input_file_key = 'infolder'
 	
-	#def __init_run__(self, *args, **kwargs):
-	#	AlgorithmTask.__init_run__(self, *args, **kwargs)
-	#	if self.algorithm_run:
-	#		self.algorithm_run.image = os.path.join(self.run_args['url_base'], 'rhm.svg')
-	#		self.algorithm_run.newick = os.path.join(self.run_args['url_base'], 'rhm_0.tre')
-	#		self.algorithm_run.save()
-	
 	def __algorithm__(self, run_args = None):
 		run_args['strap'] = 1
 		run_args['file_name'] = self.input_file_name
 		
 		binarysankoff.main(run_args)
-		nw_path = os.path.join(self.run_args['outfolder'], 'rhm_0.tre')
-		svg_path = os.path.join(self.run_args['outfolder'], 'rhm.svg')
 		
-		from Stemweb.algorithms.utils import newick2svg
-		newick2svg(self.newick_path, self.image_path, radial = self.radial_image)
+		from Stemweb.algorithms.utils import newick2img
+		newick2img(self.newick_path, self.image_path, radial = self.radial_image)
 		
 		sleep(0.1)
 		self._stop.value = 1
