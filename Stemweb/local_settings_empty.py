@@ -41,6 +41,11 @@ root_urls = 'Stemweb.urls'
 
 # Veeerry secret key. Cannot be empty string.
 secret_key = ''
+
+# Default email backend. For private use console will suffice, but for public use either
+# dummy or smtp.
+email_backend = 'django.core.mail.backends.console.EmailBackend'
+
                                                         # On Univ. of Helsinki cs-department
 email_host = ''         # Smtp email server.               mail.cs.helsinki.fi
 email_host_user = ''    # Username on email server         cs-account@cs.helsinki.fi

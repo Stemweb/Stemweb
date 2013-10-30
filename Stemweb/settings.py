@@ -171,9 +171,8 @@ BROKER_VHOST = "/"
 ACCOUNT_ACTIVATION_DAYS = 7
 LOGIN_REDIRECT_URL = '/'
 
-# Lets not send any emails yet. Change this later to: 
-#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Email backend
+EMAIL_BACKEND = ls.email_backend
 
 # E-mail settings. Needed for user registrations' confirmation.
 # Later the site will probably send mails when algorithms runs
