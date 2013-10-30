@@ -1,5 +1,5 @@
 # Import locally configured settings 
-from local import lstrings
+import local_settings as ls
 import os
 import sys
 
@@ -17,19 +17,19 @@ SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 #sys.path.insert(0, THIRD_PARTY_APPS_DIR) #
 
 ADMINS = (
-    (lstrings.db_admin, lstrings.db_email),
+    (ls.db_admin, ls.db_email),
 )
 
 MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': lstrings.db_engine,    # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': lstrings.db_name,        # Or path to database file if using sqlite3.
-        'USER': lstrings.db_user,        # Not used with sqlite3.
-        'PASSWORD': lstrings.db_pwd,     # Not used with sqlite3.
-        'HOST': lstrings.db_host,        # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': lstrings.db_port,        # Set to empty string for default. Not used with sqlite3.
+        'ENGINE': ls.db_engine,    # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': ls.db_name,        # Or path to database file if using sqlite3.
+        'USER': ls.db_user,        # Not used with sqlite3.
+        'PASSWORD': ls.db_pwd,     # Not used with sqlite3.
+        'HOST': ls.db_host,        # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': ls.db_port,        # Set to empty string for default. Not used with sqlite3.
     }
 }
 
@@ -98,7 +98,7 @@ STATICFILES_FINDERS = (
 )
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = lstrings.secret_key
+SECRET_KEY = ls.secret_key
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -116,7 +116,7 @@ MIDDLEWARE_CLASSES = (
     'Stemweb.third_party_apps.pagination.middleware.PaginationMiddleware',
 )
 
-ROOT_URLCONF = lstrings.root_urls
+ROOT_URLCONF = ls.root_urls
 
 TEMPLATE_CONTEXT_PROCESSORS = (
 	"django.contrib.auth.context_processors.auth",
@@ -154,7 +154,6 @@ INSTALLED_APPS = (
     
     # Own apps
     'Stemweb.home',
-    'Stemweb.local',
     'Stemweb.algorithms',
     'Stemweb.files',
 )
@@ -179,18 +178,18 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # E-mail settings. Needed for user registrations' confirmation.
 # Later the site will probably send mails when algorithms runs
 # complete, etc.
-DEFAULT_FROM_EMAIL = lstrings.db_email
-EMAIL_HOST = lstrings.email_host
-EMAIL_HOST_USER = lstrings.email_host_user
-EMAIL_HOST_PASSWORD = lstrings.email_host_pwd
-EMAIL_PORT = lstrings.email_port
-EMAIL_USE_TLS = lstrings.email_tls
+DEFAULT_FROM_EMAIL = ls.db_email
+EMAIL_HOST = ls.email_host
+EMAIL_HOST_USER = ls.email_host_user
+EMAIL_HOST_PASSWORD = ls.email_host_pwd
+EMAIL_PORT = ls.email_port
+EMAIL_USE_TLS = ls.email_tls
 #DEFAULT_FROM_EMAIL = "slinkola@cs.helsinki.fi"
 #SERVER_EMAIL = "slinkola@cs.helsinki.fi"
 
 # Recaptcha_works options
-RECAPTCHA_PUBLIC_KEY  = lstrings.recaptcha_public_key
-RECAPTCHA_PRIVATE_KEY = lstrings.recaptcha_private_key
+RECAPTCHA_PUBLIC_KEY  = ls.recaptcha_public_key
+RECAPTCHA_PRIVATE_KEY = ls.recaptcha_private_key
 RECAPTCHA_VALIDATION_OVERRIDE = True
 RECAPTCHA_USE_SSL = True
 RECAPTCHA_OPTIONS = {
@@ -202,11 +201,6 @@ RECAPTCHA_OPTIONS = {
 # Add small random delay to concurrency. 
 # TODO: change when in production to False
 CONCURRENT_RANDOM_DELAY = True
-
-# Absolute path to newick-utils-1.6 base compilation directory (where 
-# nw_display, etc. are located).
-NEWICK_UTILS = lstrings.newick_utils
-
 
 ROOT_LOG_DIR = os.path.join(SITE_ROOT, 'logs')
 if not os.path.exists(ROOT_LOG_DIR):
