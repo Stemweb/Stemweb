@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# First copy this file as lstring.py (into same folder) 
+# First copy this file as local_settings.py (into same folder) 
 # then add information of your own local database and 
 # other settings here.
  
@@ -39,7 +39,7 @@ db_port = ''            # Port to your db. Can be left blank
 # This is most likely stemweb.urls or Stemweb.urls.
 root_urls = 'Stemweb.urls'
 
-# Veeerry secret key.
+# Veeerry secret key. Cannot be empty string.
 secret_key = ''
                                                         # On Univ. of Helsinki cs-department
 email_host = ''         # Smtp email server.               mail.cs.helsinki.fi
@@ -51,6 +51,3 @@ email_tls = ''          # Does the email server use tls.   True
 recaptcha_public_key  = ''
 recaptcha_private_key = ''
 
-# Absolute path to newick-utils-1.6 base compilation directory (where 
-# nw_display, etc. are located).
-newick_utils = ''

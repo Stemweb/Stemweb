@@ -1,6 +1,0 @@
-Keep all files that have some localized strings etc in here.
-
-lstrings_empty.py: 
-
-Stores info about database connection that django uses.
-Rename file to lstrings.py and add your local database settings.
