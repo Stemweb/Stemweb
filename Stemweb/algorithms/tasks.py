@@ -11,25 +11,12 @@ import logging
 
 from django.template.defaultfilters import slugify
 
-
 from celery.task import Task, task
 from celery.registry import tasks
 from celery.result import AsyncResult
 
 import settings
-
-def synchronized(lock):
-	''' Synchronization decorator. '''
-	def wrap(f):
-		def syncedFunction(*args, **kw):
-			lock.acquire()
-			try: 
-				return f(*args, **kw)
-			finally: 
-				lock.release()
-		return syncedFunction
-	return wrap
-
+from decorators import synchronized
 
 class Observer():
 	'''
@@ -427,7 +414,7 @@ def external_algorithm_run_error(uuid, run_id, user_id, return_host, return_path
 	
 	import httplib, urllib, json
 	message = json.dumps(ret, encoding = "utf8")	
-	body = urllib.urlencode({u'json': message}).encode('utf8')
+	body = urllib.urlencode(message).encode('utf8')
 	conn = httplib.HTTPConnection(return_host)
 	conn.request('POST', return_path, body)
 	response = conn.getresponse()
@@ -461,7 +448,7 @@ def external_algorithm_run_finished(newick, run_id, user_id, return_host, return
 	
 	import httplib, urllib, json
 	message = json.dumps(ret, encoding = "utf8")	
-	body = urllib.urlencode({u'json': message}).encode('utf8')
+	body = urllib.urlencode(message).encode('utf8')
 	conn = httplib.HTTPConnection(return_host)
 	conn.request('POST', return_path, body)
 	response = conn.getresponse()

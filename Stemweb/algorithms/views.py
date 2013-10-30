@@ -25,7 +25,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser
 from django.views.decorators.csrf import csrf_exempt
 
-from bs4 import BeautifulSoup as bs
+#from bs4 import BeautifulSoup as bs
 
 from .models import Algorithm, AlgorithmRun, AlgorithmArg
 from . import utils
@@ -211,25 +211,17 @@ def jobstatus(request, run_id):
 	
 	
 def processtest(request):
-	csv_file = "/Users/slinkola/STAM/data_sets/notre2.csv"
+	csv_file = "/home/slinkola/data_sets/request.json"
 	csv = u""
 	import codecs
 	with codecs.open(csv_file, 'r', encoding = 'utf8') as f:
 		csv = f.read()
 
-	json_data = {
-		'return_host': '127.0.0.1:8000',
-		'return_path': '/algorithms/testresponse/',
-		'userid': 42,
-		'parameters': {
-			'imax': 1		
-			},
-		'data': csv
-		}
-	msg = json.dumps(json_data, encoding = 'utf8')
+	msg = csv
 	request = HttpRequest()
 	request.method = 'POST'
-	request.body = msg
+	request.POST = msg
+	request.content_type = "application/json"
 	request.user = AnonymousUser
 	request.META = {}
 	request.META['REMOTE_ADDR'] = '127.0.0.1'
@@ -240,7 +232,7 @@ def processtest(request):
 @csrf_exempt
 def testresponse(request):
 	if request.method == "POST":
-		print json.loads(request.POST['json'], encoding = "utf8")
+		print json.loads(request.body, encoding = "utf8")
 		
 		return HttpResponse("OK")
 	return HttpResponse("No POST")

@@ -37,8 +37,8 @@
 		{% else %}	
 				<h1>New user?</h1>
 				<div class="intro">
-					<a href={% url registration_register %}>Register</a> yourself now to run the 
-					<a href={% url algorithms_base_url %}>algorithms</a>.	
+					<a href={% url "registration_register" %}>Register</a> yourself now to run the 
+					<a href={% url "algorithms_base_url" %}>algorithms</a>.	
 				</div> 	
 		{% endif %}
 			
@@ -76,8 +76,8 @@
 		
 		{% if not user.is_authenticated %}
 		<div class="pro_tip">
-				Browse currently implemented <a href={% url algorithms_base_url %}>algorithms</a> or
-				<a href={% url registration_register %}>register</a> and login to give them a go.
+				Browse currently implemented <a href={% url "algorithms_base_url" %}>algorithms</a> or
+				<a href={% url "registration_register" %}>register</a> and login to give them a go.
 		</div>
 		{% endif %}
 			

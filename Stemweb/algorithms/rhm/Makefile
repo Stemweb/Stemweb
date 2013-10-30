@@ -12,8 +12,12 @@ osx:
 	gcc -dynamiclib -Wall -I/usr/include/python2.7/ -lpython2.7 -lz -o binarysankoff_osx.dylib binarysankoff_osx.c 
 	mv ./binarysankoff_osx.dylib ./binarysankoff.so
 
-linux:
+linux26:
 	gcc -I/usr/include/python2.6/ -lpython2.6 -I/usr/include -L/usr/lib -fPIC -g -Wall -c binarysankoff_linux.c
 	gcc -shared -fPIC -Wall -I/usr/include -L/usr/lib binarysankoff_linux.o -o binarysankoff.so -lz
 
-	
+linux27:	
+	gcc -I/usr/include/python2.7/ -lpython2.7 -I/usr/include -L/usr/lib -fPIC -g -Wall -c binarysankoff_linux.c
+	gcc -shared -fPIC -Wall -I/usr/include -L/usr/lib binarysankoff_linux.o -o binarysankoff.so -lz
+
+
