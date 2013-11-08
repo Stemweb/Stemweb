@@ -204,6 +204,8 @@ class AlgorithmRun(models.Model):
 					  ip. Probably the same ip the algorithm run request was
 					  made.
 					  
+		extras		: Extra information stored in json-format.
+					  
 		TODO: change images and folder to be in the results, probably.  
 	'''
 	start_time = models.DateTimeField(auto_now_add = True)
@@ -219,6 +221,7 @@ class AlgorithmRun(models.Model):
 	newick = models.URLField(blank = True, default = '')
 	external = models.BooleanField(default = False)
 	ip = models.IPAddressField(null = True)
+	extras = models.CharField(max_length = 10000, blank = True)
 	
 	# Really we will be wanting to have this as PickleField.
 	#results = dict()

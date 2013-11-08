@@ -181,37 +181,47 @@ def jobstatus(request, run_id):
 		return response
 	else: 
 		algo_run = AlgorithmRun.objects.get_or_none(pk = run_id)
-		if algo_run is None: #or not algo_run.external: 
+		if algo_run is None or not algo_run.external: 
 			error_message = json.dumps({'error': "No external algorithm run with given id"})
 			response = HttpResponse(error_message)
 			response.status_code = 400
 			return response
-		else:
-			msg = {
-				'job_id': run_id, 
-				'status': algo_run.status, 
-				'algorithm': algo_run.algorithm.name,
-				'start_time': str(algo_run.start_time)}	
-			if algo_run.status == STATUS_CODES['finished']:
-				if algo_run.newick == '':
-					msg['error'] = "Could not retrieve newick."
-					return HttpResponse(json.dumps(msg, encoding = "utf8"))
-				else:	
-					nwk = ""
-					with open(os.path.join(algo_media, algo_run.newick), 'r') as f:
-						nwk = f.read()
-					msg['result'] = nwk
-					msg['format'] = 'newick'
-					msg['end_time'] = str(algo_run.end_time)
-					return HttpResponse(json.dumps(msg, encoding = "utf8"))
-			if algo_run.status == STATUS_CODES['failure']:
-				msg['end_time'] = str(algo_run.end_time)
-			else: 
+
+		# Construct basic response json
+		msg = {
+			'job_id': run_id, 
+			'status': algo_run.status, 
+			'algorithm': algo_run.algorithm.name,
+			'start_time': str(algo_run.start_time)
+			}
+		# Load any extra information stored to algorithm run	
+		try:
+			extra_json = json.loads(algo_run.extras)
+			msg.update(extra_json)
+		except:
+			pass
+		
+		# Construct algorithm run status depended key-value pairs.
+		if algo_run.status == STATUS_CODES['finished']:
+			if algo_run.newick == '':
+				msg['error'] = "Could not retrieve newick."
 				return HttpResponse(json.dumps(msg, encoding = "utf8"))
-	
+			else:	
+				nwk = ""
+				with open(os.path.join(algo_media, algo_run.newick), 'r') as f:
+					nwk = f.read()
+				msg['result'] = nwk
+				msg['format'] = 'newick'
+				msg['end_time'] = str(algo_run.end_time)
+				return HttpResponse(json.dumps(msg, encoding = "utf8"))
+		if algo_run.status == STATUS_CODES['failure']:
+			msg['end_time'] = str(algo_run.end_time)
+		else: 
+			return HttpResponse(json.dumps(msg, encoding = "utf8"))
+
 	
 def processtest(request):
-	csv_file = "/home/slinkola/data_sets/request.json"
+	csv_file = "/Users/slinkola/STAM/data_sets/request.json"
 	csv = u""
 	import codecs
 	with codecs.open(csv_file, 'r', encoding = 'utf8') as f:

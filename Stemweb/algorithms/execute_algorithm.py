@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 import tempfile
 import codecs
+import json
 
 from django.shortcuts import get_object_or_404
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -49,9 +50,10 @@ def external(json_data, algo_id, request):
 	'''
 	from Stemweb.files.models import InputFile
 	csv_file = tempfile.NamedTemporaryFile(mode = 'w', delete = False)
+	csv_data = json_data.pop('data')
 	# First write the file in the temporary file and close it.
 	with codecs.open(csv_file.name, mode = 'w', encoding = 'utf8') as f:
-		f.write(json_data['data'].encode('ascii', 'replace'))	
+		f.write(csv_data.encode('ascii', 'replace'))	
 
 	# Then construct a mock up InMemoryUploadedFile from it for the InputFile
 	mock_file = None
@@ -83,6 +85,8 @@ def external(json_data, algo_id, request):
 										algorithm = algorithm, 
                                     	folder = os.path.join(algo_root, run_args['folder_url']),
                                     	external = True)
+	
+	current_run.extras = json.dumps(json_data, encoding = 'utf8')
 	current_run.save()	# Save to ensure that id generation is not delayed.
 	rid = current_run.id
 	user_id = json_data['userid']

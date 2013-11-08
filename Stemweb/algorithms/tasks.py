@@ -413,6 +413,11 @@ def external_algorithm_run_error(uuid, run_id, user_id, return_host, return_path
 		}
 	
 	import httplib, urllib, json
+	try: 
+		extra_json = json.loads(algorun.extras)
+		ret.update(extra_json)
+	except: 
+		pass
 	message = json.dumps(ret, encoding = "utf8")	
 	body = urllib.quote(message).encode('utf8')
 	conn = httplib.HTTPConnection(return_host)
@@ -447,6 +452,11 @@ def external_algorithm_run_finished(newick, run_id, user_id, return_host, return
 			}
 	
 	import httplib, urllib, json
+	try: 
+		extra_json = json.loads(algorun.extras)
+		ret.update(extra_json)
+	except: 
+		pass
 	message = json.dumps(ret, encoding = "utf8")	
 	body = urllib.quote(message).encode('utf8')
 	conn = httplib.HTTPConnection(return_host)
