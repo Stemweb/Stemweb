@@ -418,10 +418,11 @@ def external_algorithm_run_error(uuid, run_id, user_id, return_host, return_path
 		ret.update(extra_json)
 	except: 
 		pass
-	message = json.dumps(ret, encoding = "utf8")	
-	body = urllib.quote(message).encode('utf8')
+	message = json.dumps(ret, encoding = "utf8")
+	headers = {"Content-type": "application/json; charset=utf-8"}	
+	body = message.encode('utf8')
 	conn = httplib.HTTPConnection(return_host)
-	conn.request('POST', return_path, body)
+	conn.request('POST', return_path, body, headers)
 	response = conn.getresponse()
 	conn.close()
 	print response.status, response.reason, response.read()
@@ -458,9 +459,10 @@ def external_algorithm_run_finished(newick, run_id, user_id, return_host, return
 	except: 
 		pass
 	message = json.dumps(ret, encoding = "utf8")	
-	body = urllib.quote(message).encode('utf8')
+	headers = {"Content-type": "application/json; charset=utf-8"}	
+	body = message.encode('utf8')
 	conn = httplib.HTTPConnection(return_host)
-	conn.request('POST', return_path, body)
+	conn.request('POST', return_path, body, headers)
 	response = conn.getresponse()
 	conn.close()
 	print response.status, response.reason, response.read()
