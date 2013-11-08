@@ -7,14 +7,19 @@ import sys
 import logging
 
 from Stemweb.algorithms.tasks import AlgorithmTask
+from Stemweb.algorithms.utils import newick2img
 
 class Semstem(AlgorithmTask):
 	name = "Semstem"
+	has_newick = True
 	
 	def __init_run__(self, *args, **kwargs):
 		AlgorithmTask.__init_run__(self, *args, **kwargs)
 		if self.algorithm_run:
-			self.algorithm_run.image = os.path.join(self.run_args['url_base'], 'tree', 'treebest.svg')
+			self.algorithm_run.image = os.path.join(self.run_args['url_base'], 'tree', 'treebest.png')
+			self.algorithm_run.newick = os.path.join(self.run_args['url_base'], 'tree', 'treebest.tre')
+			self.image_path = os.path.join(self.run_args['outfolder'], 'tree', 'treebest.png')
+			self.newick_path = os.path.join(self.run_args['outfolder'], 'tree', 'treebest.tre')
 			self.algorithm_run.save()
 		self.score_name = 'qscore'
 		#self.iteration_name = 'iter'
@@ -512,8 +517,44 @@ class Semstem(AlgorithmTask):
 			file.write(outstr)
 			file.close()
 			os.system('neato -Tsvg -Gstart=rand ' + dot_file + ' > ' + svg_file)
-		
-		
+			
+
+		def tree2newick(treedic, nodeorder, nodehidden, resultfolder, resultfile):
+			nodelist = list(nodeorder)
+			outstr = ['(',nodelist[0],')',';']
+			
+			nodelistnotextended = list(nodelist)
+			while len(nodelistnotextended) > 0:
+				nodelistnotextendedtemp = list(nodelistnotextended)
+				for node in nodelistnotextended:
+					if node in outstr:
+						nodelistnotextendedtemp.remove(node)
+						nodeindex = outstr.index(node)
+						temp = ['(']
+						for neighbori in treedic[node]['neighbor']:
+							if neighbori not in outstr:
+								temp.append(neighbori)
+								temp.append(',')
+								if len(treedic[neighbori]['neighbor'])==1:
+									nodelistnotextendedtemp.remove(neighbori)
+
+						if len(temp) > 0:
+							if temp[len(temp)-1]==',':
+								temp.pop(len(temp)-1)
+						temp.append(')')
+						outstr[nodeindex:nodeindex] = temp
+				nodelistnotextended = list(nodelistnotextendedtemp)
+
+			for node in nodehidden:
+				outstr.remove(node)
+			outstrtemp = ''
+			for outstri in outstr:
+				outstrtemp = outstrtemp + outstri
+			tre_file = self.newick_path
+			with open(tre_file,'w') as f:
+				f.write(outstrtemp)
+
+
 		def semuniform (inputfile, iterationmax):
 
 			# step 1 read file
@@ -606,10 +647,12 @@ class Semstem(AlgorithmTask):
 					sigma = sigma0
 		
 			treediclast,nodehiddenlast =  removehidden(nodehidden,treedic)
-			treetodot(treediclast ,treediclast.keys(),nodehiddenlast, resfoldertree,'treelast')
+			tree2newick(treediclast ,treediclast.keys(),nodehiddenlast, resfoldertree,'treelast')
+			
 		
 			treedicbest,nodehiddenbest = removehidden(nodehidden,treedicold)
-			treetodot(treedicbest ,treedicbest.keys(),nodehiddenbest, resfoldertree,'treebest')
+			tree2newick(treedicbest ,treedicbest.keys(),nodehiddenbest, resfoldertree,'treebest')
+			utils.tree2img(self.newick_path, self.image_path, self.run_args['learnlength'], radial = False)
 			
 			logstr = logstr + 'End at'+ str (time.gmtime()) + '\n' + 'best iteration is ' + str(bestiteration) +'\n' + 'best qscore is ' + str(qscoreold) + '\n\n\n'
 			inumber = len(logvector)

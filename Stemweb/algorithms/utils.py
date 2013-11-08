@@ -47,7 +47,7 @@ def newick2img(newick, filepath, branch_length = True, radial = True, width = 80
 	nwk = Phylo.read(newick, 'newick')
 	Phylo.draw_graphviz(nwk, prog = prog, node_size = 500)
 	#Phylo.draw(nwk, do_show = False)
- 	plt.savefig(filepath)
+	plt.savefig(filepath)
 
 	
 def id_generator(size=8, chars=string.ascii_uppercase + string.digits):

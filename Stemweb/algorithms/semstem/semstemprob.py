@@ -12,12 +12,15 @@ class Semstem(AlgorithmTask):
 	name = "Semstem"
 	input_file_key = 'infile'
 	has_image = True
+	has_newick = True
 	
 	def __init_run__(self, *args, **kwargs):
 		AlgorithmTask.__init_run__(self, *args, **kwargs)
 		if self.algorithm_run:
 			self.algorithm_run.image = os.path.join(self.run_args['folder_url'], 'tree', 'treebest.png')
+			self.algorithm_run.newick = os.path.join(self.run_args['folder_url'], 'tree', 'treebest.tre')
 			self.image_path = os.path.join(self.run_args['outfolder'], 'tree', 'treebest.png')
+			self.newick_path = os.path.join(self.run_args['outfolder'], 'tree', 'treebest.tre')
 			self.algorithm_run.save()
 		self.score_name = 'qscore'
 		#self.iteration_name = 'iter'
@@ -181,6 +184,40 @@ class Semstem(AlgorithmTask):
 			file.close()
 			os.system('neato -Tpng -Gstart=rand ' + dot_file + ' > ' + self.image_path)
 		
+		def tree2newick(treedic, nodeorder, nodehidden, resultfolder, resultfile):
+			nodelist = list(nodeorder)
+			outstr = ['(',nodelist[0],')',';']
+			
+			nodelistnotextended = list(nodelist)
+			while len(nodelistnotextended) > 0:
+				nodelistnotextendedtemp = list(nodelistnotextended)
+				for node in nodelistnotextended:
+					if node in outstr:
+						nodelistnotextendedtemp.remove(node)
+						nodeindex = outstr.index(node)
+						temp = ['(']
+						for neighbori in treedic[node]['neighbor']:
+							if neighbori not in outstr:
+								temp.append(neighbori)
+								temp.append(',')
+								if len(treedic[neighbori]['neighbor'])==1:
+									nodelistnotextendedtemp.remove(neighbori)
+
+						if len(temp) > 0:
+							if temp[len(temp)-1]==',':
+								temp.pop(len(temp)-1)
+						temp.append(')')
+						outstr[nodeindex:nodeindex] = temp
+				nodelistnotextended = list(nodelistnotextendedtemp)
+
+			for node in nodehidden:
+				outstr.remove(node)
+			outstrtemp = ''
+			for outstri in outstr:
+				outstrtemp = outstrtemp + outstri
+			tre_file = self.newick_path
+			with open(tre_file,'w') as f:
+				f.write(outstrtemp)
 		
 		def	njtree (textdata):
 			import copy
@@ -723,9 +760,13 @@ class Semstem(AlgorithmTask):
 			#(1)
 			#without hidden nodes
 			treediclast,nodehiddenlast =  removehidden(nodehidden,treediclastbackup)
-			treetodot(treediclast ,treediclast.keys(),nodehiddenlast, resfoldertree,'treelast')
+			#treetodot(treediclast ,treediclast.keys(),nodehiddenlast, resfoldertree,'treelast')
+			tree2newick(treediclast ,treediclast.keys(),nodehiddenlast, resfoldertree,'treelast')
 			treedicbestrh,nodehiddenbest = removehidden(nodehidden,treedicbest)
-			treetodot(treedicbestrh ,treedicbestrh.keys(),nodehiddenbest, resfoldertree,'treebest')
+			#treetodot(treedicbestrh ,treedicbestrh.keys(),nodehiddenbest, resfoldertree,'treebest')
+			tree2newick(treedicbestrh ,treedicbestrh.keys(),nodehiddenbest, resfoldertree,'treebest')
+			from Stemweb.algorithms.utils import newick2img
+			newick2img(self.newick_path, self.image_path, self.run_args['learnlength'], radial = False)
 			#(2)
 			#with hidden nodes
 			#treetodot(treediclastbackup, treediclastbackup.keys(), nodehidden, resfoldertree,'treelast_withhidden')
