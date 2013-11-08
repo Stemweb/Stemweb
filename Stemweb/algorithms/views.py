@@ -189,7 +189,7 @@ def jobstatus(request, run_id):
 
 		# Construct basic response json
 		msg = {
-			'job_id': run_id, 
+			'jobid': run_id, 
 			'status': algo_run.status, 
 			'algorithm': algo_run.algorithm.name,
 			'start_time': str(algo_run.start_time)
