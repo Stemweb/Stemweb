@@ -111,20 +111,23 @@ class NJ(AlgorithmTask):
 		data={} # sequences
 		waitformatrix=True  # should we skip initial part until MATRIX segment?
 		for line in f:
-		    if line.strip().upper()=="#NEXUS": waitformatrix=True
-		    if waitformatrix and line.strip().upper()!="MATRIX": continue
-		    if waitformatrix and line.strip().upper()=="MATRIX": waitformatrix=False; continue
-		    if line.strip()=="": continue
-		    if line.strip()==";": break
+			if line.strip().upper()=="#NEXUS": waitformatrix=True
+			if waitformatrix and line.strip().upper()!="MATRIX": continue
+			if waitformatrix and line.strip().upper()=="MATRIX": waitformatrix=False; continue
+			if line.strip()=="": continue
+			if line.strip()==";": break
 		
-		    t=line.split()[0]
-		    if t not in tax: # new taxon; create new data sequence
-		        tax.append(t)
-		        data[t]=line.split()[1]
-		    else:            # continuation of existing taxon; concatenate to existing seq.
-		        data[t]=data[t]+line.split()[1]
-		    if data[tax[-1]][-1]==';': data[tax[-1]]=data[tax[-1]][0:-1]; break # end matrix
+			t=line.split()[0]
+			if t not in tax: # new taxon; create new data sequence
+				tax.append(t)
+				data[t]=line.split()[1]
+			else:            # continuation of existing taxon; concatenate to existing seq.
+				data[t]=data[t]+line.split()[1]
+			if data[tax[-1]][-1]==';': data[tax[-1]]=data[tax[-1]][0:-1]; break # end matrix
 		
+		print "Taxas", len(tax)
+		print len(data[tax[0]])
+		print len(data[tax[-1]])
 		taxa=len(tax)         # number of taxa
 		d={}                  # observed distances between pairs
 		gd={}                 # distances between groups
@@ -179,6 +182,7 @@ class NJ(AlgorithmTask):
 		# groups of manuscripts)
 		S=[tuple([t]) for t in tax]
 		
+		print "S", len(S)
 		# main loop
 		while len(S)>1:
 		    # computed NJ distances

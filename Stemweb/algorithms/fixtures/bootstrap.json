@@ -99,7 +99,7 @@
       		"source": "No source currently available.",
       		"desc": "Short tooltip text of semstem",
       		"url": "http://",
-      		"args": [1,2],
+      		"args": [1,2,4],
       		"template": "semstem_about.html",
       		"file_extension": "nex"
     	}

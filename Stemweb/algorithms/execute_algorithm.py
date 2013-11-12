@@ -47,10 +47,22 @@ def external(json_data, algo_id, request):
 	it. Then executes the actual run.
 	
 	Returns AlgorithmRun id.
+	
+	TODO: Refactor me
 	'''
 	from Stemweb.files.models import InputFile
+	algorithm = get_object_or_404(Algorithm, pk = algo_id)
 	csv_file = tempfile.NamedTemporaryFile(mode = 'w', delete = False)
-	csv_data = json_data.pop('data')
+	ext = ""
+	csv_data = None
+	if algorithm.file_extension == 'csv': 
+		csv_data = json_data.pop('data')
+		ext = ".csv"
+	elif algorithm.file_extension == 'nex': 
+		from csvtonexus import csv2nex
+		csv_data = csv2nex(json_data.pop('data'))
+		ext = ".nex"
+		
 	# First write the file in the temporary file and close it.
 	with codecs.open(csv_file.name, mode = 'w', encoding = 'utf8') as f:
 		f.write(csv_data.encode('ascii', 'replace'))	
@@ -59,19 +71,18 @@ def external(json_data, algo_id, request):
 	mock_file = None
 	input_file_id = None
 	with open(csv_file.name, "r") as f:
-		name =  datetime.now().strftime("%Y%m%d-%H%M%S") + "-" + utils.id_generator() + ".csv"
+		name =  datetime.now().strftime("%Y%m%d-%H%M%S") + "-" + utils.id_generator() + ext
+		print name
 		mock_file = InMemoryUploadedFile(file = f, field_name = 'file', name = name, \
 									content_type = 'utf8', size = os.path.getsize(csv_file.name), charset = 'utf-8')	
 			
-		input_file = InputFile(name = datetime.now().strftime("%Y%m%d-%H%M%S") + "-" + utils.id_generator() + ".csv", 
-                                  file = mock_file)  
-		input_file.extension = 'csv'
+		input_file = InputFile(name = name, file = mock_file)  
+		input_file.extension = ext
 		input_file.save() # Save to be sure input_file.id is created 
 		input_file_id = input_file.id
 	
 	input_file = InputFile.objects.get(pk = input_file_id)
 	parameters = json_data['parameters']
-	algorithm = get_object_or_404(Algorithm, pk = algo_id)
 	#print input_file
 	
 	input_file_key = ''
