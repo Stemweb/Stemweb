@@ -220,7 +220,7 @@ def jobstatus(request, run_id):
 
 	
 def processtest(request):
-	csv_file = "/home/slinkola/data_sets/request.json"
+	csv_file = "/Users/slinkola/STAM/data_sets/request4.json"
 	csv = u""
 	import codecs
 	with codecs.open(csv_file, 'r', encoding = 'utf8') as f:

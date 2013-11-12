@@ -196,14 +196,14 @@ def validate_json(json_data, algo_id):
 def validate_parameter(value, param_type):
 	''' Validate, that value can be converted safely into param_type. '''
 	if param_type == "positive_integer":
-		if type(int(value)) == int:
-			return int(value) > 0
+		if type(value) == int:
+			return value > 0
 		else: 
 			return False
 	if param_type == "integer":
-		return type(int(value)) == int
+		return type(value) == int
 	if param_type == "float":
-		return type(float(value)) == float
+		return type(value) == float
 	if param_type == "boolean":
 		if type(value) == bool:
 			return True
