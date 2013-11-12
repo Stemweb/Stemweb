@@ -221,7 +221,7 @@ def jobstatus(request, run_id):
 
 	
 def processtest(request):
-	csv_file = "/Users/slinkola/STAM/data_sets/request2.json"
+	csv_file = "/home/slinkola/data_sets/request.json"
 	csv = u""
 	import codecs
 	with codecs.open(csv_file, 'r', encoding = 'utf8') as f:
@@ -236,7 +236,7 @@ def processtest(request):
 	request.META = {}
 	request.META['REMOTE_ADDR'] = '127.0.0.1'
 	request.META['SERVER_PORT'] = 8000
-	execute_algorithm.external(json.loads(csv, encoding = 'utf8'), 1, request)
+	execute_algorithm.external(json.loads(csv, encoding = 'utf8'), 3, request)
 	return HttpResponse("ok")
 
 
