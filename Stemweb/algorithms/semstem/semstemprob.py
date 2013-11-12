@@ -182,7 +182,7 @@ class Semstem(AlgorithmTask):
 			file = open(dot_file,'w')
 			file.write(outstr)
 			file.close()
-			os.system('neato -Tpng -Gstart=rand ' + dot_file + ' > ' + self.image_path)
+			#os.system('neato -Tpng -Gstart=rand ' + dot_file + ' > ' + self.image_path)
 		
 		def tree2newick(treedic, nodeorder, nodehidden, resultfolder, resultfile):
 			nodelist = list(nodeorder)
@@ -634,7 +634,7 @@ class Semstem(AlgorithmTask):
 			#(1)
 			#plot tree with removed hiddden nodes
 			treedicremoved,nodehiddenremoved = removehidden(nodehidden,treedic)
-			treetodot(treedicremoved,treedicremoved.keys(),nodehiddenremoved, resfoldertree, str(0).zfill(4))
+			#treetodot(treedicremoved,treedicremoved.keys(),nodehiddenremoved, resfoldertree, str(0).zfill(4))
 			#(2)
 			#plot tree with NO removed hiddden nodes
 			#treetodot(treedic,treedic.keys(),nodehidden, resfoldertree, str(0).zfill(4)+'_withhidden')
@@ -748,7 +748,7 @@ class Semstem(AlgorithmTask):
 					probtreeallbest = probtreeall
 					bestiteration = iteration - 1
 					treedicremoved,nodehiddenremoved = removehidden(nodehidden,treedicbest)
-					treetodot(treedicremoved,treedicremoved.keys(),nodehiddenremoved, resfoldertree, str(iteration-1).zfill(4))
+					#treetodot(treedicremoved,treedicremoved.keys(),nodehiddenremoved, resfoldertree, str(iteration-1).zfill(4))
 			#important>
 				#update sigma
 				if iteration >= 2:

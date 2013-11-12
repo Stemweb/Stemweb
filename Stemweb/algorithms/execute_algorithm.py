@@ -72,7 +72,6 @@ def external(json_data, algo_id, request):
 	input_file_id = None
 	with open(csv_file.name, "r") as f:
 		name =  datetime.now().strftime("%Y%m%d-%H%M%S") + "-" + utils.id_generator() + ext
-		print name
 		mock_file = InMemoryUploadedFile(file = f, field_name = 'file', name = name, \
 									content_type = 'utf8', size = os.path.getsize(csv_file.name), charset = 'utf-8')	
 			
