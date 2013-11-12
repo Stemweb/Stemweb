@@ -215,9 +215,8 @@ def jobstatus(request, run_id):
 				msg['end_time'] = str(algo_run.end_time)
 				return HttpResponse(json.dumps(msg, encoding = "utf8"))
 		if algo_run.status == STATUS_CODES['failure']:
-			msg['end_time'] = str(algo_run.end_time)
-		else: 
-			return HttpResponse(json.dumps(msg, encoding = "utf8"))
+			msg['end_time'] = str(algo_run.end_time) 
+		return HttpResponse(json.dumps(msg, encoding = "utf8"))
 
 	
 def processtest(request):
@@ -236,7 +235,7 @@ def processtest(request):
 	request.META = {}
 	request.META['REMOTE_ADDR'] = '127.0.0.1'
 	request.META['SERVER_PORT'] = 8000
-	execute_algorithm.external(json.loads(csv, encoding = 'utf8'), 3, request)
+	execute_algorithm.external(json.loads(csv, encoding = 'utf8'), 1, request)
 	return HttpResponse("ok")
 
 
