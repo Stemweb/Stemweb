@@ -156,7 +156,8 @@ def validate_server(request):
 	trusted_server = False
 	
 	for server in TRUSTED_SERVERS:
-		if server['addr'] == addr:
+		m = server['re'].search(addr)
+		if m != None and m.start() == 0: 
 			trusted_server = True
 	
 	if trusted_server:

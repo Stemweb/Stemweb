@@ -1,5 +1,6 @@
 from django.conf.urls.defaults import patterns, url
-from views import base, details, delete_runs, run, results, available, process, jobstatus, processtest, testresponse
+from views import base, details, delete_runs, run, results, available, process 
+from views import jobstatus, processtest, testresponse, testserver
 
 from .settings import ALGORITHM_URL_PREFIX as prefix
 
@@ -18,4 +19,5 @@ urlpatterns = patterns('',
     # Test URL
     url(r'^%s/processtest/$' % prefix, processtest, name = 'algorithms_test_url'),
     url(r'^%s/testresponse/$' % prefix, testresponse, name = 'algorithms_testresponse_url'),
+    url(r'^%s/testserver/$' % prefix, testserver, name = 'algorithms_testserver_url'),
 )

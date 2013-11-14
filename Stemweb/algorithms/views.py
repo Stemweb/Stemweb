@@ -247,4 +247,9 @@ def testresponse(request):
 		return HttpResponse("OK")
 	return HttpResponse("No POST")
 
+def testserver(request):
+	ret = utils.validate_server(request)
+	return HttpResponse(ret[0])
+	
+
 	
