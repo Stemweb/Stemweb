@@ -129,7 +129,7 @@ def available(request):
 	''' Returns all available AlgorithmArg and Algorithm model instances in 
 		json-format. '''
 	return HttpResponse(serialize('json', list(AlgorithmArg.objects.all()) +\
-			list(Algorithm.objects.all()), fields = ['pk', 'key', 'value', 'name', 'args', 'external']),\
+			list(Algorithm.objects.all()), fields = ['pk', 'key', 'value', 'name', 'args', 'external', 'desc']),\
 			mimetype='application/json')
 	
 
