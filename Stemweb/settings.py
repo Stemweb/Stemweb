@@ -261,9 +261,9 @@ LOGGING = {
 			'level': 'DEBUG',
 		},
         'django': {
-            'handlers':['null'],
+            'handlers':['console'],
             'propagate': True,
-            'level':'INFO',
+            'level':'DEBUG',
         },
 		'stemweb.auth': {
 			'handlers': ['console', 'authentication'],
