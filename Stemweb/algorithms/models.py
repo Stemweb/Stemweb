@@ -220,7 +220,7 @@ class AlgorithmRun(models.Model):
 	current_iteration = models.PositiveIntegerField(null = True)
 	newick = models.URLField(blank = True, default = '')
 	external = models.BooleanField(default = False)
-	ip = models.IPAddressField(null = True)
+	ip = models.GenericIPAddressField(null = True)
 	extras = models.CharField(max_length = 10000, blank = True)
 	
 	# Really we will be wanting to have this as PickleField.

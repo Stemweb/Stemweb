@@ -11,13 +11,13 @@ from .semstem.semstemprob import Semstem
 from .neighbour_joining.njc import NJ
 from .rhm.binary_sankoff import RHM
 import validators
-import lsettings
+#import lsettings
 
 ALGORITHM_URL_PREFIX = settings.ALGORITHM_URL_PREFIX if \
 	hasattr(settings, 'ALGORITHM_URL_PREFIX') else 'algorithms'
 ALGORITHM_MEDIA_ROOT = settings.ALGORITHM_MEDIA_ROOT if \
 	hasattr(settings, 'ALGORITHM_MEDIA_ROOT') else settings.MEDIA_ROOT
-TRUSTED_SERVERS = lsettings.TRUSTED_SERVERS
+#TRUSTED_SERVERS = lsettings.TRUSTED_SERVERS
 
 '''
 	Dictionary mapping Algorithm model ids to dictionaries which contain 

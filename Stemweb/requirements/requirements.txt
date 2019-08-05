@@ -1,11 +1,13 @@
-Django==1.5.4
-PIL==1.1.7
+Django>=1.5.4
+#PIL==1.1.7
+Pillow-PIL
 networkx>=1.7
-celery==3.0.24
-django-celery==3.0.23
-django-kombu==0.9.4
-django-picklefield==0.2.0
-psycopg2==2.4.4
+celery<4.0,>=3.1.15
+django-celery>=3.0.23
+django-kombu>=0.9.4
+django-picklefield>=0.2.0
+django-registration>=1.0
+#psycopg2==2.4.4
 
 # On OSX you might need to configure these separately
 numpy>=1.3
@@ -13,4 +15,4 @@ matplotlib>=1.1.0
 scipy>=0.7
 
 # For drawing newicks
-biopython==1.62
+biopython>=1.62

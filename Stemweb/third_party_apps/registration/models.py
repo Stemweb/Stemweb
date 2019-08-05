@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db import transaction
 from django.template.loader import render_to_string
-from django.utils.hashcompat import sha_constructor
+from hashlib import sha1 as sha_constructor
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -80,7 +80,7 @@ class RegistrationManager(models.Manager):
             registration_profile.send_activation_email(site)
 
         return new_user
-    create_inactive_user = transaction.commit_on_success(create_inactive_user)
+    create_inactive_user = transaction.atomic(create_inactive_user)
 
     def create_profile(self, user):
         """

@@ -975,7 +975,7 @@ int min_cost(int *cost, int id, int i, int ch)
 
 int eval_subtree(int *cost, struct node_st *node, int ch)
 {
-  int i, minval = 0;
+  int i; double minval = 0.0;
 
   if (node->left && node->right)
   {
@@ -1008,7 +1008,8 @@ int eval_subtree(int *cost, struct node_st *node, int ch)
 int eval_uptree(struct node_st *tree, struct node_st *node, 
 		struct node_st *stopper, int ch)
 {
-  int i, minval = 0, *cost;
+  int i, *cost; 
+  double minval = 0.0;
 
   cost = tree->cost;
 
@@ -1075,8 +1076,8 @@ void restore_cost_uptree(struct node_st *tree, struct node_st *node)
 
 void fill_subtree(int *cost, struct node_st *node)
 {
-  int i, ch;
-  int val, minval = 0;
+  int i, ch, val;
+  double minval = 0.0;
 
   if (!node) return;
 
