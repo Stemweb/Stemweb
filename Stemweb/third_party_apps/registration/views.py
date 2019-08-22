@@ -231,7 +231,9 @@ def login(request, template_name='registration/login.html',
     added decorator ``fix_recaptcha_remote_ip`` and authentication_form
     is set to AuthenticationFormWithRecaptcha as default
     """
-    redirect_to = request.REQUEST.get(redirect_field_name, '')
+    #redirect_to = request.REQUEST.get(redirect_field_name, '')
+    # HttpRequest.REQUEST is deprecated since django version 1.7: Use the more explicit GET and POST instead. (https://docs.djangoproject.com/en/1.8/ref/request-response/)
+    redirect_to = request.GET.get(redirect_field_name, '')
 
     if request.method == "POST":
         form = authentication_form(data=request.POST)

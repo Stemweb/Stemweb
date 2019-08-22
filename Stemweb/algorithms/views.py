@@ -36,7 +36,8 @@ from .settings import ALGORITHM_MEDIA_ROOT as algo_media
 def base(request):
 	algorithms = Algorithm.objects.all()
 	c = RequestContext(request, {"all_algorithms" : algorithms}) 
-	return render_to_response("algorithms_base.html", c)
+	#return render_to_response("algorithms_base.html", c)
+	return render_to_response("algorithms_base.html", c.flatten()) # avoids Type error "context must be a dict rather than RequestContext" (necessary since django-1.11)
 
 def details(request, algo_id, form = None):
 	'''

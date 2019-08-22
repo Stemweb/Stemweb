@@ -38,7 +38,10 @@ def home(request):
 	
 	c = RequestContext(request, {'recent_activities': recent_activities})
 	t = loader.get_template('home.html')  
-	return HttpResponse(t.render(c))
+	#return HttpResponse(t.render(c))
+	# In Django 1.8+, the template's render method takes a dictionary for the context parameter. Support for passing a Context instance is deprecated, and gives an error in Django 1.10+.
+	# hence let us just use a regular dict instead of a Context instance:
+	return HttpResponse(t.render(c.flatten()))
 
 
 def server_error(request):

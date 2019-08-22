@@ -7,7 +7,7 @@ import djcelery
 djcelery.setup_loader()
 
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
+#TEMPLATE_DEBUG = DEBUG
 
 # Root folder of the site
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
@@ -96,12 +96,6 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = ls.secret_key
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -114,22 +108,41 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = ls.root_urls
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-	"django.contrib.auth.context_processors.auth",
-	"django.core.context_processors.debug",
-	"django.core.context_processors.i18n",
-	"django.core.context_processors.media",
-	"django.core.context_processors.request"
-)
 
-TEMPLATE_DIRS = template_dirs = ( 
-    os.path.join(SITE_ROOT, 'templates/'),
-    os.path.join(SITE_ROOT, 'templates/stemweb'),
-    os.path.join(SITE_ROOT, 'templates/algorithms'),
-    os.path.join(SITE_ROOT, 'templates/registration'),
-    os.path.join(SITE_ROOT, 'templates/files'),
-   
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            # insert your TEMPLATE_DIRS here
+            os.path.join(SITE_ROOT, 'templates/'),
+            os.path.join(SITE_ROOT, 'templates/stemweb'),
+            os.path.join(SITE_ROOT, 'templates/algorithms'),
+            os.path.join(SITE_ROOT, 'templates/registration'),
+            os.path.join(SITE_ROOT, 'templates/files'),
+        ],
+        'OPTIONS': {
+            'context_processors': [
+                # Insert your TEMPLATE_CONTEXT_PROCESSORS here
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.request',
+                #'django.template.context_processors.static',
+                #'django.template.context_processors.tz',
+                #'django.contrib.messages.context_processors.messages',
+            ],
+            'loaders': [
+                # insert your TEMPLATE_LOADERS here
+                # List of callables that know how to import templates from various sources
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+                #'django.template.loaders.eggs.Loader',
+            ]
+        },
+    },
+]
+
 
 INSTALLED_APPS = (
     'django.contrib.auth',
