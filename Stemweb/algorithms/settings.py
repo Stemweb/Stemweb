@@ -26,16 +26,16 @@ ALGORITHM_MEDIA_ROOT = settings.ALGORITHM_MEDIA_ROOT if \
 	inside run_args dictionary to that callable.
 '''
 ALGORITHMS_CALLING_DICT = { 
-	'1': { 
-		'callable': Semstem,	
-	},
+#	'1': { 
+#		'callable': Semstem,	
+#	},
 	'2': {
 		'callable': RHM,
 	},
-	'3': {
+	'3': {  # neighbour joining:
 		'callable': NJ,
 	},
-#	'4': {
+#	'4': {  # neighbour net:
 #		'callable': NN,
 #	},	
 }

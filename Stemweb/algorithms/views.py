@@ -56,9 +56,9 @@ def details(request, algo_id, form = None):
 	context_dict['algorithm_runs'] = previous_runs
 	context_dict['all_algorithms'] = Algorithm.objects.all()
 	c = RequestContext(request, context_dict)
-	return render_to_response("algorithms_details.html", c)
-	
-	
+	#return render_to_response("algorithms_details.html", c)
+        return render_to_response("algorithms_details.html", context_dict)	# avoids Type error "context must be a dict rather than RequestContext" (necessary since django-1.11)
+
 @login_required
 def delete_runs(request):
 	''' Delete runs that are present in request.POST in 'runs' paramater.
@@ -117,10 +117,12 @@ def results(request, run_id):
 	if request.user == run.user:
 		c = RequestContext(request, {'algorithm_run': run})
 		if run.status == STATUS_CODES['finished']:
-			return render_to_response('algorithm_running_results.html', c)
+			#return render_to_response('algorithm_running_results.html', c)
+                        return render_to_response('algorithm_running_results.html', c.flatten()) 
 		# TODO: different view for non-finished algorithms
 		else:
-			return render_to_response('algorithm_running_results.html', c)
+			#return render_to_response('algorithm_running_results.html', c)
+                        return render_to_response('algorithm_running_results.html', c.flatten())
 		
 	raise Http404
 
@@ -131,7 +133,7 @@ def available(request):
 		json-format. '''
 	return HttpResponse(serialize('json', list(AlgorithmArg.objects.all()) +\
 			list(Algorithm.objects.all()), fields = ['pk', 'key', 'value', 'name', 'args', 'external', 'desc']),\
-			mimetype='application/json')
+			content_type='application/json')
 	
 
 @csrf_exempt	

@@ -9,7 +9,8 @@ from django.conf import settings
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from django.shortcuts import redirect
-from django.shortcuts import render_to_response
+#from django.shortcuts import render_to_response
+from django.shortcuts import render # since django 1.11
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 
@@ -99,9 +100,13 @@ def activate(request, backend,
     for key, value in extra_context.items():
         context[key] = callable(value) and value() or value
 
-    return render_to_response(template_name,
-                              kwargs,
-                              context_instance=context)
+    #return render_to_response(template_name,
+    #                          kwargs,
+    #                          context_instance=context)
+                              
+    return render(kwargs,  # request?
+                  template_name,
+                  context)                                  
 
 
 @fix_recaptcha_remote_ip
@@ -212,9 +217,12 @@ def register(request, backend, success_url=None, form_class=None,
     for key, value in extra_context.items():
         context[key] = callable(value) and value() or value
 
-    return render_to_response(template_name,
-                              { 'form': form },
-                              context_instance=context)
+    #return render_to_response(template_name,
+    #                          { 'form': form },
+    #                          context_instance=context)
+    return render({ 'form': form },
+                  template_name,                              
+                  context)                              
 
 
 @csrf_protect
@@ -270,6 +278,9 @@ def login(request, template_name='registration/login.html',
         'site': current_site,
         'site_name': current_site.name,
     }
-    context.update(extra_context or {})
-    return render_to_response(template_name, context,
-                              context_instance=RequestContext(request, current_app=current_app))
+    context.update(extra_context or {})				# extra_context={'current_app':'current_app'}  #? # needed since django 1.11 ?
+    #return render_to_response(template_name, context,
+    #                          #context_instance=RequestContext(request, current_app=current_app))
+    #                          context_instance=RequestContext(request, current_app))
+                              
+    return render(RequestContext(request, current_app), template_name, context)                          
