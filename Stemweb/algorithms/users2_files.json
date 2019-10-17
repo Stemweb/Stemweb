@@ -1,0 +1,64 @@
+[
+	{
+		"pk": 1, 
+		"model": "auth.user", 
+		"fields": {
+			"username": "test_user", 
+			"first_name": "", 
+			"last_name": "", 
+			"is_active": true, 
+			"is_superuser": false, 
+			"is_staff": false, 
+			"last_login": "2019-07-11 15:25:42", 
+			"groups": [], 
+			"user_permissions": [], 
+			"password": "sha1$bee13$d0e580a67e3582ac68546ce269dc58165a2ca499", 
+			"email": "testi@testi.com", 
+			"date_joined": "2019-07-11 15:25:42"
+		}
+	}, 
+	{
+		"pk": 2, 
+		"model": "auth.user", 
+		"fields": {
+			"username": "test_user2", 
+			"first_name": "", 
+			"last_name": "", 
+			"is_active": true, 
+			"is_superuser": false, 
+			"is_staff": false, 
+			"last_login": "2019-07-11 15:26:57", 
+			"groups": [], 
+			"user_permissions": [], 
+			"password": "sha1$d84ab$8392a1e17747efb5a7af3066ce24ff745edee569", 
+			"email": "testi2@testi.com", 
+			"date_joined": "2019-07-11 15:26:57"
+		}
+	},
+	{
+		"model": "files.inputfile",
+		"pk": 1,
+		"fields": {
+			"user": 1,
+			"upload_time": "2019-07-06 10:52:45",
+			"last_access": "2019-07-06 10:52:46",
+			"extension": "nex",
+			"name": "parzival.nex",
+			"file": "datasets/parzival.nex"
+		}
+	},
+	{
+		"pk": 2, 
+		"model": "files.inputfile", 
+		"fields": {
+			"upload_time": "2019-06-14 14:48:12", 
+			"name": "notrebesoin_aligned.csv", 
+			"extension": "csv", 
+			"user": 2, 
+			"file": "datasets/notrebesoin_aligned.csv", 
+			"last_access": "2019-07-06 10:52:45"
+		}
+	}
+
+
+]

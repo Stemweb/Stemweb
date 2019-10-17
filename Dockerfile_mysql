@@ -1,0 +1,69 @@
+# install everything based on image "python:2.7"
+
+FROM python:2.7
+ENV DEBIAN_FRONTEND=noninteractive 
+
+#========== create the technical user "stemweb" with sudo-right  =======
+RUN adduser stemweb --gecos ""
+RUN usermod -aG sudo stemweb
+WORKDIR /home/stemweb
+ 
+#=========== copy configured stemweb repository from host server =======
+COPY manage.py .
+COPY Stemweb Stemweb
+COPY Stemweb/requirements/requirements.txt requirements.txt
+
+#========= replace apt sources file and add public key =================
+RUN rm /etc/apt/sources.list
+COPY apt_sources.list /etc/apt/sources.list
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3B4FE6ACC0B21F32
+
+#======================== install tools ================================
+RUN apt-get update && apt-get -y install graphviz wget libffi-dev libssl-dev r-base-core curl vim tree python-dev  mysql-server libmysqlclient-dev
+RUN pip install -U setuptools
+RUN pip install pyopenssl ndg-httpsclient pyasn1 rpy2==2.8.6 mysqlclient pymysql
+# really needed?: pymysql, MySQL-python
+
+#===================== install requirements ============================
+RUN pip install -r requirements.txt
+
+#=====  compile & build the c-extension "binarysankoff" for python =====
+# assumption: in order to get rid of error messages, 
+# initialization of relevant variables as floating-point numbers in binarysankoff_linux.c
+# is already done in the repository on the host server
+WORKDIR Stemweb/algorithms/rhm
+RUN gcc -I/usr/local/include/python2.7/ -I/usr/include/python2.7 -lpython2.7 -I/usr/local/include -L/usr/local/lib -fPIC -g -Wall -c binarysankoff_linux.c
+RUN gcc -shared -fPIC -Wall -I/usr/local/include -L/usr/local/lib binarysankoff_linux.o -o binarysankoff.so -lz
+
+#============ make the log directory and set permissions ===============
+WORKDIR /home/stemweb
+RUN mkdir Stemweb/logs && chown -R stemweb:stemweb .
+#USER stemweb
+
+#=== start mysql server as a service/daemon & create mysql database ====
+#RUN service mysql start && mysqladmin -u root create stemwebdb_v1
+
+#============ start mysql server as a service/daemon =================== 
+#RUN service mysql start
+
+#============= start mysql server as a service/daemon && create the mysql DB and DB-user with grants =============
+COPY createMysqlDBandUserWithGrants.sql .
+RUN service mysql start && ./createMysqlDBandUserWithGrants.sql   # &>/dev/null
+
+#========  test django's access to the mysql db ========================
+#USER stemweb
+#RUN service mysql restart  && python manage.py dbshell
+
+ 
+#============ syncdb  & initialize algorithm tables ====================
+RUN chown -R stemweb:stemweb .
+USER stemweb
+RUN sudo service mysql restart && python manage.py makemigrations && \
+    python manage.py migrate --run-syncdb && \
+    python manage.py loaddata Stemweb/algorithms/init_algorithms.json && \
+    python manage.py loaddata Stemweb/algorithms/users2_files.json 
+
+#===================== start the server ================================
+EXPOSE 8000
+USER root
+CMD python manage.py runserver 0.0.0.0:8000
