@@ -38,30 +38,17 @@ RUN gcc -shared -fPIC -Wall -I/usr/local/include -L/usr/local/lib binarysankoff_
 #============ make the log directory and set permissions ===============
 WORKDIR /home/stemweb
 RUN mkdir Stemweb/logs && chown -R stemweb:stemweb .
-#USER stemweb
-
-#=== start mysql server as a service/daemon & create mysql database ====
-#RUN service mysql start && mysqladmin -u root create stemwebdb_v1
-
-#============ start mysql server as a service/daemon =================== 
-#RUN service mysql start
 
 #============= start mysql server as a service/daemon && create the mysql DB and DB-user with grants =============
+#============= then migrate/syncdb, init algorithm tables, import users & files, reenable foreign key checks  ====
 COPY createMysqlDBandUserWithGrants.sql .
-RUN service mysql start && ./createMysqlDBandUserWithGrants.sql   # &>/dev/null
-
-#========  test django's access to the mysql db ========================
-#USER stemweb
-#RUN service mysql restart  && python manage.py dbshell
-
- 
-#============ syncdb  & initialize algorithm tables ====================
 RUN chown -R stemweb:stemweb .
-USER stemweb
-RUN sudo service mysql restart && python manage.py makemigrations && \
-    python manage.py migrate --run-syncdb && \
+RUN service mysql start &&  ./createMysqlDBandUserWithGrants.sql && su stemweb && \
+    python manage.py makemigrations && \ 
+    python manage.py migrate --run-syncdb && \ 
     python manage.py loaddata Stemweb/algorithms/init_algorithms.json && \
-    python manage.py loaddata Stemweb/algorithms/users2_files.json 
+    python manage.py loaddata Stemweb/algorithms/users2_files.json && \
+    mysql -D stemwebdb_v1 -u stemweb -pChangeMe -e "SET GLOBAL FOREIGN_KEY_CHECKS = 1"
 
 #===================== start the server ================================
 EXPOSE 8000
