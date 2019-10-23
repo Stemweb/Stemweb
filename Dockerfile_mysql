@@ -53,4 +53,4 @@ RUN service mysql start &&  ./createMysqlDBandUserWithGrants.sql && su stemweb &
 #===================== start the server ================================
 EXPOSE 8000
 USER root
-CMD python manage.py runserver 0.0.0.0:8000
+CMD service mysql start && python manage.py runserver 0.0.0.0:8000
