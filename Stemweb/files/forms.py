@@ -41,16 +41,17 @@ class InputFileChoiceField(forms.ModelChoiceField):
 	def __init__(self, *args, **kwargs):
 		self.user = kwargs.pop('user', AnonymousUser)
 		
-		kwargs['queryset'] = EmptyQuerySet()
-		if self.user is not AnonymousUser: 
-			if self.user.is_authenticated():
-				kwargs['queryset'] = InputFile.objects.filter(user__exact = self.user)		
-		else:
-			'''
+                # omit user checks due to user registration problems
+		#kwargs['queryset'] = EmptyQuerySet()
+		#if self.user is not AnonymousUser: 
+		#	if self.user.is_authenticated():
+		kwargs['queryset'] = InputFile.objects.filter(user__exact = self.user)		
+		#else:
+		'''
 						TODO: add AnonymousUser logic here
 						ATM tests suppose that AnonymousUsers don't have any 
 						input files.
-			'''	
+		'''	
 		super(InputFileChoiceField, self).__init__(*args, **kwargs)
 	
 	def to_python(self, value):

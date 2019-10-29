@@ -1,6 +1,7 @@
 import os
 import shutil
 import logging
+import django.contrib.auth.models as dj_auth_models
 
 from django.db import models
 from django.contrib.auth.models import User, AnonymousUser
@@ -142,8 +143,13 @@ class Algorithm(models.Model):
 					populate the fields.
 		'''
 		if len(self.args.all()) == 0: return None
-		return DynamicArgs(arguments = self.args, user = user, post = post)
-	
+                #return DynamicArgs(arguments = self.args, user = user, post = post)
+               
+                # workaround because of not working user registration via web page  
+                # use dedicated user with id = 1 from the loaded users in the database
+                workaround_user = dj_auth_models.User.objects.get(id = 1)  
+                return DynamicArgs(arguments = self.args, user = workaround_user, post = post) 
+		
 	
 	def get_external_args(self):
 		''' Get all algorithms arguments that will be send to external server. 

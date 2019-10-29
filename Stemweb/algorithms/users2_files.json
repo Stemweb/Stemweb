@@ -12,9 +12,9 @@
 			"last_login": "2019-07-11 15:25:42", 
 			"groups": [], 
 			"user_permissions": [], 
-			"password": "sha1$bee13$d0e580a67e3582ac68546ce269dc58165a2ca499", 
+			"password": "pbkdf2_sha256$36000$iKDlY3LxBACi$t0td7snMRXlArTLpXFUKuvd6zwQWAY2eGKLXqesxXAg=", 
 			"email": "testi@testi.com", 
-			"date_joined": "2019-07-11 15:25:42"
+			"date_joined": "2019-10-28 16:30:42"
 		}
 	}, 
 	{
@@ -30,9 +30,9 @@
 			"last_login": "2019-07-11 15:26:57", 
 			"groups": [], 
 			"user_permissions": [], 
-			"password": "sha1$d84ab$8392a1e17747efb5a7af3066ce24ff745edee569", 
+			"password": "pbkdf2_sha256$36000$iKDlY3LxBACi$t0td7snMRXlArTLpXFUKuvd6zwQWAY2eGKLXqesxXAg=", 
 			"email": "testi2@testi.com", 
-			"date_joined": "2019-07-11 15:26:57"
+			"date_joined": "2019-10-28 15:26:57"
 		}
 	},
 	{

@@ -44,7 +44,8 @@ class DynamicArgs(forms.Form):
 				kwargs['user'] = self.user
 				field = ftypes[value](**kwargs)
 				#print "%s %s" % (self.user, len(field.queryset))
-				if field is not EmptyQuerySet():
+ 				#if field is not EmptyQuerySet():         ## raises TypeError("EmptyQuerySet can't be instantiated")
+                                if field:                                 ## using simpler check instead   
 					self.input_files.append(key)
 					self.fields[key] = field
 			else: 			
