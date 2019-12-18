@@ -13,10 +13,6 @@ def upload_path(instance, filename):
 	''' Returns upload path where InputFile -instance with filename should be 
 	    uploaded.
 	'''
-	if instance.user is None:
-		uppath = 'external'
-	else:
-		uppath = os.path.join('users', instance.user.username)
 	uppath = os.path.join(uppath, 'files')
 	uppath = os.path.join(uppath, filename.rsplit('.', 1)[1]) # extension
 	uppath = os.path.join(uppath, filename)

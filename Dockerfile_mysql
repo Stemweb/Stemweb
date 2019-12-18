@@ -40,14 +40,15 @@ WORKDIR /home/stemweb
 RUN mkdir Stemweb/logs && chown -R stemweb:stemweb .
 
 #============= start mysql server as a service/daemon && create the mysql DB and DB-user with grants =============
-#============= then migrate/syncdb, init algorithm tables, import users & files, reenable foreign key checks  ====
+#============= then migrate/syncdb, init algorithm tables, import files, reenable foreign key checks  ====
 COPY createMysqlDBandUserWithGrants.sql .
 RUN chown -R stemweb:stemweb .
 RUN service mysql start &&  ./createMysqlDBandUserWithGrants.sql && su stemweb && \
     python manage.py makemigrations && \ 
     python manage.py migrate --run-syncdb && \ 
     python manage.py loaddata Stemweb/algorithms/init_algorithms.json && \
-    python manage.py loaddata Stemweb/algorithms/users2_files.json && \
+    python manage.py loaddata Stemweb/files/files.json && \
+    python manage.py loaddata Stemweb/home/bootstrap.json && \
     mysql -D stemwebdb_v1 -u stemweb -pChangeMe -e "SET GLOBAL FOREIGN_KEY_CHECKS = 1"
 
 #===================== start the server ================================

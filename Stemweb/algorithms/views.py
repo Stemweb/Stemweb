@@ -22,7 +22,6 @@ from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
 from django.core.serializers import serialize
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import AnonymousUser
 from django.views.decorators.csrf import csrf_exempt
 
 #from bs4 import BeautifulSoup as bs
@@ -41,43 +40,31 @@ def base(request):
 
 def details(request, algo_id, form = None):
 	'''
-		Details view of the given algorithm. Shows description and user's 
-		previous runs with this algorithm. Also user is able to do a new run.
+		Details view of the given algorithm. Shows description and 
+		previous runs with this algorithm. Also it is possible to do a new run.
 	'''
 	algorithm = get_object_or_404(Algorithm, id = algo_id)
 	context_dict = {'algorithm': algorithm}
 	''' If we have been given a form don't build it. '''
 	if form is None:
-		form = algorithm.args_form(user = request.user, post = None)
+		form = algorithm.args_form(post = None)
 	if form is not None and len(form.fields) > 0: context_dict['form'] = form
 	previous_runs = None
-	if request.user.is_authenticated():
-		previous_runs = AlgorithmRun.objects.filter(user = request.user, algorithm = algo_id)
+	previous_runs = AlgorithmRun.objects.filter(algorithm = algo_id)
 	context_dict['algorithm_runs'] = previous_runs
 	context_dict['all_algorithms'] = Algorithm.objects.all()
 	c = RequestContext(request, context_dict)
 	#return render_to_response("algorithms_details.html", c)
         return render_to_response("algorithms_details.html", context_dict)	# avoids Type error "context must be a dict rather than RequestContext" (necessary since django-1.11)
 
-@login_required
 def delete_runs(request):
 	''' Delete runs that are present in request.POST in 'runs' paramater.
-	
-	If any of the run id's don't belong to the user making the request, does not 
-	delete any of the runs.
 	'''
 	
 	if request.method == 'POST':
 		run_ids = request.POST.get('runs').split()
 		runs = AlgorithmRun.objects.filter(id__in = run_ids)
 			
-		for r in runs:
-			if r.user != request.user:
-				logger = logging.getLogger('stemweb.algorithm_run')
-				logger.error('AlgorithmRun %s:%s tried to be removed by wrong user id:%s' \
-				% (r.algorithm.name, r.id, request.user.id))
-				return HttpResponseBadRequest("You are trying to remove runs which are not owned by active user.\nThe request could not be completed and has been logged.")
-		
 		for r in runs:
 			#if r.finished == True:
 			# TODO: prompt that user has to stop the run before it can be 
@@ -88,14 +75,13 @@ def delete_runs(request):
 	return HttpResponseRedirect("/server_error")
 
 	
-@login_required
 def run(request, algo_id):
 	''' Run's the given algorithm with arguments spesified in request.POST if 
-		the form builded from them is valid for the given algorithm.
+		the form built from them is valid for the given algorithm.
 	'''
 	if request.method == 'POST':
 		algorithm = get_object_or_404(Algorithm, pk = algo_id)
-		form = algorithm.args_form(user = request.user, post = request.POST)
+		form = algorithm.args_form(post = request.POST)
 		if form.is_valid():
 			run_id = execute_algorithm.local(form, algo_id, request)
 			return HttpResponseRedirect(reverse('algorithms_run_results_url', \
@@ -108,23 +94,21 @@ def run(request, algo_id):
 	return HttpResponseRedirect(reverse('algorithms_details_url', \
 									kwargs = { 'algo_id' : algo_id }))
 
-@login_required
 def results(request, run_id):
-	''' Results of the algorithm run by run_id. Runs user should be the same as 
-		the one who send the request. '''
+	''' Results of the algorithm run by run_id '''
+ 
 	run = get_object_or_404(AlgorithmRun, id = run_id)
 	
-	if request.user == run.user:
-		c = RequestContext(request, {'algorithm_run': run})
-		if run.status == STATUS_CODES['finished']:
-			#return render_to_response('algorithm_running_results.html', c)
-                        return render_to_response('algorithm_running_results.html', c.flatten()) 
+	c = RequestContext(request, {'algorithm_run': run})
+	if run.status == STATUS_CODES['finished']:
+		#return render_to_response('algorithm_running_results.html', c)
+                       return render_to_response('algorithm_running_results.html', c.flatten()) 
+	else:
 		# TODO: different view for non-finished algorithms
-		else:
-			#return render_to_response('algorithm_running_results.html', c)
-                        return render_to_response('algorithm_running_results.html', c.flatten())
+		#return render_to_response('algorithm_running_results.html', c)
+                return render_to_response('algorithm_running_results.html', c.flatten())
 		
-	raise Http404
+	#raise Http404
 
 
 @csrf_exempt
@@ -223,8 +207,9 @@ def jobstatus(request, run_id):
 
 	
 def processtest(request):
-	csv_file = "/Users/slinkola/STAM/data_sets/request4.json"
-	csv = u""
+	#csv_file = "/Users/slinkola/STAM/data_sets/request4.json"
+        csv_file ="/home/stemweb/Stemweb/media/which.json"	
+        csv = u""
 	import codecs
 	with codecs.open(csv_file, 'r', encoding = 'utf8') as f:
 		csv = f.read()
@@ -234,7 +219,6 @@ def processtest(request):
 	request.method = 'POST'
 	request.POST = msg
 	request.content_type = "application/json"
-	request.user = AnonymousUser
 	request.META = {}
 	request.META['REMOTE_ADDR'] = '127.0.0.1'
 	request.META['SERVER_PORT'] = 8000

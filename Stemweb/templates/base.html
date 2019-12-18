@@ -100,11 +100,6 @@
 					<td class="menu_item "><a class="menu_link {% block menu_files %}{% endblock %}" href="{% url "files_base_url" %}">files</a></td>
 					{# <td class="menu_item"><a class="menu_link">groups</a></td> #}
 					
-					{% if user.is_authenticated %}
-					<td class="menu_item"><a class="menu_link {% block menu_logout %}{% endblock %}" href={% url "auth_logout" %}>logout</a></td>
-					{% else %}
-					<td class="menu_item"><a class="menu_link {% block menu_login %}{% endblock %}" href={% url "auth_login" %}>login</a></td>
-					{% endif %}
 				</tr>
 				</table>
 		

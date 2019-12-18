@@ -21,16 +21,14 @@ import utils
 
 
 def local(form, algo_id, request):
-	''' Make a local algorithm run for logged in user.
-	
-	Returns AlgorithmRun id.
+	''' Make a local algorithm run.
+	    Returns AlgorithmRun id.
 	'''
 	algorithm = get_object_or_404(Algorithm, pk = algo_id)
 	
 	run_args = utils.build_local_args(form, algorithm_name = algorithm.name, request = request)
 	current_run = AlgorithmRun.objects.create(input_file = InputFile.objects.get(id = run_args['file_id']),
-											algorithm = Algorithm.objects.get(id = algo_id), 
-											user = request.user,
+						algorithm = Algorithm.objects.get(id = algo_id), 
                                         	folder = os.path.join(algo_root, run_args['folder_url']))
 	current_run.save()	# Save to ensure that id generation is not delayed.
 	rid = current_run.id
@@ -99,13 +97,12 @@ def external(json_data, algo_id, request):
 	current_run.extras = json.dumps(json_data, encoding = 'utf8')
 	current_run.save()	# Save to ensure that id generation is not delayed.
 	rid = current_run.id
-	user_id = json_data['userid']
 	return_host = json_data['return_host']
 	return_path = json_data['return_path']
 	kwargs = {'run_args': run_args, 'algorithm_run': rid}
 	call = algorithm.get_callable(kwargs)
-	call.apply_async(kwargs = kwargs, link = external_algorithm_run_finished.s(rid, user_id, return_host, return_path), \
-					link_error = external_algorithm_run_error.s(rid, user_id, return_host, return_path))
+	call.apply_async(kwargs = kwargs, link = external_algorithm_run_finished.s(rid, return_host, return_path), \
+					link_error = external_algorithm_run_error.s(rid, return_host, return_path))
 	return current_run.id
 
 	

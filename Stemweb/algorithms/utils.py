@@ -63,7 +63,7 @@ def id_generator(size=8, chars=string.ascii_uppercase + string.digits):
 	return ''.join(random.choice(chars) for x in range(size))
 
 
-def __build_run_folder__(user, input_file_id, algorithm_name):
+def __build_run_folder__(input_file_id, algorithm_name):
 	''' Builds unique path for algorithm run's result folder. Does not create
 		the folder.
 
@@ -71,15 +71,13 @@ def __build_run_folder__(user, input_file_id, algorithm_name):
 		run_id:		 ID of the R_runs db-table's entry
 
 		Returns path to run's storage folder. All runs' storage folders have
-		structure: 'users', user.username, 'runs', algorithm_name, input_file_id,
+		##structure: 'users', user.username, 'runs', algorithm_name, input_file_id,
+		structure: 'runs', algorithm_name, input_file_id,
 		id_generator(). Algorithm name is slugified in the process.
 
 	'''
-	if user is None:
-		uppath = os.path.join('external')
-	else:
-		uppath = os.path.join('users')
-		uppath = os.path.join(uppath, user.username)
+	uppath = os.path.join('results')
+	#uppath = os.path.join(uppath)
 	uppath = os.path.join(uppath, 'runs')
 	uppath = os.path.join(uppath, slugify(algorithm_name))
 	uppath = os.path.join(uppath, '%s' % input_file_id)
@@ -87,14 +85,12 @@ def __build_run_folder__(user, input_file_id, algorithm_name):
 	return uppath
 
 
-def create_run_folder(user, input_file_id, algorithm_name):
+def create_run_folder(input_file_id, algorithm_name):
 	''' Create unique folder for algorithm run's results.
-
-	Returns folder url for the run, join this path with MEDIA_ROOT to get
-	absolute path of the folder.
+	    Returns folder url for the run, join this path with MEDIA_ROOT to get
+	    absolute path of the folder.
 	'''
-	folder_url = __build_run_folder__(user, input_file_id, \
-										algorithm_name)
+	folder_url = __build_run_folder__(input_file_id, algorithm_name)
 	abs_folder = os.path.join(algo_media, folder_url)
 	try:
 		os.makedirs(abs_folder)
@@ -107,9 +103,9 @@ def create_run_folder(user, input_file_id, algorithm_name):
 
 def build_local_args(form = None, algorithm_name = None, request = None):
 	''' Generate arguments from given DynamicArgs-form for an algorithm run and
-		creates preferred directories for output files.
+		create preferred directories for output files.
 
-		Returns dictionary with running arguments.
+       	    Returns dictionary with running arguments.
 	'''
 	run_args = {}
 	for key in form.cleaned_data.keys():
@@ -123,9 +119,9 @@ def build_local_args(form = None, algorithm_name = None, request = None):
 			run_args[key] = form.cleaned_data[key]
 
 	''' Create run folder based on input file's id and algorithm's name. '''
-	run_args['folder_url'] = create_run_folder(request.user, run_args['file_id'], \
-		algorithm_name)
-	return run_args
+	run_args['folder_url'] = create_run_folder(run_args['file_id'], algorithm_name)
+	
+        return run_args
 
 
 def build_external_args(parameters, input_file_key, input_file, \
@@ -177,7 +173,6 @@ def validate_json(json_data, algo_id):
 	algorithm = Algorithm.objects.get_or_none(pk = algo_id)
 	if algorithm is None: return (False, "No such algorithm id.")
 
-	if 'userid' not in json_data: return (False, "No userid given.")
 	if 'data' not in json_data: return (False, "No data key present")
 	if 'parameters' not in json_data: return (False, "No parameters present")
 

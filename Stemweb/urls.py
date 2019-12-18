@@ -15,7 +15,7 @@ urlpatterns = [
     # These are the registration apps own urls. Check documentation for the usage.
     # https://bitbucket.org/ubernostrum/django-registration/src/tip/docs/quickstart.rst
     #(r'^accounts/', include('registration.backends.default.urls')),
-    url(r'^accounts/', include('Stemweb.third_party_apps.registration.backends.default.urls')),
+    #url(r'^accounts/', include('Stemweb.third_party_apps.registration.backends.default.urls')),
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', include(admin.site.urls)),
 ]

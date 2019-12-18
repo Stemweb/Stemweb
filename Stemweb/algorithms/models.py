@@ -4,7 +4,6 @@ import logging
 import django.contrib.auth.models as dj_auth_models
 
 from django.db import models
-from django.contrib.auth.models import User, AnonymousUser
 
 from forms import DynamicArgs
 from Stemweb.files.models import InputFile
@@ -125,7 +124,7 @@ class Algorithm(models.Model):
 		return algo_callable
 	
 
-	def args_form(self, user = AnonymousUser, post = None):
+	def args_form(self, post = None):
 		'''
 			Build form from args of this algorithm instance. The form is build
 			again for each call of this function and is not stored to this model 
@@ -135,24 +134,16 @@ class Algorithm(models.Model):
 			arguments as fields. If there are no arguments in args then returns
 			None.
 			
-			user:	User who is currently active in this session. Only this 
-					user's files will be shown as possible input files.
-			
 			post:	request.POST to populate form fields so that is_valid() 
 					can be called. Don't use this if you expect user's to 
 					populate the fields.
 		'''
 		if len(self.args.all()) == 0: return None
-                #return DynamicArgs(arguments = self.args, user = user, post = post)
+                return DynamicArgs(arguments = self.args, post = post)
                
-                # workaround because of not working user registration via web page  
-                # use dedicated user with id = 1 from the loaded users in the database
-                workaround_user = dj_auth_models.User.objects.get(id = 1)  
-                return DynamicArgs(arguments = self.args, user = workaround_user, post = post) 
-		
 	
 	def get_external_args(self):
-		''' Get all algorithms arguments that will be send to external server. 
+		''' Get all algorithms arguments that will be sent to external server. 
 		'''
 		external_args = []
 		for arg in self.args.all():
@@ -188,11 +179,6 @@ class AlgorithmRun(models.Model):
 		folder		: Absolute path to folder where results are, is run is not
 					  external. Max length 200.
 		
-		user		: User who started this run. This cannot be AnonymousUser. 
-					  If no user field is blank, external must be True and ip
-					  should have valid response ip when this algorithm run 
-					  finishes.
-					  
 		image		: Image of this run's resulting graph of best scored 
 					  network structure (if available).
 					  
@@ -220,7 +206,6 @@ class AlgorithmRun(models.Model):
 	algorithm = models.ForeignKey(Algorithm)        
 	input_file = models.ForeignKey(InputFile)   
 	folder = models.CharField(max_length = 300, blank = True) 
-	user = models.ForeignKey(User, null = True)
 	image = models.ImageField(upload_to = folder, null = True) 
 	score = models.FloatField(null = True, verbose_name = "Score")
 	current_iteration = models.PositiveIntegerField(null = True)
@@ -236,10 +221,6 @@ class AlgorithmRun(models.Model):
 		'''	
 			Deletes all the run's results from hard drive so that there are no
 			files in users/-subfolders with zero links to them in database.
-			
-			IMPORTANT: Caller needs to verify that current active user has the
-			rights to delete this run. For now it means that self.user is the
-			same as request.user.
 		'''
 		
 		# TODO: we need to first check that run has been finished before any

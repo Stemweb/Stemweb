@@ -157,8 +157,8 @@ INSTALLED_APPS = (
     'djcelery',
 	"djkombu",
     
-    'Stemweb.third_party_apps.recaptcha_works',
-    'Stemweb.third_party_apps.registration',
+#    'Stemweb.third_party_apps.recaptcha_works',
+#    'Stemweb.third_party_apps.registration',
     'Stemweb.third_party_apps.pagination',
     
     # Own apps

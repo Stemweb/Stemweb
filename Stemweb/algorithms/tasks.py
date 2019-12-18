@@ -199,7 +199,7 @@ class AlgorithmTask(Task):
 			function will make algorithm stop without exceptions and final
 			results from algorithm are written to hard drive.
 		'''
-		if (self.algorithm_run is None) or (self.algorithm_run.user == request.user):
+		if (self.algorithm_run is None):
 				self.algorithm_run.process = None
 				self._stop.value = 1
 		
@@ -387,7 +387,7 @@ class AlgorithmTask(Task):
 	
 
 @task
-def external_algorithm_run_error(uuid, run_id, user_id, return_host, return_path):
+def external_algorithm_run_error(uuid, run_id, return_host, return_path):
 	''' Callback task in case external algorithm run fails. '''
 	print run_id, uuid
 	result = AsyncResult(uuid)
@@ -404,7 +404,6 @@ def external_algorithm_run_error(uuid, run_id, user_id, return_host, return_path
 	algorun.save()
 	
 	ret = {
-		'userid': user_id,
 		'jobid': run_id,
 		'status': algorun.status,
 		'algorithm': algorun.algorithm.name,
@@ -432,7 +431,7 @@ def external_algorithm_run_error(uuid, run_id, user_id, return_host, return_path
 	
 	
 @task
-def external_algorithm_run_finished(newick, run_id, user_id, return_host, return_path):
+def external_algorithm_run_finished(newick, run_id, return_host, return_path):
 	''' Callback task in case external algorithm run finishes succesfully. '''
 	print run_id, newick
 	
@@ -442,7 +441,6 @@ def external_algorithm_run_finished(newick, run_id, user_id, return_host, return
 	algorun.save()
 	
 	ret = {
-			'userid': user_id,
 			'jobid': run_id,
 			'status': algorun.status,
 			'algorithm': algorun.algorithm.name,

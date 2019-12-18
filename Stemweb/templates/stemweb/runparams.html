@@ -44,13 +44,6 @@
 {% endblock %}
 		
 {% block form %}
-	{% if not user.is_authenticated %}
-			<p class="development_note">
-				You have to <a href={% url registration_register %}>register</a> and login 
-				in this version to be able to run algorithms.
-			</p>
-	{% endif %}
-
 	<form action="/run/{{input_file.id}}/" enctype="multipart/form-data" method="post">
 		{% csrf_token %}
 		{{ form.as_p }}
