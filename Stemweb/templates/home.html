@@ -12,7 +12,7 @@
 	<div id="subpage_index" class="box-sizing_border">
 	{% block subpage_index %}
 	
-		{% if user.is_authenticated %}
+		#{% if user.is_authenticated %}
 			{% block subpage_index_title %}
 			<h1>Recent activity</h1>
 			{% endblock%}
@@ -34,13 +34,13 @@
 				{% endblock %}
 				
 			{% endif %}
-		{% else %}	
-				<h1>New user?</h1>
-				<div class="intro">
-					<a href={% url "registration_register" %}>Register</a> yourself now to run the 
-					<a href={% url "algorithms_base_url" %}>algorithms</a>.	
-				</div> 	
-		{% endif %}
+		#{% else %}	
+		#		<h1>New user?</h1>
+		#		<div class="intro">
+		#			<a href={% url "registration_register" %}>Register</a> yourself now to run the 
+		#			<a href={% url "algorithms_base_url" %}>algorithms</a>.	
+		#		</div> 	
+		#{% endif %}
 			
 	{% endblock %}
 	</div>

@@ -17,9 +17,10 @@ def details(request, file_id, form = None):
 	if form is None or form.__class__ != UploadFile:
 		form = UploadFile
 	
-	allfiles = InputFile.objects.all()
-	context = RequestContext(request, {'file': details_file, 'form': form})
-	return render_to_response('files_details.html', context.flatten())
+	#allfiles = InputFile.objects.all()
+	#context = RequestContext(request, {'file': details_file, 'form': form})
+	#return render_to_response('files_details.html', context.flatten())
+        return render_to_response('files_details.html',  {'file': details_file, 'form': form}) 
 
 def base(request, form = None):
 	'''
@@ -29,8 +30,9 @@ def base(request, form = None):
 		form = UploadFile
 	
 	allfiles = InputFile.objects.all()
-	context = RequestContext(request, { 'all_files': allfiles, 'form': form })
-	return render_to_response('files_base.html', context)
+	#context = RequestContext(request, { 'all_files': allfiles, 'form': form })
+	#return render_to_response('files_base.html', context.flatten())
+	return render_to_response('files_base.html', { 'all_files': allfiles, 'form': form })
 
 
 def upload(request):
@@ -48,9 +50,9 @@ def upload(request):
 			return HttpResponseRedirect('/files/%s' % (input_file.id))
 		else:
 			form = UploadFile()
-	context = RequestContext(request)            
+	#context = RequestContext(request) 
 	return render_to_response('/files/',
                               { 'form': form },
-                              context_instance=context)
-	
+                              #context_instance=context)
+                              request = request)	
 	

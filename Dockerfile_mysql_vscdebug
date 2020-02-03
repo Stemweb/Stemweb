@@ -21,7 +21,7 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3B4FE6ACC0B21F32
 #======================== install tools ================================
 RUN apt-get update && apt-get -y install graphviz wget libffi-dev libssl-dev r-base-core curl vim tree python-dev  mysql-server libmysqlclient-dev
 RUN pip install -U setuptools
-RUN pip install pyopenssl ndg-httpsclient pyasn1 rpy2==2.8.6 mysqlclient pymysql ptvsd==3.0.0
+RUN pip install pyopenssl ndg-httpsclient pyasn1 rpy2==2.8.6 mysqlclient pymysql ptvsd
 # really needed?: pymysql, MySQL-python
 
 #===================== install requirements ============================
@@ -31,7 +31,7 @@ RUN pip install -r requirements.txt
 # assumption: in order to get rid of error messages, 
 # initialization of relevant variables as floating-point numbers in binarysankoff_linux.c
 # is already done in the repository on the host server
-WORKDIR Stemweb/algorithms/rhm
+WORKDIR /home/stemweb/Stemweb/algorithms/rhm
 RUN gcc -I/usr/local/include/python2.7/ -I/usr/include/python2.7 -lpython2.7 -I/usr/local/include -L/usr/local/lib -fPIC -g -Wall -c binarysankoff_linux.c
 RUN gcc -shared -fPIC -Wall -I/usr/local/include -L/usr/local/lib binarysankoff_linux.o -o binarysankoff.so -lz
 
@@ -48,11 +48,13 @@ RUN service mysql start &&  ./createMysqlDBandUserWithGrants.sql && su stemweb &
     python manage.py migrate --run-syncdb && \ 
     python manage.py loaddata Stemweb/algorithms/init_algorithms.json && \
     python manage.py loaddata Stemweb/files/files.json && \
-    python manage.py loaddata Stemweb/home/bootstrap.json && \
+    python manage.py loaddata Stemweb/home/fixtures/bootstrap.json && \
     mysql -D stemwebdb_v1 -u stemweb -pChangeMe -e "SET GLOBAL FOREIGN_KEY_CHECKS = 1"
 
 #===================== start the server ================================
-EXPOSE 8000
-EXPOSE 3000
+# EXPOSE port 3000 for debugging access from outside of the container, 
+# EXPOSE port 8000 for the web site
+EXPOSE 3000 8000
 USER root
+#CMD service mysql start && python manage.py runserver --noreload --nothreading 0.0.0.0:8000
 CMD service mysql start && python manage.py runserver 0.0.0.0:8000

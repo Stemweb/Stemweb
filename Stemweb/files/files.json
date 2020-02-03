@@ -1,0 +1,24 @@
+[
+	{
+		"model": "files.inputfile",
+		"pk": 1,
+		"fields": {
+			"upload_time": "2019-11-19 10:52:45",
+			"last_access": "2019-11-19 10:52:46",
+			"name": "parzival.nex",
+			"extension": "nex",
+			"file": "datasets/parzival.nex"
+		}
+	},
+	{
+		"model": "files.inputfile", 
+		"pk": 2, 
+		"fields": {
+			"upload_time": "2019-11-19 14:48:12", 
+			"last_access": "2020-01-27 10:52:45",
+			"name": "notrebesoin_aligned.csv", 
+			"extension": "csv", 
+			"file": "datasets/notrebesoin_aligned.csv"
+		}
+	}
+]

@@ -36,7 +36,7 @@ DATABASES = {
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'Europe/Helsinki'
+TIME_ZONE = 'Europe/Berlin'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -158,7 +158,7 @@ INSTALLED_APPS = (
 	"djkombu",
     
 #    'Stemweb.third_party_apps.recaptcha_works',
-#    'Stemweb.third_party_apps.registration',
+    'Stemweb.third_party_apps.registration',
     'Stemweb.third_party_apps.pagination',
     
     # Own apps
@@ -282,7 +282,12 @@ LOGGING = {
 			'handlers': ['console', 'authentication'],
 			'propagate': False,
 			'level': 'DEBUG',
-		}
+		},
+        'django.template': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        }        
 
     }
 }

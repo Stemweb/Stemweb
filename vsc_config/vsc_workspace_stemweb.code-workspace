@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "/home/fugger/repos3/Stemweb/Stemweb"
+		}
+	],
+	"settings": {
+		"debug.allowBreakpointsEverywhere": true,
+		"debug.inlineValues": true
+	}
+}

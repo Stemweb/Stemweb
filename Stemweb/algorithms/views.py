@@ -37,6 +37,7 @@ def base(request):
 	c = RequestContext(request, {"all_algorithms" : algorithms}) 
 	#return render_to_response("algorithms_base.html", c)
 	return render_to_response("algorithms_base.html", c.flatten()) # avoids Type error "context must be a dict rather than RequestContext" (necessary since django-1.11)
+        #return render_to_response("algorithms_base.html", {"all_algorithms" : algorithms})
 
 def details(request, algo_id, form = None):
 	'''
@@ -53,7 +54,7 @@ def details(request, algo_id, form = None):
 	previous_runs = AlgorithmRun.objects.filter(algorithm = algo_id)
 	context_dict['algorithm_runs'] = previous_runs
 	context_dict['all_algorithms'] = Algorithm.objects.all()
-	c = RequestContext(request, context_dict)
+	#c = RequestContext(request, context_dict)
 	#return render_to_response("algorithms_details.html", c)
         return render_to_response("algorithms_details.html", context_dict)	# avoids Type error "context must be a dict rather than RequestContext" (necessary since django-1.11)
 
@@ -79,6 +80,7 @@ def run(request, algo_id):
 	''' Run's the given algorithm with arguments spesified in request.POST if 
 		the form built from them is valid for the given algorithm.
 	'''
+
 	if request.method == 'POST':
 		algorithm = get_object_or_404(Algorithm, pk = algo_id)
 		form = algorithm.args_form(post = request.POST)
@@ -99,15 +101,17 @@ def results(request, run_id):
  
 	run = get_object_or_404(AlgorithmRun, id = run_id)
 	
-	c = RequestContext(request, {'algorithm_run': run})
+	#c = RequestContext(request, {'algorithm_run': run})
 	if run.status == STATUS_CODES['finished']:
 		#return render_to_response('algorithm_running_results.html', c)
-                       return render_to_response('algorithm_running_results.html', c.flatten()) 
+                #return render_to_response('algorithm_running_results.html', c.flatten()) 
+                return render_to_response('algorithm_running_results.html', {'algorithm_run': run})
 	else:
 		# TODO: different view for non-finished algorithms
 		#return render_to_response('algorithm_running_results.html', c)
-                return render_to_response('algorithm_running_results.html', c.flatten())
-		
+                return render_to_response('algorithm_running_results.html', {'algorithm_run': run})
+                #pass 
+
 	#raise Http404
 
 
@@ -208,7 +212,7 @@ def jobstatus(request, run_id):
 	
 def processtest(request):
 	#csv_file = "/Users/slinkola/STAM/data_sets/request4.json"
-        csv_file ="/home/stemweb/Stemweb/media/which.json"	
+        csv_file ="/home/stemweb/Stemweb/media/datasets/parzival_aligned.csv"	
         csv = u""
 	import codecs
 	with codecs.open(csv_file, 'r', encoding = 'utf8') as f:
