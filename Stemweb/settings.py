@@ -3,8 +3,8 @@ import local_settings as ls
 import os
 import sys
 
-import djcelery
-djcelery.setup_loader()
+#import djcelery
+#djcelery.setup_loader()
 
 DEBUG = True
 #TEMPLATE_DEBUG = DEBUG
@@ -153,9 +153,10 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
-    
-    'djcelery',
-	"djkombu",
+    'kombu',
+    'redis',    
+#    'djcelery',
+#	"djkombu",
     
 #    'Stemweb.third_party_apps.recaptcha_works',
     'Stemweb.third_party_apps.registration',
@@ -167,17 +168,27 @@ INSTALLED_APPS = (
     'Stemweb.files',
 )
 
-BROKER_BACKEND = "django"
-# Django-celery configurations
-BROKER_HOST = "localhost"
-BROKER_PORT = 5672
-BROKER_USER = "guest"
-BROKER_PASSWORD = "guest"
-BROKER_VHOST = "/"
+#BROKER_BACKEND = "django"  ## async not working
+## Django-celery configurations
+#BROKER_HOST = "localhost"
+#BROKER_PORT = 5672
+#BROKER_USER = "guest"
+#BROKER_PASSWORD = "guest"
+#BROKER_VHOST = "/"
+
+# celery  configurations  ## from example
+CELERY_BROKER_URL = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+
+
+
 
 # registration apps own setting. Configures how many days
 # user has to activate account before it expires.
-ACCOUNT_ACTIVATION_DAYS = 7
+ACCOUNT_ACTIVATION_DAYS = 99
 LOGIN_REDIRECT_URL = '/'
 
 # Email backend

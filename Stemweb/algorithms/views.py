@@ -100,7 +100,7 @@ def results(request, run_id):
 	''' Results of the algorithm run by run_id '''
  
 	run = get_object_or_404(AlgorithmRun, id = run_id)
-	
+	#run.save()
 	#c = RequestContext(request, {'algorithm_run': run})
 	if run.status == STATUS_CODES['finished']:
 		#return render_to_response('algorithm_running_results.html', c)
@@ -136,7 +136,10 @@ def process(request, algo_id):
 		return response
 		
 	if request.method == 'POST':
-		json_data = json.loads(request.body, encoding = 'utf8')
+		#json_data = json.loads(request.body, encoding = 'utf8')  
+		# avoid error: request.body:  RawPostDataException(u"You cannot access body after reading from request's data stream",)
+		# hence changed to:
+		json_data = json.loads(request.data, encoding = 'utf8')
 		ret = utils.validate_json(json_data, algo_id)
 		if not ret[0]:
 			# No valid JSON
@@ -233,8 +236,8 @@ def processtest(request):
 @csrf_exempt
 def testresponse(request):
 	if request.method == "POST":
-		print json.loads(request.body, encoding = "utf8")
-		
+		#print json.loads(request.body, encoding = "utf8")
+		print json.loads(request.data, encoding = "utf8")		
 		return HttpResponse("OK")
 	return HttpResponse("No POST")
 

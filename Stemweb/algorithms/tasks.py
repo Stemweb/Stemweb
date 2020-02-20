@@ -15,6 +15,8 @@ from celery.task import Task, task
 from celery.registry import tasks
 from celery.result import AsyncResult
 
+from celery import shared_task
+
 import settings
 from decorators import synchronized
 
@@ -246,6 +248,7 @@ class AlgorithmTask(Task):
 						where algorithm should store all it's results. It should
 						NOT be changed during the subclassing algorithm's run!
 		'''
+		pass
 
 				
 	def run(self, *args, **kwargs):
@@ -465,4 +468,10 @@ def external_algorithm_run_finished(newick, run_id, return_host, return_path):
 	conn.close()
 	print response.status, response.reason, response.read()
 	
-	
+@shared_task
+def adding_task(x, y, items=[]):
+    result = x + y
+    if items:
+        for x, y in items:
+            result += (x + y)
+    return result

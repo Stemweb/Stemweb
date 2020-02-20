@@ -125,9 +125,9 @@ class NJ(AlgorithmTask):
 				data[t]=data[t]+line.split()[1]
 			if data[tax[-1]][-1]==';': data[tax[-1]]=data[tax[-1]][0:-1]; break # end matrix
 		
-		print "Taxas", len(tax)
-		print len(data[tax[0]])
-		print len(data[tax[-1]])
+		print "these Taxas", len(tax)
+		#print len(data[tax[0]])
+		#print len(data[tax[-1]])
 		taxa=len(tax)         # number of taxa
 		d={}                  # observed distances between pairs
 		gd={}                 # distances between groups

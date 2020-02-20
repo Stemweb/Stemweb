@@ -1,1 +1,1 @@
-../Dockerfile_mysql_vscdebug
+../Dockerfile_newCelery

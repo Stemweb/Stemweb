@@ -2,9 +2,13 @@ Django==1.11.23
 #PIL==1.1.7
 Pillow-PIL
 networkx>=1.7
-celery<4.0,>=3.1.15
-django-celery>=3.0.23
-django-kombu>=0.9.4
+#celery<4.0,>=3.1.15
+celery==4.3.0
+#django-celery>=3.0.23
+#django-kombu>=0.9.4
+kombu==4.5.0
+redis==3.2.1
+#mqp
 django-picklefield>=0.2.0
 #django-registration>=1.0
 #psycopg2==2.4.4

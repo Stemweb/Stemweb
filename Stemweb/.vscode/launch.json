@@ -10,6 +10,7 @@
             "request": "attach",
             "port": 3000,
             "host": "172.17.0.2",
+            "django": true,
             "pathMappings": [
                 {
                     //"localRoot": "${workspaceFolder}",
