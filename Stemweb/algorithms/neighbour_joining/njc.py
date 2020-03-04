@@ -110,6 +110,7 @@ class NJ(AlgorithmTask):
 		tax=[]  # list of taxon labels
 		data={} # sequences
 		waitformatrix=True  # should we skip initial part until MATRIX segment?
+		
 		for line in f:
 			if line.strip().upper()=="#NEXUS": waitformatrix=True
 			if waitformatrix and line.strip().upper()!="MATRIX": continue
@@ -117,17 +118,14 @@ class NJ(AlgorithmTask):
 			if line.strip()=="": continue
 			if line.strip()==";": break
 		
-			t=line.split()[0]
-			if t not in tax: # new taxon; create new data sequence
-				tax.append(t)
-				data[t]=line.split()[1]
-			else:            # continuation of existing taxon; concatenate to existing seq.
-				data[t]=data[t]+line.split()[1]
+			tax.append(line.strip().split()[0])
+			data[tax[-1]]=line.strip().split()[-1]
 			if data[tax[-1]][-1]==';': data[tax[-1]]=data[tax[-1]][0:-1]; break # end matrix
 		
-		print "these Taxas", len(tax)
+		#print "these Taxas", len(tax)
 		#print len(data[tax[0]])
 		#print len(data[tax[-1]])
+
 		taxa=len(tax)         # number of taxa
 		d={}                  # observed distances between pairs
 		gd={}                 # distances between groups
@@ -135,6 +133,7 @@ class NJ(AlgorithmTask):
 		
 		# Example in Table 27.11 in evolution-textbook.org
 		example = None # set to 1 or 2 to use one of the examples
+		#example = 1 # set to 1 or 2 to use one of the examples
 		if example == 1:
 		    tax=['A','B','C','D','E','F']
 		    d['A','B']=5

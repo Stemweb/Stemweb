@@ -19,9 +19,9 @@ COPY apt_sources.list /etc/apt/sources.list
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3B4FE6ACC0B21F32
 
 #======================== install tools ================================
-RUN apt-get update && apt-get -y install graphviz wget libffi-dev libssl-dev r-base-core curl vim tree python-dev  mysql-server libmysqlclient-dev redis-server
+RUN apt-get update && apt-get -y install graphviz libgraphviz-dev pkg-config wget libffi-dev libssl-dev r-base-core curl vim tree python-dev  mysql-server libmysqlclient-dev redis-server 
 RUN pip install -U setuptools
-RUN pip install pyopenssl ndg-httpsclient pyasn1 rpy2==2.8.6 mysqlclient pymysql ptvsd
+RUN pip install pyopenssl ndg-httpsclient pyasn1 rpy2==2.8.6 mysqlclient pymysql ptvsd pygraphviz
 # really needed?: pymysql, MySQL-python
 
 #===================== install requirements ============================
@@ -65,5 +65,5 @@ USER root
 CMD service mysql start && \
     service redis-server start && \
     #celery worker -A Stemweb --loglevel=info --uid=1000 && \ 
-    (celery worker -A Stemweb &) ; \ 
+    #(celery worker -A Stemweb &) ; \ 
     python manage.py runserver 0.0.0.0:8000 
