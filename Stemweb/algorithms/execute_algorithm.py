@@ -34,8 +34,8 @@ def local(form, algo_id, request):
 	rid = current_run.id
 	kwargs = {'run_args': run_args, 'algorithm_run': rid}
 	call = algorithm.get_callable(kwargs)
-	#call.apply_async(kwargs = kwargs)
-	call.apply(kwargs = kwargs)    # synchronous call for dev and test purpose
+	call.apply_async(kwargs = kwargs)
+	#call.apply(kwargs = kwargs)    # synchronous call for dev and test purpose
 	return current_run.id
 
 
