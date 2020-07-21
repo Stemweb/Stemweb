@@ -19,10 +19,9 @@ COPY apt_sources.list /etc/apt/sources.list
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3B4FE6ACC0B21F32
 
 #======================== install tools ================================
-RUN apt-get update && apt-get -y install graphviz libgraphviz-dev pkg-config wget libffi-dev libssl-dev r-base-core curl vim tree python-dev  mysql-server libmysqlclient-dev redis-server 
+RUN apt-get update && apt-get -y install graphviz libgraphviz-dev pkg-config wget libffi-dev libssl-dev r-base-core curl vim tree python-dev  mysql-server libmysqlclient-dev redis-server httpie
 RUN pip install -U setuptools
-RUN pip install pyopenssl ndg-httpsclient pyasn1 rpy2==2.8.6 mysqlclient ptvsd pygraphviz ete2
-# not needed?: pymysql 
+RUN pip install pyopenssl ndg-httpsclient pyasn1 rpy2==2.8.6 mysqlclient ptvsd pygraphviz ete2 pymysql djangorestframework==3.9.4 httplib2
 
 #===================== install requirements ============================
 RUN pip install -r requirements.txt
@@ -59,7 +58,10 @@ RUN sed -i '0,/supervised no/! s/supervised no/supervised systemd/' /etc/redis/r
 #====================== start the server ================================
 # EXPOSE port 3000 for debugging access from outside of the docker container, 
 # EXPOSE port 8000 for the web site
-EXPOSE 3000 8000
+# EXPOSE port 80 for the stemmaweb.net RESTapi endpoint outside of the docker container // needed?
+# EXPOSE port 443 for the https://stemmaweb.net RESTapi endpoint outside of the docker container // needed?
+# EXPOSE port 51000 as fixed http-request outbound src-port
+EXPOSE 3000 8000 80 51000 443
 USER root
 CMD service mysql start && \
     service redis-server start && \

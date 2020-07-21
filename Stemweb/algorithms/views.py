@@ -24,6 +24,8 @@ from django.core.serializers import serialize
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 
+from rest_framework.parsers import JSONParser
+
 #from bs4 import BeautifulSoup as bs
 
 from .models import Algorithm, AlgorithmRun, AlgorithmArg
@@ -100,7 +102,7 @@ def results(request, run_id):
 	''' Results of the algorithm run by run_id '''
  
 	run = get_object_or_404(AlgorithmRun, id = run_id)
-	#run.save()
+	#run.save()   ### why?
 	#c = RequestContext(request, {'algorithm_run': run})
 	if run.status == STATUS_CODES['finished']:
 		#return render_to_response('algorithm_running_results.html', c)
@@ -139,7 +141,8 @@ def process(request, algo_id):
 		#json_data = json.loads(request.body, encoding = 'utf8')  
 		# avoid error: request.body:  RawPostDataException(u"You cannot access body after reading from request's data stream",)
 		# hence changed to:
-		json_data = json.loads(request.data, encoding = 'utf8')
+		#json_data = json.loads(request.data, encoding = 'utf8')  ### AttributeError: 'WSGIRequest' object has no attribute 'data' ; # hence changed to:
+		json_data = JSONParser().parse(request)					  ###  this will rise already JSON parse error if JSON is invalid
 		ret = utils.validate_json(json_data, algo_id)
 		if not ret[0]:
 			# No valid JSON
@@ -150,9 +153,13 @@ def process(request, algo_id):
 		else:
 			# JSON ok, will process the algorithm
 			run_id = execute_algorithm.external(json_data, algo_id, request)
+			nwk = ""
+			with open(os.path.join(algo_media, AlgorithmRun.objects.get_or_none(pk = run_id).newick), 'r') as f:
+				nwk = f.read()
 			message = json.dumps({
 								'jobid': run_id,
-								'status': AlgorithmRun.objects.get_or_none(pk = run_id).status})	
+								'status': AlgorithmRun.objects.get_or_none(pk = run_id).status,
+								'newicktree': nwk})	
 			response = HttpResponse(message)
 			response.status_code = 200		
 			return response
@@ -175,7 +182,8 @@ def jobstatus(request, run_id):
 		return response
 	else: 
 		algo_run = AlgorithmRun.objects.get_or_none(pk = run_id)
-		if algo_run is None or not algo_run.external: 
+		if algo_run is None or not algo_run.external: 		
+		#if algo_run is None: 						###  temporarily removed external check to enable access via REST-API (JSON) for test purpose
 			error_message = json.dumps({'error': "No external algorithm run with given id"})
 			response = HttpResponse(error_message)
 			response.status_code = 400
@@ -215,8 +223,8 @@ def jobstatus(request, run_id):
 	
 def processtest(request):
 	#csv_file = "/Users/slinkola/STAM/data_sets/request4.json"
-        csv_file ="/home/stemweb/Stemweb/media/datasets/parzival_aligned.csv"	
-        csv = u""
+	csv_file ="/home/stemweb/Stemweb/algorithm/fixtures/02_nj.json"	
+	csv = u""
 	import codecs
 	with codecs.open(csv_file, 'r', encoding = 'utf8') as f:
 		csv = f.read()
@@ -229,7 +237,7 @@ def processtest(request):
 	request.META = {}
 	request.META['REMOTE_ADDR'] = '127.0.0.1'
 	request.META['SERVER_PORT'] = 8000
-	execute_algorithm.external(json.loads(csv, encoding = 'utf8'), 1, request)
+	execute_algorithm.external(json.loads(csv, encoding = 'utf8'), 3, request)
 	return HttpResponse("ok")
 
 

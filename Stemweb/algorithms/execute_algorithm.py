@@ -3,6 +3,7 @@ Functions for executing local and external algorithm runs.
 '''
 import os
 from datetime import datetime
+from time import sleep
 import tempfile
 import codecs
 import json
@@ -59,12 +60,13 @@ def external(json_data, algo_id, request):
 		ext = ".csv"
 	elif algorithm.file_extension == 'nex': 
 		from csvtonexus import csv2nex
-		csv_data = csv2nex(json_data.pop('data'))
+		csv_data = csv2nex(json_data.pop('data'))	
 		ext = ".nex"
 		
 	# First write the file in the temporary file and close it.
 	with codecs.open(csv_file.name, mode = 'w', encoding = 'utf8') as f:
 		f.write(csv_data.encode('ascii', 'replace'))	
+		#json.dump(csv_data, f, indent = 4)
 
 	# Then construct a mock up InMemoryUploadedFile from it for the InputFile
 	mock_file = None
@@ -98,12 +100,16 @@ def external(json_data, algo_id, request):
 	current_run.extras = json.dumps(json_data, encoding = 'utf8')
 	current_run.save()	# Save to ensure that id generation is not delayed.
 	rid = current_run.id
-	return_host = json_data['return_host']
-	return_path = json_data['return_path']
+	return_host = json_data['return_host']        
+	return_path = json_data['return_path']        
 	kwargs = {'run_args': run_args, 'algorithm_run': rid}
 	call = algorithm.get_callable(kwargs)
-	call.apply_async(kwargs = kwargs, link = external_algorithm_run_finished.s(rid, return_host, return_path), \
-					link_error = external_algorithm_run_error.s(rid, return_host, return_path))
+	#call.apply_async(kwargs = kwargs, link = external_algorithm_run_finished.s(rid, return_host, return_path), \
+	#				link_error = external_algorithm_run_error.s(rid, return_host, return_path))      ### raised error ToBe checked
+	call.apply_async(kwargs = kwargs, link = external_algorithm_run_finished.s(rid, return_host, return_path))
+	#call.apply(kwargs = kwargs, link = external_algorithm_run_finished.s(rid, return_host, return_path))  ### synchronous task; for test purpose 
+	
+	sleep(0.3)	### needed for correct setting of task status ; seems to be a timing problem
 	return current_run.id
 
 	

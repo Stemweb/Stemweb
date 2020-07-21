@@ -45,8 +45,8 @@ def newick2img(newick, filepath, branch_length = True, radial = True, width = 80
 	'''
 	prog = 'dot' if radial else 'neato'
 	nwk = Phylo.read(newick, 'newick')
-	Phylo.draw_graphviz(nwk, prog = prog, node_size = 500)
-	#Phylo.draw(nwk, do_show = False)
+	#Phylo.draw_graphviz(nwk, prog = prog, node_size = 500) ### BiopythonDeprecationWarning: draw_graphviz is deprecated; use Bio.Phylo.draw instead
+	tree_plot = Phylo.draw(nwk)  #Phylo.draw(nwk, do_show = False) 
 	plt.savefig(filepath)
 
 
@@ -130,7 +130,8 @@ def build_external_args(parameters, input_file_key, input_file, \
 	for key, value in parameters.items():
 		run_args[key] = value
 	run_args[input_file_key] = input_file.file.path
-	run_args['folder_url'] = create_run_folder(None, input_file.id, algorithm_name)
+	#run_args['folder_url'] = create_run_folder(None, input_file.id, algorithm_name)
+	run_args['folder_url'] = create_run_folder(input_file.id, algorithm_name)
 	return run_args
 
 

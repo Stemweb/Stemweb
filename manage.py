@@ -13,7 +13,7 @@ if __name__ == "__main__":
               import ptvsd
               ptvsd.enable_attach(address = ('0.0.0.0', 3000))
               #ptvsd.wait_for_attach()
-              print " hopefully Attached remote debugger"
+              print " Attached remote debugger"
               #ptvsd.break_into_debugger()  
 
     execute_from_command_line(sys.argv)

@@ -75,7 +75,6 @@ class NJ(AlgorithmTask):
 		# tree output
 		def printtree(node):
 		    print _printtree(node, '')
-		    print
 		    
 		
 		# tree output

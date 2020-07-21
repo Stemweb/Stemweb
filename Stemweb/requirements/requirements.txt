@@ -19,4 +19,5 @@ matplotlib>=1.1.0
 scipy>=0.7
 
 # For drawing newicks
-biopython>=1.62
+#biopython>=1.62
+biopython<=1.76

@@ -9,7 +9,13 @@ import datetime
 import os
 import logging
 
+import json
+import functools
+import httplib
+import urllib2
+
 from django.template.defaultfilters import slugify
+from django.views.decorators.csrf import csrf_exempt
 
 from celery.task import Task, task
 from celery.registry import tasks
@@ -266,16 +272,16 @@ class AlgorithmTask(Task):
 		self._algorithm_thread = th.Thread(target = self.__algorithm__, 
 										args = (self.run_args,), 
 										name = 'stemweb_algorun')
-		self._algorithm_thread.start()	
+		self._algorithm_thread.start()									### here class NJ(AlgorithmTask)  in  njc.py is called
 		self.algorithm_run.status = settings.STATUS_CODES['running']
-		self.algorithm_run.save()
+		self.algorithm_run.save()									### here again class NJ(AlgorithmTask)  in  njc.py is called
 		
 		# TODO: Fix me st000pid busy wait.
 		while self._stop.value == 0:
 			if not self._algorithm_thread.isAlive(): break
 			self._read_from_results_()	
 		
-		self._finalize_()
+		#self._finalize_()
 		
 		# Return newick as string for simplify callbacks of external runs.
 		if self.has_newick: 
@@ -283,7 +289,7 @@ class AlgorithmTask(Task):
 			with open(self.newick_path, 'r') as f:
 				nwk = f.read()
 			return nwk
-		
+		self._finalize_()   #### should be here? -- otherwise never called!!
 		
 	def _finalize_(self):
 		# Just be sure that all the results have been written to queue.
@@ -388,7 +394,7 @@ class AlgorithmTask(Task):
 
 	
 	
-
+#@csrf_exempt
 @task
 def external_algorithm_run_error(uuid, run_id, return_host, return_path):
 	''' Callback task in case external algorithm run fails. '''
@@ -424,6 +430,7 @@ def external_algorithm_run_error(uuid, run_id, return_host, return_path):
 	headers = {"Content-type": "application/json; charset=utf-8"}	
 	body = message.encode('utf8')
 	conn = httplib.HTTPConnection(return_host)
+	#conn = httplib.HTTPConnection("127.0.0.1","7000")   # separated host , port
 	conn.request('POST', return_path, body, headers)
 	response = conn.getresponse()
 	conn.close()
@@ -432,42 +439,149 @@ def external_algorithm_run_error(uuid, run_id, return_host, return_path):
 	
 	
 	
-	
+#@csrf_exempt	
 @task
 def external_algorithm_run_finished(newick, run_id, return_host, return_path):
+	hostparts = return_host.split(':')
+	host = hostparts[0]
+	port = hostparts[1]
 	''' Callback task in case external algorithm run finishes succesfully. '''
-	print run_id, newick
+	print ' ##### Callback task in case external algorithm run finishes succesfully;  print run_id & newick #####'
+	print "run-id: ", run_id 
+	print "newick-string: ", newick
+	print "return_host: ", host
+	print "return_port: ", port
+	print "return_path: ", return_path
+	print "#####################################################################################################"
+
+	logger = logging.getLogger('stemweb.algorithm_run')
+	logger.info('################# ############## ############## #################### #########')
+
 	
 	from Stemweb.algorithms.models import AlgorithmRun
 	algorun = AlgorithmRun.objects.get(pk = run_id)
 	algorun.status = settings.STATUS_CODES['finished']
+	print 'status=finished'
 	algorun.save()
+	#time.sleep(90)
 	
 	ret = {
 			'jobid': run_id,
-			'status': algorun.status,
+			'statuscode': algorun.status,			### or: 'status': ?
 			'algorithm': algorun.algorithm.name,
 			'start_time': str(algorun.start_time),
 			'end_time': str(algorun.end_time),
 			'result': newick,
-			'format': 'newick'
-			}
+			'result_format': 'newick'				### or: 'format': ?
+			}	
 	
-	import httplib, urllib, json
+	"""
+	according to a proposal at:
+	https://stackoverflow.com/questions/1150332/source-interface-with-python-and-urllib2
+	This gives us a custom urllib2.HTTPHandler implementation that is source_address aware. We can add it to a new urllib2.OpenerDirector
+	"""
+
+	class BoundHTTPHandler(urllib2.HTTPHandler):
+
+		def __init__(self, source_address=None, debuglevel=0):
+			urllib2.HTTPHandler.__init__(self, debuglevel)
+			self.http_class = functools.partial(httplib.HTTPConnection, source_address=source_address)
+	
+		def http_open(self, req):
+			return self.do_open(self.http_class, req)
+
+
+	class BoundHTTPSHandler(urllib2.HTTPSHandler):
+
+		def __init__(self, source_address=None, debuglevel=0):
+			urllib2.HTTPSHandler.__init__(self, debuglevel)
+			self.http_class = functools.partial(httplib.HTTPSConnection, source_address=source_address)
+	
+		def http_open(self, req):
+			return self.do_open(self.http_class, req)
+
+
+
+	source_port = 51000
+	handler = BoundHTTPHandler(source_address=("0.0.0.0", source_port), debuglevel = 2)
+	shandler = BoundHTTPSHandler(source_address=("0.0.0.0", source_port), debuglevel = 2)
+	fixed_sourceport_opener = urllib2.build_opener(handler, shandler)
+
+	### using urllib2 in python 2.7
+
+	url = 'https://stemmaweb.net:443/stemmaweb/stemweb/result/'
+	message = json.dumps(ret)
+	data = message.encode('utf8')
+	headers = {'Content-type': 'application/json; charset=utf-8'}
+	targeturl = 'https://' + return_host + return_path
+	#req = urllib2.Request(url, data, headers)	
+	req = urllib2.Request(targeturl, data, headers)
+	#print req.get_full_url()		### https://stemmaweb.net:443/stemmaweb/stemweb/result/
+    #print req.get_method()          ### POST
+    #print req.(get_data) 
+            
 	try: 
-		extra_json = json.loads(algorun.extras)
-		ret.update(extra_json)
-	except: 
-		pass
-	message = json.dumps(ret, encoding = "utf8")	
-	headers = {"Content-type": "application/json; charset=utf-8"}	
-	body = message.encode('utf8')
-	conn = httplib.HTTPConnection(return_host)
-	conn.request('POST', return_path, body, headers)
-	response = conn.getresponse()
-	conn.close()
-	print response.status, response.reason, response.read()
+		#response = urllib2.urlopen(req)	
+		response = fixed_sourceport_opener.open(req)	
+		content = response.read()
+		print content
+	except urllib2.HTTPError, e:
+		print e.code
+		print e.reason
 	
+
+	#with fixed_sourceport_opener.open(req) as response:
+	#with urllib2.urlopen(req) as response:   
+   	#	resp = response.read()
+	#	print resp
+
+
+
+	"""
+	### urllib.request  is to be used in python 3.x (instead of urllib2 in python 2.7)
+	import json
+	import urllib.request
+	#url = 'https://stemmaweb.net:443/stemmaweb/stemweb/result/'
+
+	message = json.dumps(ret)
+	data = message.encode('utf8')
+	headers = {'Content-type': 'application/json; charset=utf-8'}
+	targeturl = 'https://' + return_host + return_path
+	req = urllib.request.Request(targeturl, data, headers)
+	#req = urllib.request.Request(url, data, headers)
+
+	with urllib.request.urlopen(req) as response:
+   		resp = response.read()
+
+	print resp
+	"""
+
+
+	"""
+	### approach with httplib2; could not be changed to source_address/port aware
+	
+	import httplib2, json
+	h = httplib2.Http()
+	message = json.dumps(ret)
+	#body = message.encode('utf8')
+	targeturl = 'https://' + return_host + return_path
+	#resp, content = h.request(targeturl,
+	resp, content = h.request("https://stemmaweb.net:443/stemmaweb/stemweb/result/", 
+	#resp, content = h.request("http://127.0.0.1:7000/sendreceiverequest/", 
+                       method="POST", 
+                       headers = {'Content-type': 'application/json; charset=utf-8'},
+                       body = message.encode('utf8') )
+	print resp
+	print content
+	
+
+	"""
+
+
+
+
+
+
 @shared_task
 def adding_task(x, y, items=[]):
     result = x + y

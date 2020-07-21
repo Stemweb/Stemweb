@@ -39,12 +39,12 @@
 
 
 {% block subpage_content %}
-	{#{% if algorithm_run.status == 1 or algorithm_run.status == -1 %}#}
-	{% if algorithm_run.status == 1 %}
+	{% if algorithm_run.status == 1 or algorithm_run.status == -1 %}
+	{#{% if algorithm_run.status == 1 %}#}
 	<script type="text/javascript">
 		window.setTimeout("location.reload(true);", 5000);
 	</script>
-	<p>Page will refresh in 10 second periods.</p>
+	<p>Page will refresh in 5 second periods.</p>
 	{% endif %}
 
 	<div id="algorithm_result_div">
@@ -63,9 +63,9 @@
 				No image for this run. <br>
 			{% endif %}
 		{% else %}
-			{% if algorithm_run.status == -1 %}
-				Run could not be started!
-			{% endif %}			
+			{#{% if algorithm_run.status == -1 %}
+			Run could not be started!
+			{% endif %}	#}		
 			{% if algorithm_run.status > 1 %}
 				Run failed for unexpected reason!
 			{% endif %}

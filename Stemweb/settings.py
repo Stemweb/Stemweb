@@ -154,9 +154,10 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'kombu',
-    'redis',    
+    'redis',   
+    'rest_framework', 
 #    'djcelery',
-#	"djkombu",
+#    "djkombu",
     
 #    'Stemweb.third_party_apps.recaptcha_works',
     'Stemweb.third_party_apps.registration',
@@ -176,7 +177,7 @@ INSTALLED_APPS = (
 #BROKER_PASSWORD = "guest"
 #BROKER_VHOST = "/"
 
-# celery  configurations  ## from example
+# celery  configurations 
 CELERY_BROKER_URL = 'redis://localhost:6379'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
@@ -276,7 +277,15 @@ LOGGING = {
 			'filename': os.path.join(ALGORITHMS_LOG_DIR, 'auth'),
 			'when': 'D',
 			#'interval': 1,
-		}
+		},
+    	#'celery_tasks': {
+		#	'level':'DEBUG',
+		#	'class':'logging.handlers.TimedRotatingFileHandler',
+		#	'formatter': 'verbose',
+		#	'filename': os.path.join(ALGORITHMS_LOG_DIR, 'tasks'),
+		#	'when': 'D',
+		#	#'interval': 1,    
+        #}    
     },
     'loggers': {
 		'stemweb.algorithm_run': {
@@ -298,7 +307,13 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
-        }        
+        },
+        'celery': {
+            #'handlers': ['console','celery_tasks'],
+            'handlers': ['console'],            
+            'level': 'DEBUG',
+            'propagate': True
+        }      
 
     }
 }
