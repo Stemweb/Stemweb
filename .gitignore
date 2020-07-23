@@ -1,5 +1,4 @@
 *.pyc
-local_settings.py
 Stemweb/logs/
 Stemweb/algorithms/rhm/binarysankoff
 Stemweb/media/users/
