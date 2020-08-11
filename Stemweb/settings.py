@@ -18,6 +18,8 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+ALLOWED_HOSTS = ['10.0.0.137', '10.0.0.192', 'localhost', '127.0.0.1']
+
 DATABASES = {
     'default': {
         'ENGINE': ls.db_engine,    # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
