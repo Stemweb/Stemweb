@@ -64,6 +64,7 @@ RUN sed -i '0,/supervised no/! s/supervised no/supervised systemd/' /etc/redis/r
 EXPOSE 3000 8000 80 51000 443
 USER root
 CMD service mysql start && \
+    sleep 20 && \
     service redis-server start && \
     (celery worker -A Stemweb &) ; \ 
     python manage.py runserver 0.0.0.0:8000 
