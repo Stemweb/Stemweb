@@ -104,11 +104,19 @@ def external(json_data, algo_id, request):
 	return_path = json_data['return_path']        
 	kwargs = {'run_args': run_args, 'algorithm_run': rid}
 	call = algorithm.get_callable(kwargs)
-	#call.apply_async(kwargs = kwargs, link = external_algorithm_run_finished.s(rid, return_host, return_path), \
-	#				link_error = external_algorithm_run_error.s(rid, return_host, return_path))      ### raised error ToBe checked
-	call.apply_async(kwargs = kwargs, link = external_algorithm_run_finished.s(rid, return_host, return_path))
+
+	#with_debug = {'debug': True}
+	#kwargs.update(with_debug)
+	#print kwargs
+
+	# .s is a celery signature; see https://docs.celeryproject.org/en/master/userguide/calling.html
+	call.apply_async(kwargs = kwargs, 					
+					link = external_algorithm_run_finished.s(rid, return_host, return_path),
+					link_error = external_algorithm_run_error.s(rid, return_host, return_path)
+	)
+
 	#call.apply(kwargs = kwargs, link = external_algorithm_run_finished.s(rid, return_host, return_path))  ### synchronous task; for test purpose 
-	
+
 	sleep(0.3)	### needed for correct setting of task status ; seems to be a timing problem
 	return current_run.id
 

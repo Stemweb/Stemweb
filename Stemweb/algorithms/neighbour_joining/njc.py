@@ -25,6 +25,7 @@ class NJ(AlgorithmTask):
 
 		# simple Hamming distance
 		def hamming(r,s):
+		    #raise Exception("ERROR: this is an intended test case exception")   ### a manual test case in order to call task.py/external_algorithm_run_error()
 		    n=0
 		    diff=0
 		    for i in range(len(r)):
@@ -217,6 +218,8 @@ class NJ(AlgorithmTask):
 		    # ...and to the list of taxa
 		    S=Snew+[new]
 		
+		#time.sleep(90)   ### test_case: simulate long lasting (e.g. additional 90 sec) nj-algorithm run
+
 		# print out tree
 		save_tree(nodes[tuple(new)])
 		

@@ -16,11 +16,13 @@ import urllib2
 
 from django.template.defaultfilters import slugify
 from django.views.decorators.csrf import csrf_exempt
+from django.core.cache import cache ### #
 
-from celery.task import Task, task
+#from celery.task import Task, task
+from celery.task import Task
 from celery.registry import tasks
-from celery.result import AsyncResult
-
+from celery.result import AsyncResult 
+from celery.decorators import task
 from celery import shared_task
 
 import settings
@@ -48,7 +50,7 @@ class Observer():
 		'''
 		self.listening_to.file_lock.release()
 
-		
+#@task(bind=True)		
 class AlgorithmTask(Task):
 	'''
 		Super class of all algorithms.
@@ -150,6 +152,8 @@ class AlgorithmTask(Task):
 	observer_lock = th.Lock()
 	# Lock for _results_queue. 
 	result_lock = th.Lock()
+
+
 			
 	def __init_run__(self, *args, **kwargs):
 		''' Celery calls __init__ only once when it is started for every task.
@@ -158,8 +162,10 @@ class AlgorithmTask(Task):
 			queue and sets up image and newick path.
 			
 		'''
+	
 		self.run_args = kwargs.pop('run_args', None)			
 		run_id = kwargs.pop('algorithm_run', None)
+
 		if run_id is not None:
 			from Stemweb.algorithms.models import AlgorithmRun
 			self.algorithm_run = AlgorithmRun.objects.get(pk = run_id)
@@ -196,8 +202,6 @@ class AlgorithmTask(Task):
 		if not obs is None:
 			for o in obs:
 				self.attach(o)
-				
-		print self.request.id
 			
 						
 	def stop(self, request = None):
@@ -255,8 +259,7 @@ class AlgorithmTask(Task):
 						NOT be changed during the subclassing algorithm's run!
 		'''
 		pass
-
-				
+			
 	def run(self, *args, **kwargs):
 		'''
 			Called when task is getting executed. Don't override unless you 
@@ -272,24 +275,30 @@ class AlgorithmTask(Task):
 		self._algorithm_thread = th.Thread(target = self.__algorithm__, 
 										args = (self.run_args,), 
 										name = 'stemweb_algorun')
-		self._algorithm_thread.start()									### here class NJ(AlgorithmTask)  in  njc.py is called
+
+		self._algorithm_thread.start()		## here class NJ(AlgorithmTask)  in  njc.py is called
 		self.algorithm_run.status = settings.STATUS_CODES['running']
-		self.algorithm_run.save()									### here again class NJ(AlgorithmTask)  in  njc.py is called
+		print 'I am running NOW as thread'
+		self.algorithm_run.save()			## here again class NJ(AlgorithmTask)  in  njc.py is called
 		
 		# TODO: Fix me st000pid busy wait.
 		while self._stop.value == 0:
 			if not self._algorithm_thread.isAlive(): break
 			self._read_from_results_()	
-		
-		#self._finalize_()
+
+		#provoked_failure = 1/0      # test case: intended to create error in order to call external_algorithm_run_error()
+									 # raising the exception here keeps the task in RUNNING state 
+									 # ==> also a good test case: Stemmaweb shall ask for status of algorithm execution (if not yet finished)
+		self._finalize_()
 		
 		# Return newick as string for simplify callbacks of external runs.
 		if self.has_newick: 
 			nwk = ""
 			with open(self.newick_path, 'r') as f:
 				nwk = f.read()
-			return nwk
-		self._finalize_()   #### should be here? -- otherwise never called!!
+			return nwk				
+
+	
 		
 	def _finalize_(self):
 		# Just be sure that all the results have been written to queue.
@@ -395,75 +404,115 @@ class AlgorithmTask(Task):
 	
 	
 #@csrf_exempt
+#@shared_task
 @task
-def external_algorithm_run_error(uuid, run_id, return_host, return_path):
+def external_algorithm_run_error(request, exc, traceback, run_id, return_host, return_path):
 	''' Callback task in case external algorithm run fails. '''
-	print run_id, uuid
-	result = AsyncResult(uuid)
-	exc = result.get(propagate=False)
-	trace = result.traceback
+	print 'external algorithm run failed :-(( '
+	uuid = request.id
+	#print run_id, uuid
 	logger = logging.getLogger('stemweb.algorithm_run')
-	logger.error("AlgorithmRun %r/Task %r raised error: %r\n%r" %\
-				(run_id, uuid, exc, trace))
+	#logger.info(uuid)
+	logger.error("unfortunately our AlgorithmRun %r/Task %r raised this error: %r\n%r" %\
+				(run_id, uuid, exc, traceback))
+
+	print 'Task {0} raised exception: {1!r}\n{2!r}'.format(uuid, exc, traceback)
+
+	error_message = 'HUHU, an error msg: ' + str(exc) + '/n details: /n' + str(traceback)
+	print error_message    
 	
 	from Stemweb.algorithms.models import AlgorithmRun
 	algorun = AlgorithmRun.objects.get(pk = run_id)
 	algorun.status = settings.STATUS_CODES['failure']
 	algorun.end_time = datetime.datetime.now()
+	print algorun.end_time
 	algorun.save()
 	
 	ret = {
 		'jobid': run_id,
-		'status': algorun.status,
-		'algorithm': algorun.algorithm.name,
-		'start_time': str(algorun.start_time),
-		'end_time': str(algorun.end_time),
+		'statuscode': algorun.status,
+		#'algorithm': algorun.algorithm.name,
+		#'start_time': str(algorun.start_time),
+		##'end_time': str(algorun.end_time),
+		'result': error_message
 		}
 	
-	import httplib, urllib, json
 	try: 
 		extra_json = json.loads(algorun.extras)
 		ret.update(extra_json)
 	except: 
 		pass
+	
 	message = json.dumps(ret, encoding = "utf8")
 	headers = {"Content-type": "application/json; charset=utf-8"}	
 	body = message.encode('utf8')
-	conn = httplib.HTTPConnection(return_host)
-	#conn = httplib.HTTPConnection("127.0.0.1","7000")   # separated host , port
-	conn.request('POST', return_path, body, headers)
-	response = conn.getresponse()
-	conn.close()
-	print response.status, response.reason, response.read()
 	
+	class BoundHTTPHandler(urllib2.HTTPHandler):
+
+		def __init__(self, source_address=None, debuglevel=0):
+			urllib2.HTTPHandler.__init__(self, debuglevel)
+			self.http_class = functools.partial(httplib.HTTPConnection, source_address=source_address)
 	
+		def http_open(self, req):
+			return self.do_open(self.http_class, req)
+
+
+	class BoundHTTPSHandler(urllib2.HTTPSHandler):
+
+		def __init__(self, source_address=None, debuglevel=0):
+			urllib2.HTTPSHandler.__init__(self, debuglevel)
+			self.http_class = functools.partial(httplib.HTTPSConnection, source_address=source_address)
+	
+		def http_open(self, req):
+			return self.do_open(self.http_class, req)
+
+
+
+	source_port = 51000
+	handler = BoundHTTPHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
+	shandler = BoundHTTPSHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
+	fixed_sourceport_opener = urllib2.build_opener(handler, shandler)
+
+	### using urllib2 in python 2.7
+
+	message = json.dumps(ret)
+	data = message.encode('utf8')
+	headers = {'Content-type': 'application/json; charset=utf-8'}
+	#targeturl = 'https://' + return_host + return_path	
+	targeturl = 'http://' + return_host + return_path
+	req = urllib2.Request(targeturl, data, headers)
+
+	try: 
+		#response = urllib2.urlopen(req)	# not using dedicated source_port; alternative to next line
+		response = fixed_sourceport_opener.open(req)	
+		content = response.read()
+		print content
+	except urllib2.HTTPError, e:
+		print e.code
+		print e.reason
+
+
 	
 	
 #@csrf_exempt	
+#@shared_task
 @task
-def external_algorithm_run_finished(newick, run_id, return_host, return_path):
+def external_algorithm_run_finished(newick_result, run_id, return_host, return_path):
+	''' Callback task in case external algorithm run finishes succesfully. '''
+	#return_path = 'stemmaweb/stemweb/result/'
 	hostparts = return_host.split(':')
 	host = hostparts[0]
 	port = hostparts[1]
-	''' Callback task in case external algorithm run finishes succesfully. '''
-	print ' ##### Callback task in case external algorithm run finishes succesfully;  print run_id & newick #####'
-	print "run-id: ", run_id 
-	print "newick-string: ", newick
-	print "return_host: ", host
-	print "return_port: ", port
-	print "return_path: ", return_path
-	print "#####################################################################################################"
 
-	logger = logging.getLogger('stemweb.algorithm_run')
-	logger.info('################# ############## ############## #################### #########')
-
-	
+	#logger = logging.getLogger('stemweb.algorithm_run')
+		
 	from Stemweb.algorithms.models import AlgorithmRun
 	algorun = AlgorithmRun.objects.get(pk = run_id)
 	algorun.status = settings.STATUS_CODES['finished']
-	print 'status=finished'
+	#print 'status=finished'
+	#print "newick-path via algorun: ", algorun.newick
+	#print "newick-string via handed over newick_result: ", newick_result
 	algorun.save()
-	#time.sleep(90)
 	
 	ret = {
 			'jobid': run_id,
@@ -471,7 +520,8 @@ def external_algorithm_run_finished(newick, run_id, return_host, return_path):
 			'algorithm': algorun.algorithm.name,
 			'start_time': str(algorun.start_time),
 			'end_time': str(algorun.end_time),
-			'result': newick,
+			#'newick_path': algorun.newick,
+			'result': newick_result,
 			'result_format': 'newick'				### or: 'format': ?
 			}	
 	
@@ -503,20 +553,21 @@ def external_algorithm_run_finished(newick, run_id, return_host, return_path):
 
 
 	source_port = 51000
-	handler = BoundHTTPHandler(source_address=("0.0.0.0", source_port), debuglevel = 2)
-	shandler = BoundHTTPSHandler(source_address=("0.0.0.0", source_port), debuglevel = 2)
+	handler = BoundHTTPHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
+	shandler = BoundHTTPSHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
 	fixed_sourceport_opener = urllib2.build_opener(handler, shandler)
 
 	### using urllib2 in python 2.7
 
-	url = 'https://stemmaweb.net:443/stemmaweb/stemweb/result/'
+	#url = 'https://stemmaweb.net:443/stemmaweb/stemweb/result/'
 	message = json.dumps(ret)
 	data = message.encode('utf8')
 	headers = {'Content-type': 'application/json; charset=utf-8'}
-	targeturl = 'https://' + return_host + return_path
+	#targeturl = 'https://' + return_host + return_path
+	targeturl = 'http://' + return_host + return_path
 	#req = urllib2.Request(url, data, headers)	
 	req = urllib2.Request(targeturl, data, headers)
-	#print req.get_full_url()		### https://stemmaweb.net:443/stemmaweb/stemweb/result/
+	#print req.get_full_url()		### e.g.: https://stemmaweb.net:443/stemmaweb/stemweb/result/
     #print req.get_method()          ### POST
     #print req.(get_data) 
             
@@ -531,7 +582,7 @@ def external_algorithm_run_finished(newick, run_id, return_host, return_path):
 	
 
 	#with fixed_sourceport_opener.open(req) as response:
-	#with urllib2.urlopen(req) as response:   
+	##with urllib2.urlopen(req) as response:   
    	#	resp = response.read()
 	#	print resp
 
