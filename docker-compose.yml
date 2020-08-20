@@ -1,0 +1,15 @@
+version: '3'
+services:
+    mysql:
+        image: "mysql:5.7"
+        environment:
+            MYSQL_ALLOW_EMPTY_PASSWORD: "TRUE"
+        volumes:
+            - ./mysqlinit:/docker-entrypoint-initdb.d
+    redis:
+        image: "redis:alpine"
+    stemweb_py27:
+        build: .
+        ports:
+            - "127.0.0.1:8000:8000"
+            - "127.0.0.1:51000:51000"

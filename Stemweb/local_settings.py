@@ -33,8 +33,8 @@ db_name = 'stemwebdb_v1'
 
 db_user = 'stemweb'            # Your db user. Not needed in sqlite3
 db_pwd = 'ChangeMe'             # Your db password. Not needed in sqlite3
-db_host = ''            # Host, leave blank if db is on local computer.
-db_port = ''            # Port to your db. Can be left blank
+db_host = 'mysql'            # Host, leave blank if db is on local computer.
+db_port = '3306'            # Port to your db. Can be left blank
 
 # name of your ROOT_URLCONF. Needs to be in here, because
 # of some inconsisties in package naming on linux vs. mac.
