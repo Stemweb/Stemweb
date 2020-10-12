@@ -63,11 +63,11 @@
 				No image for this run. <br>
 			{% endif %}
 		{% else %}
-			{#{% if algorithm_run.status == -1 %}
-			Run could not be started!
-			{% endif %}	#}		
+			{% if algorithm_run.status == -1 %}
+			    Run did not (yet) start
+			{% endif %}			
 			{% if algorithm_run.status > 1 %}
-				Run failed for unexpected reason!
+				Run failed for this reason: {{ algorithm_run.error_msg }}
 			{% endif %}
 		{% endif %}
 		

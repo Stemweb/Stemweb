@@ -106,7 +106,7 @@ def results(request, run_id):
 	#c = RequestContext(request, {'algorithm_run': run})
 	if run.status == STATUS_CODES['finished']:
 		#return render_to_response('algorithm_running_results.html', c)
-                #return render_to_response('algorithm_running_results.html', c.flatten()) 
+        #return render_to_response('algorithm_running_results.html', c.flatten()) 
                 return render_to_response('algorithm_running_results.html', {'algorithm_run': run})
 	else:
 		# TODO: different view for non-finished algorithms
@@ -142,7 +142,7 @@ def process(request, algo_id):
 		# avoid error: request.body:  RawPostDataException(u"You cannot access body after reading from request's data stream",)
 		# hence changed to:
 		#json_data = json.loads(request.data, encoding = 'utf8')  ### AttributeError: 'WSGIRequest' object has no attribute 'data' ; # hence changed to:
-		json_data = JSONParser().parse(request)					  ###  this will rise already JSON parse error if JSON is invalid
+		json_data = JSONParser().parse(request)					  ###  this will raise already JSON parse error if JSON is invalid
 		ret = utils.validate_json(json_data, algo_id)
 		if not ret[0]:
 			# No valid JSON
@@ -154,8 +154,9 @@ def process(request, algo_id):
 			# JSON ok, will process the algorithm
 			run_id = execute_algorithm.external(json_data, algo_id, request)
 			nwk = ""
-			with open(os.path.join(algo_media, AlgorithmRun.objects.get_or_none(pk = run_id).newick), 'r') as f:
-				nwk = f.read()
+			if AlgorithmRun.objects.get_or_none(pk = run_id).status == STATUS_CODES['finished']:			
+				with open(os.path.join(algo_media, AlgorithmRun.objects.get_or_none(pk = run_id).newick), 'r') as f:
+					nwk = f.read()
 			message = json.dumps({
 								'jobid': run_id,
 								'status': AlgorithmRun.objects.get_or_none(pk = run_id).status,
@@ -205,18 +206,31 @@ def jobstatus(request, run_id):
 		
 		# Construct algorithm run status depended key-value pairs.
 		if algo_run.status == STATUS_CODES['finished']:
+			### algo_run.newick is the path + filename where the newick-string is stored, e.g.:
+			### results/runs/neighbour-joining/15/B4Q6CTMO/20200929-115514-5GKHQ3UU_neighbour-joining.tre
 			if algo_run.newick == '':
-				msg['error'] = "Could not retrieve newick."
+				msg['error'] = "Could not retrieve the newick."
+				### status should be "failure" instead of "finished", but we won't change it in a status request			
 				return HttpResponse(json.dumps(msg, encoding = "utf8"))
 			else:	
 				nwk = ""
-				with open(os.path.join(algo_media, algo_run.newick), 'r') as f:
-					nwk = f.read()
+				try:
+					with open(os.path.join(algo_media, algo_run.newick), 'r') as f:
+						nwk = f.read()
+				except:
+					if algo_run.error_msg != '':
+					msg['error'] = algo_run.error_msg
+					else:
+						msg['error'] = "Could not retrieve newick."	
+
+					### status should be "failure" instead of "finished", but we won't change it in a status request			
+
 				msg['result'] = nwk
 				msg['format'] = 'newick'
 				msg['end_time'] = str(algo_run.end_time)
 				return HttpResponse(json.dumps(msg, encoding = "utf8"))
 		if algo_run.status == STATUS_CODES['failure']:
+			msg['result'] = algo_run.error_msg  ### the result field shall contain the error info according to the white paper 
 			msg['end_time'] = str(algo_run.end_time) 
 		return HttpResponse(json.dumps(msg, encoding = "utf8"))
 

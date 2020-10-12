@@ -109,11 +109,13 @@ def external(json_data, algo_id, request):
 	#kwargs.update(with_debug)
 	#print kwargs
 
-	# .s is a celery signature; see https://docs.celeryproject.org/en/master/userguide/calling.html
+	# .s is a celery signature , used to concatenate tasks;  see:
+	#  https://docs.celeryproject.org/en/master/userguide/calling.html
+	#  https://docs.celeryproject.org/en/master/userguide/calling.html#linking-callbacks-errbacks
 	call.apply_async(kwargs = kwargs, 					
 					link = external_algorithm_run_finished.s(rid, return_host, return_path),
-					link_error = external_algorithm_run_error.s(rid, return_host, return_path)
-	)
+					link_error = external_algorithm_run_error.s(rid, return_host, return_path))
+
 
 	#call.apply(kwargs = kwargs, link = external_algorithm_run_finished.s(rid, return_host, return_path))  ### synchronous task; for test purpose 
 

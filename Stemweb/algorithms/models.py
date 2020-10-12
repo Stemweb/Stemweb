@@ -187,7 +187,7 @@ class AlgorithmRun(models.Model):
 					  value to other than null when initiating run. Otherwise
 					  it can cause rendering issues in browser.
 					  
-		newick		: Resulting newick file of the run.
+		newick		: Resulting newick file of the run. (path + filename)
 		
 		external	: Boolean, True if external server send this run request, 
 					  false otherwise.
@@ -197,6 +197,8 @@ class AlgorithmRun(models.Model):
 					  made.
 					  
 		extras		: Extra information stored in json-format.
+
+		error_msg   : error message (exception, [also traceback wanted?]) if it exists; else this is empty
 					  
 		TODO: change images and folder to be in the results, probably.  
 	'''
@@ -209,10 +211,11 @@ class AlgorithmRun(models.Model):
 	image = models.ImageField(upload_to = folder, null = True) 
 	score = models.FloatField(null = True, verbose_name = "Score")
 	current_iteration = models.PositiveIntegerField(null = True)
-	newick = models.URLField(blank = True, default = '')
+	newick = models.URLField(blank = True, default = '')     ### ToCheck: shouldn't it be a CharField ?!
 	external = models.BooleanField(default = False)
 	ip = models.GenericIPAddressField(null = True)
 	extras = models.CharField(max_length = 10000, blank = True)
+	error_msg = models.CharField(max_length = 10000, blank = True, default = '')
 	
 	# Really we will be wanting to have this as PickleField.
 	#results = dict()

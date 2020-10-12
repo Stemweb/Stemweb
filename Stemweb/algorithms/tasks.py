@@ -279,6 +279,7 @@ class AlgorithmTask(Task):
 		self._algorithm_thread.start()		## here class NJ(AlgorithmTask)  in  njc.py is called
 		self.algorithm_run.status = settings.STATUS_CODES['running']
 		print 'I am running NOW as thread'
+		#raise Exception("ERROR: this is an INTENDED test case exception from AlgorithmTask level ")   ### a manual test case 
 		self.algorithm_run.save()			## here again class NJ(AlgorithmTask)  in  njc.py is called
 		
 		# TODO: Fix me st000pid busy wait.
@@ -286,16 +287,14 @@ class AlgorithmTask(Task):
 			if not self._algorithm_thread.isAlive(): break
 			self._read_from_results_()	
 
-		#provoked_failure = 1/0      # test case: intended to create error in order to call external_algorithm_run_error()
-									 # raising the exception here keeps the task in RUNNING state 
-									 # ==> also a good test case: Stemmaweb shall ask for status of algorithm execution (if not yet finished)
 		self._finalize_()
 		
 		# Return newick as string for simplify callbacks of external runs.
 		if self.has_newick: 
 			nwk = ""
-			with open(self.newick_path, 'r') as f:
-				nwk = f.read()
+			if settings.STATUS_CODES['finished']:
+				with open(self.newick_path, 'r') as f:
+					nwk = f.read()
 			return nwk				
 
 	
@@ -313,7 +312,8 @@ class AlgorithmTask(Task):
 			'''
 			from Stemweb.algorithms.models import AlgorithmRun
 			self.algorithm_run = AlgorithmRun.objects.get(pk=self.algorithm_run.id)
-			self.algorithm_run.status = settings.STATUS_CODES['finished']
+			if self.algorithm_run.status != settings.STATUS_CODES['failure']:  # failure was set during njc algorithm run; we want to keep this
+				self.algorithm_run.status = settings.STATUS_CODES['finished']
 			self.algorithm_run.end_time = datetime.datetime.now()
 			self.algorithm_run.pid = -1
 			self.algorithm_run.save()
@@ -407,23 +407,39 @@ class AlgorithmTask(Task):
 #@shared_task
 @task
 def external_algorithm_run_error(request, exc, traceback, run_id, return_host, return_path):
-	''' Callback task in case external algorithm run fails. '''
+###def external_algorithm_run_error(uuid, run_id, return_host, return_path):	
+	''' Callback task in case external requested algorithm run fails.  
+		note these 3 "hidden" parameters, handed over but NOT visible in the call execute_algorithm.py/external/call.apply_async()
+		- request
+		- exc: exception / error text
+		- traceback: details about exception
+	'''
 	print 'external algorithm run failed :-(( '
-	uuid = request.id
+	
+	##### other option of parameters #########################
+	##### uuid: parents_task_id ################
+	###result = AsyncResult(uuid)
+	#e##xc = result.get(propagate=False)
+	###traceback = result.traceback
+
+	uuid = request.id ### the parent's task id
+	print('Task {0} raised exception: {1!r}\n{2!r}'.format(uuid, exc, traceback))
 	#print run_id, uuid
 	logger = logging.getLogger('stemweb.algorithm_run')
 	#logger.info(uuid)
-	logger.error("unfortunately our AlgorithmRun %r/Task %r raised this error: %r\n%r" %\
+	logger.error("unfortunately the AlgorithmRun %r/Task %r raised this error: %r\n%r" %\
 				(run_id, uuid, exc, traceback))
 
 	print 'Task {0} raised exception: {1!r}\n{2!r}'.format(uuid, exc, traceback)
 
-	error_message = 'HUHU, an error msg: ' + str(exc) + '/n details: /n' + str(traceback)
+	error_message = 'HUHU, an ERROR occured: ' + str(exc) + '/n details: /n' + str(traceback)
 	print error_message    
 	
 	from Stemweb.algorithms.models import AlgorithmRun
 	algorun = AlgorithmRun.objects.get(pk = run_id)
 	algorun.status = settings.STATUS_CODES['failure']
+	print "############ failure status set! ###############"
+	algorun.error_msg = error_message   ### for later usage in algorithms/views.py/jobstatus()
 	algorun.end_time = datetime.datetime.now()
 	print algorun.end_time
 	algorun.save()
@@ -492,9 +508,6 @@ def external_algorithm_run_error(request, exc, traceback, run_id, return_host, r
 		print e.reason
 
 
-	
-	
-#@csrf_exempt	
 #@shared_task
 @task
 def external_algorithm_run_finished(newick_result, run_id, return_host, return_path):
@@ -508,10 +521,11 @@ def external_algorithm_run_finished(newick_result, run_id, return_host, return_p
 		
 	from Stemweb.algorithms.models import AlgorithmRun
 	algorun = AlgorithmRun.objects.get(pk = run_id)
-	algorun.status = settings.STATUS_CODES['finished']
-	#print 'status=finished'
-	#print "newick-path via algorun: ", algorun.newick
-	#print "newick-string via handed over newick_result: ", newick_result
+	if algorun.status != settings.STATUS_CODES['failure']: # if failure status was set in njc.py then keep it  (not detectable during tasks execution level)
+		algorun.status = settings.STATUS_CODES['finished']
+		#print 'status=finished'
+		#print "newick-path via algorun: ", algorun.newick
+		#print "newick-string via handed over newick_result: ", newick_result 
 	algorun.save()
 	
 	ret = {
