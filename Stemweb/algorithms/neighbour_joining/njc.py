@@ -8,7 +8,6 @@ import logging
 import sys, traceback
 from time import sleep
 from Stemweb.algorithms.tasks import AlgorithmTask
-#from Stemweb.algorithms.settings import STATUS_CODES
 import Stemweb.algorithms.settings
 
 # node structure for storing the tree
@@ -243,10 +242,10 @@ class NJ(AlgorithmTask):
 			#traceback.print_exc()
 			#traceback.print_tb(tb)
 			self.algorithm_run.error_msg = value	# keep only the error message; not the detailed traceback info
-			self.algorithm_run.status = STATUS_CODES['failure']
+			self.algorithm_run.status = Stemweb.algorithms.settings.STATUS_CODES['failure']
 			self.algorithm_run.save()
 			self._stop.value = 1
 			return -1
-		finally: 
-			del tb
+		#finally: 
+			#del tb
 

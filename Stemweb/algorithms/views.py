@@ -219,7 +219,7 @@ def jobstatus(request, run_id):
 						nwk = f.read()
 				except:
 					if algo_run.error_msg != '':
-					msg['error'] = algo_run.error_msg
+						msg['error'] = algo_run.error_msg
 					else:
 						msg['error'] = "Could not retrieve newick."	
 
