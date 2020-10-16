@@ -28,7 +28,7 @@ class NJ(AlgorithmTask):
 
 		# simple Hamming distance
 		def hamming(r,s):
-		    raise Exception(" This is an intended test case exception from NJ-algorithm")   ### a manual test case in order to call task.py/external_algorithm_run_error()
+		    #raise Exception(" This is an intended test case exception from NJ-algorithm")   ### a manual test case in order to call task.py/external_algorithm_run_error()
 		    n=0
 		    diff=0
 		    for i in range(len(r)):
@@ -238,12 +238,16 @@ class NJ(AlgorithmTask):
 		except: # catch *all* exceptions
 			#typ =  sys.exc_info()[0]		# e.g.: <type 'exceptions.Exception'>
 			value = sys.exc_info()[1]		# e.g.: This is an intended test case exception from NJ-algorithm
-			#ex_type, ex, tb = sys.exc_info()
+			ex_type, ex, tb = sys.exc_info()
 			#traceback.print_exc()
 			#traceback.print_tb(tb)
-			self.algorithm_run.error_msg = value	# keep only the error message; not the detailed traceback info
+			trace_back = traceback.format_tb(tb)   # get  traceback info as string 
+			self.algorithm_run.error_msg = 	value # = ex? ; keep only the error message; not the detailed tb traceback info
 			self.algorithm_run.status = Stemweb.algorithms.settings.STATUS_CODES['failure']
 			self.algorithm_run.save()
+			logger = logging.getLogger('stemweb.algorithm_run')
+			logger.error('AlgorithmRun %s:%s aborted with error %s  and this traceback: %s ' % \
+			(self.algorithm_run.algorithm.name, self.algorithm_run.id, value, trace_back))
 			self._stop.value = 1
 			return -1
 		#finally: 

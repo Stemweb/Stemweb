@@ -432,13 +432,13 @@ def external_algorithm_run_error(request, exc, traceback, run_id, return_host, r
 
 	print 'Task {0} raised exception: {1!r}\n{2!r}'.format(uuid, exc, traceback)
 
-	error_message = 'HUHU, an ERROR occured: ' + str(exc) + '/n details: /n' + str(traceback)
-	print error_message    
+	#error_message = 'ERROR: ' + str(exc) + '    traceback: ' + str(traceback)
+	error_message = 'ERROR: ' + str(exc) 
+	#print error_message    
 	
 	from Stemweb.algorithms.models import AlgorithmRun
 	algorun = AlgorithmRun.objects.get(pk = run_id)
 	algorun.status = settings.STATUS_CODES['failure']
-	print "############ failure status set! ###############"
 	algorun.error_msg = error_message   ### for later usage in algorithms/views.py/jobstatus()
 	algorun.end_time = datetime.datetime.now()
 	print algorun.end_time
@@ -487,15 +487,15 @@ def external_algorithm_run_error(request, exc, traceback, run_id, return_host, r
 	source_port = 51000
 	handler = BoundHTTPHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
 	shandler = BoundHTTPSHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
-	fixed_sourceport_opener = urllib2.build_opener(handler, shandler)
+	fixed_sourceport_opener = urllib2.build_opener(shandler, handler)
 
 	### using urllib2 in python 2.7
 
 	message = json.dumps(ret)
 	data = message.encode('utf8')
 	headers = {'Content-type': 'application/json; charset=utf-8'}
-	#targeturl = 'https://' + return_host + return_path	
-	targeturl = 'http://' + return_host + return_path
+	targeturl = 'https://' + return_host + return_path	
+	#targeturl = 'http://' + return_host + return_path
 	req = urllib2.Request(targeturl, data, headers)
 
 	try: 
@@ -569,7 +569,7 @@ def external_algorithm_run_finished(newick_result, run_id, return_host, return_p
 	source_port = 51000
 	handler = BoundHTTPHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
 	shandler = BoundHTTPSHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
-	fixed_sourceport_opener = urllib2.build_opener(handler, shandler)
+	fixed_sourceport_opener = urllib2.build_opener(shandler, handler)
 
 	### using urllib2 in python 2.7
 
@@ -577,8 +577,8 @@ def external_algorithm_run_finished(newick_result, run_id, return_host, return_p
 	message = json.dumps(ret)
 	data = message.encode('utf8')
 	headers = {'Content-type': 'application/json; charset=utf-8'}
-	#targeturl = 'https://' + return_host + return_path
-	targeturl = 'http://' + return_host + return_path
+	targeturl = 'https://' + return_host + return_path
+	#targeturl = 'http://' + return_host + return_path
 	#req = urllib2.Request(url, data, headers)	
 	req = urllib2.Request(targeturl, data, headers)
 	#print req.get_full_url()		### e.g.: https://stemmaweb.net:443/stemmaweb/stemweb/result/
