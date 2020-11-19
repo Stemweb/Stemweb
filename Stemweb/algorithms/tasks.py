@@ -8,15 +8,16 @@ import threading as th
 import datetime
 import os
 import logging
+import settings
 
 import json
 import functools
 import httplib
 import urllib2
 
+from decorators import synchronized
 from django.template.defaultfilters import slugify
 from django.views.decorators.csrf import csrf_exempt
-from django.core.cache import cache ### #
 
 #from celery.task import Task, task
 from celery.task import Task
@@ -25,8 +26,8 @@ from celery.result import AsyncResult
 from celery.decorators import task
 from celery import shared_task
 
-import settings
-from decorators import synchronized
+#from Stemweb.algorithms.settings import ALGORITHM_MEDIA_ROOT as algo_media_root ###   ImportError    ="=
+import Stemweb.algorithms.settings 
 
 class Observer():
 	'''
@@ -401,9 +402,6 @@ class AlgorithmTask(Task):
 			o.update(self)
 	
 
-	
-	
-#@csrf_exempt
 #@shared_task
 @task
 def external_algorithm_run_error(request, exc, traceback, run_id, return_host, return_path):
@@ -414,23 +412,23 @@ def external_algorithm_run_error(request, exc, traceback, run_id, return_host, r
 		- exc: exception / error text
 		- traceback: details about exception
 	'''
-	print 'external algorithm run failed :-(( '
+	#print 'external algorithm run failed :-(( '
 	
 	##### other option of parameters #########################
 	##### uuid: parents_task_id ################
 	###result = AsyncResult(uuid)
-	#e##xc = result.get(propagate=False)
+	###exc = result.get(propagate=False)
 	###traceback = result.traceback
 
 	uuid = request.id ### the parent's task id
-	print('Task {0} raised exception: {1!r}\n{2!r}'.format(uuid, exc, traceback))
+	#print('Task {0} raised exception: {1!r}\n{2!r}'.format(uuid, exc, traceback))
 	#print run_id, uuid
 	logger = logging.getLogger('stemweb.algorithm_run')
 	#logger.info(uuid)
-	logger.error("unfortunately the AlgorithmRun %r/Task %r raised this error: %r\n%r" %\
+	logger.error("the AlgorithmRun %r/Task %r raised this error: %r\n%r" %\
 				(run_id, uuid, exc, traceback))
 
-	print 'Task {0} raised exception: {1!r}\n{2!r}'.format(uuid, exc, traceback)
+	#print 'Task {0} raised exception: {1!r}\n{2!r}'.format(uuid, exc, traceback)
 
 	#error_message = 'ERROR: ' + str(exc) + '    traceback: ' + str(traceback)
 	error_message = 'ERROR: ' + str(exc) 
@@ -499,7 +497,7 @@ def external_algorithm_run_error(request, exc, traceback, run_id, return_host, r
 	req = urllib2.Request(targeturl, data, headers)
 
 	try: 
-		#response = urllib2.urlopen(req)	# not using dedicated source_port; alternative to next line
+		#response = urllib2.urlopen(req)	# standard request; not using dedicated source_port; alternative to next line
 		response = fixed_sourceport_opener.open(req)	
 		content = response.read()
 		print content
@@ -523,9 +521,12 @@ def external_algorithm_run_finished(newick_result, run_id, return_host, return_p
 	algorun = AlgorithmRun.objects.get(pk = run_id)
 	if algorun.status != settings.STATUS_CODES['failure']: # if failure status was set in njc.py then keep it  (not detectable during tasks execution level)
 		algorun.status = settings.STATUS_CODES['finished']
-		#print 'status=finished'
 		#print "newick-path via algorun: ", algorun.newick
-		#print "newick-string via handed over newick_result: ", newick_result 
+		#print "newick-string via handed over newick_result: ", newick_result ### in fact it's NOT handed over although the celery docu claims that this is done				
+		
+		with open(os.path.join(Stemweb.algorithms.settings.ALGORITHM_MEDIA_ROOT, AlgorithmRun.objects.get_or_none(pk = run_id).newick), 'r') as f:
+			nwk = f.read()
+		#print "newick-string via file: ", nwk
 	algorun.save()
 	
 	ret = {
@@ -535,7 +536,8 @@ def external_algorithm_run_finished(newick_result, run_id, return_host, return_p
 			'start_time': str(algorun.start_time),
 			'end_time': str(algorun.end_time),
 			#'newick_path': algorun.newick,
-			'result': newick_result,
+			#'result': newick_result,
+			'result': nwk,
 			'result_format': 'newick'				### or: 'format': ?
 			}	
 	
@@ -586,7 +588,7 @@ def external_algorithm_run_finished(newick_result, run_id, return_host, return_p
     #print req.(get_data) 
             
 	try: 
-		#response = urllib2.urlopen(req)	
+		#response = urllib2.urlopen(req)	### standard request, using any free source port
 		response = fixed_sourceport_opener.open(req)	
 		content = response.read()
 		print content

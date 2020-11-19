@@ -109,7 +109,7 @@ def results(request, run_id):
         #return render_to_response('algorithm_running_results.html', c.flatten()) 
                 return render_to_response('algorithm_running_results.html', {'algorithm_run': run})
 	else:
-		# TODO: different view for non-finished algorithms
+		# TODO: different view for non-finished algorithms ####  a MUST ToDo! ==> test with (simulated) long lasting calculations
 		#return render_to_response('algorithm_running_results.html', c)
                 return render_to_response('algorithm_running_results.html', {'algorithm_run': run})
                 #pass 
@@ -208,6 +208,7 @@ def jobstatus(request, run_id):
 		if algo_run.status == STATUS_CODES['finished']:
 			### algo_run.newick is the path + filename where the newick-string is stored, e.g.:
 			### results/runs/neighbour-joining/15/B4Q6CTMO/20200929-115514-5GKHQ3UU_neighbour-joining.tre
+			### full path is: /home/stemweb/Stemweb/media/results/runs/neighbour-joining/15/B4Q6CTMO/20200929-115514-5GKHQ3UU_neighbour-joining.tre
 			if algo_run.newick == '':
 				msg['error'] = "Could not retrieve the newick."
 				### status should be "failure" instead of "finished", but we won't change it in a status request			

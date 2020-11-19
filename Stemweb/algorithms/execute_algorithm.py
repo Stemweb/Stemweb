@@ -7,6 +7,7 @@ from time import sleep
 import tempfile
 import codecs
 import json
+from cleanup import remove_old_results_db, remove_old_results_fs
 
 from django.shortcuts import get_object_or_404
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -50,6 +51,12 @@ def external(json_data, algo_id, request):
 	
 	TODO: Refactor me
 	'''
+
+	# remoce outdated results in file system and in database compared with value in settings.KEEP_RESULTS_DAYS
+	remove_old_results_fs()
+	remove_old_results_db()
+
+
 	from Stemweb.files.models import InputFile
 	algorithm = get_object_or_404(Algorithm, pk = algo_id)
 	csv_file = tempfile.NamedTemporaryFile(mode = 'w', delete = False)

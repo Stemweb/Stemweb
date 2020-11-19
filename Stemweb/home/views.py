@@ -47,4 +47,4 @@ def server_error(request):
 	return HttpResponse('Internal Server Error: We are sorry, but we could not handle your request.')
 
 def script_failure(request):
-	return HttpResponse('Script\'s run was failure for unknown reason.')    
+	return HttpResponse('Script\'s run failed for unknown reason.')    

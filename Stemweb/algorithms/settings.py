@@ -29,9 +29,9 @@ ALGORITHMS_CALLING_DICT = {
 #	'1': { 
 #		'callable': Semstem,	
 #	},
-	'2': {
-		'callable': RHM,
-	},
+#	'2': {
+#		'callable': RHM,
+#	},
 	'3': {  # neighbour joining:
 		'callable': NJ,
 	},

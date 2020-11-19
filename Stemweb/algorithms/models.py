@@ -176,7 +176,7 @@ class AlgorithmRun(models.Model):
 		input_file	: Input file used for this run if the run is not external. 
 					  Foreign key to InputFile-model.
 					  
-		folder		: Absolute path to folder where results are, is run is not
+		folder		: Absolute path to folder where results are, if run is not
 					  external. Max length 200.
 		
 		image		: Image of this run's resulting graph of best scored 
@@ -199,7 +199,7 @@ class AlgorithmRun(models.Model):
 		extras		: Extra information stored in json-format.
 
 		error_msg   : error message (exception, [also traceback wanted?]) if it exists; else this is empty
-					  
+	  
 		TODO: change images and folder to be in the results, probably.  
 	'''
 	start_time = models.DateTimeField(auto_now_add = True)
@@ -241,7 +241,8 @@ class AlgorithmRun(models.Model):
 			logger = logging.getLogger('stemweb.algorithm_run')
 			logger.error('AlgorithmRun could not delete files: %s:%s folder:%s' \
 				% (self.algorithm.name, self.id, self.folder))
-			
+
+		# delete meta data in database:	
 		models.Model.delete(self)
 	
 	def __str__(self):

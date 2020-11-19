@@ -102,7 +102,7 @@ SECRET_KEY = ls.secret_key
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-#    'django.middleware.csrf.CsrfViewMiddleware',           # deactivated as a workaround the Cross Site Request Forgery protection (csrf)
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'Stemweb.third_party_apps.pagination.middleware.PaginationMiddleware',
@@ -193,6 +193,10 @@ CELERY_TASK_SERIALIZER = 'json'
 # user has to activate account before it expires.
 ACCOUNT_ACTIVATION_DAYS = 99
 LOGIN_REDIRECT_URL = '/'
+
+# number of days the results shall be kept as files and the meta infos shall be kept in DB
+# used to prevent filling the file system and the database
+KEEP_RESULTS_DAYS = 60
 
 # Email backend
 EMAIL_BACKEND = ls.email_backend
