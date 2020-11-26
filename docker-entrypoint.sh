@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Wait for MySQL to come up
-echo "######### waiting 30 secs for MySQL to come up #########"
+echo "######### waiting 60 secs for MySQL to come up #########"
 now=$(date)
 echo $now
-sleep 30 
+sleep 60 
 echo "######### waiting finihed #########"
 now=$(date)
 echo $now
