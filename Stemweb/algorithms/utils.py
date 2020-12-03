@@ -168,14 +168,20 @@ def validate_json(json_data, algo_id):
 	algorithm run.
 
 	returns 2-tuple (boolean, error message). If boolean is true, json
-	is valid, otherwise error message should send some light into why the query
+	is valid, otherwise error message should send some light info why the query
 	failed.
 	'''
 	algorithm = Algorithm.objects.get_or_none(pk = algo_id)
 	if algorithm is None: return (False, "No such algorithm id.")
 
+	if 'userid' not in json_data: return (False, "No userid given.")
 	if 'data' not in json_data: return (False, "No data key present")
 	if 'parameters' not in json_data: return (False, "No parameters present")
+	if 'textid' not in json_data: return (False, "No textid present")
+	if 'return_host' not in json_data: return (False, "No return_host present")
+	if 'return_path' not in json_data: return (False, "No return_path present")
+
+	
 
 	params = json_data['parameters']
 	for arg in algorithm.args.all().filter(external = True):

@@ -138,12 +138,15 @@ def process(request, algo_id):
 		return response
 		
 	if request.method == 'POST':
-		#json_data = json.loads(request.body, encoding = 'utf8')  
-		# avoid error: request.body:  RawPostDataException(u"You cannot access body after reading from request's data stream",)
-		# hence changed to:
-		#json_data = json.loads(request.data, encoding = 'utf8')  ### AttributeError: 'WSGIRequest' object has no attribute 'data' ; # hence changed to:
-		json_data = JSONParser().parse(request)					  ###  this will raise already JSON parse error if JSON is invalid
-		ret = utils.validate_json(json_data, algo_id)
+		try:
+			json_data = JSONParser().parse(request)
+		except Exception as e:			               # raising JSON parse error if JSON structure is invalid		
+			error_message = json.dumps({'error': e})
+			response = HttpResponse(error_message)
+			response.status_code = 400
+			return response
+
+		ret = utils.validate_json(json_data, algo_id)  # Validate that json contains all the needed parameters for external algorithm run.
 		if not ret[0]:
 			# No valid JSON
 			error_message = json.dumps({'error': ret[1]})

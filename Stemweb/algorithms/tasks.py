@@ -288,12 +288,20 @@ class AlgorithmTask(Task):
 			if not self._algorithm_thread.isAlive(): break
 			self._read_from_results_()	
 
-		self._finalize_()
-		
+		self._finalize_()		##  status can be being set either to 'finished' or to 'failure'
+		if self.algorithm_run.status == settings.STATUS_CODES['failure']:			### failure status was set during njc algorithm run
+			request = exc = traceback = ''
+			print '########### calling ext_algo_run_error NOT as errback #######################'
+			algorun_extras_dictionary = json.loads(self.algorithm_run.extras)   ###  algorun.extras is of type unicode-string
+			return_host = algorun_extras_dictionary["return_host"]
+			return_path = algorun_extras_dictionary["return_path"]
+			### probably not needed:
+			#external_algorithm_run_error(request, exc, traceback, self.algorithm_run.id, return_host, return_path)
+
 		# Return newick as string for simplify callbacks of external runs.
 		if self.has_newick: 
 			nwk = ""
-			if settings.STATUS_CODES['finished']:
+			if self.algorithm_run.status == settings.STATUS_CODES['finished']:
 				with open(self.newick_path, 'r') as f:
 					nwk = f.read()
 			return nwk				
@@ -404,8 +412,7 @@ class AlgorithmTask(Task):
 
 #@shared_task
 @task
-def external_algorithm_run_error(request, exc, traceback, run_id, return_host, return_path):
-###def external_algorithm_run_error(uuid, run_id, return_host, return_path):	
+def external_algorithm_run_error(request, exc, traceback, run_id, return_host, return_path):	
 	''' Callback task in case external requested algorithm run fails.  
 		note these 3 "hidden" parameters, handed over but NOT visible in the call execute_algorithm.py/external/call.apply_async()
 		- request
@@ -413,31 +420,29 @@ def external_algorithm_run_error(request, exc, traceback, run_id, return_host, r
 		- traceback: details about exception
 	'''
 	#print 'external algorithm run failed :-(( '
-	
-	##### other option of parameters #########################
-	##### uuid: parents_task_id ################
-	###result = AsyncResult(uuid)
-	###exc = result.get(propagate=False)
-	###traceback = result.traceback
-
-	uuid = request.id ### the parent's task id
-	#print('Task {0} raised exception: {1!r}\n{2!r}'.format(uuid, exc, traceback))
-	#print run_id, uuid
-	logger = logging.getLogger('stemweb.algorithm_run')
-	#logger.info(uuid)
-	logger.error("the AlgorithmRun %r/Task %r raised this error: %r\n%r" %\
-				(run_id, uuid, exc, traceback))
-
-	#print 'Task {0} raised exception: {1!r}\n{2!r}'.format(uuid, exc, traceback)
-
-	#error_message = 'ERROR: ' + str(exc) + '    traceback: ' + str(traceback)
-	error_message = 'ERROR: ' + str(exc) 
-	#print error_message    
-	
 	from Stemweb.algorithms.models import AlgorithmRun
 	algorun = AlgorithmRun.objects.get(pk = run_id)
-	algorun.status = settings.STATUS_CODES['failure']
-	algorun.error_msg = error_message   ### for later usage in algorithms/views.py/jobstatus()
+	if algorun.status == settings.STATUS_CODES['running']:
+		uuid = request.id ### the parent's task id
+		#print('Task {0} raised exception: {1!r}\n{2!r}'.format(uuid, exc, traceback))
+		#print run_id, uuid
+		logger = logging.getLogger('stemweb.algorithm_run')
+		#logger.info(uuid)
+		logger.error("the AlgorithmRun %r/Task %r raised this error: %r\n%r" %\
+					(run_id, uuid, exc, traceback))
+
+		#print 'Task {0} raised exception: {1!r}\n{2!r}'.format(uuid, exc, traceback)
+
+		#error_message = 'ERROR: ' + str(exc) + '    traceback: ' + str(traceback)
+		error_message = 'ERROR: ' + str(exc) 
+		#print error_message    
+		
+		
+		algorun.status = settings.STATUS_CODES['failure']
+		algorun.error_msg = error_message   ### for later usage in algorithms/views.py/jobstatus()
+	else:									### else: status 'failure' was already set during njc-run
+		error_message = algorun.error_msg
+
 	algorun.end_time = datetime.datetime.now()
 	print algorun.end_time
 	algorun.save()
@@ -499,17 +504,19 @@ def external_algorithm_run_error(request, exc, traceback, run_id, return_host, r
 	try: 
 		#response = urllib2.urlopen(req)	# standard request; not using dedicated source_port; alternative to next line
 		response = fixed_sourceport_opener.open(req)	
-		content = response.read()
-		print content
+		#content = response.read()
+		#print content
 	except urllib2.HTTPError, e:
-		print e.code
-		print e.reason
+		#print e.code
+		#print e.reason
+		pass
 
 
 #@shared_task
 @task
 def external_algorithm_run_finished(newick_result, run_id, return_host, return_path):
 	''' Callback task in case external algorithm run finishes succesfully. '''
+	print '########### algo_run_finished called #######################'
 	#return_path = 'stemmaweb/stemweb/result/'
 	hostparts = return_host.split(':')
 	host = hostparts[0]
@@ -519,26 +526,28 @@ def external_algorithm_run_finished(newick_result, run_id, return_host, return_p
 		
 	from Stemweb.algorithms.models import AlgorithmRun
 	algorun = AlgorithmRun.objects.get(pk = run_id)
-	if algorun.status != settings.STATUS_CODES['failure']: # if failure status was set in njc.py then keep it  (not detectable during tasks execution level)
+
+	res = ""
+	if algorun.status == settings.STATUS_CODES['failure']: # if failure status was set in njc.py then keep it  (not detectable during tasks execution level)
+		res = algorun.error_msg
+	else:	
 		algorun.status = settings.STATUS_CODES['finished']
-		#print "newick-path via algorun: ", algorun.newick
-		#print "newick-string via handed over newick_result: ", newick_result ### in fact it's NOT handed over although the celery docu claims that this is done				
-		
 		with open(os.path.join(Stemweb.algorithms.settings.ALGORITHM_MEDIA_ROOT, AlgorithmRun.objects.get_or_none(pk = run_id).newick), 'r') as f:
-			nwk = f.read()
-		#print "newick-string via file: ", nwk
+			res = f.read()						### read newick-string from file
 	algorun.save()
-	
+	algorun_extras_dictionary = json.loads(algorun.extras)   ###  algorun.extras is of type unicode-string
+	text_id = algorun_extras_dictionary["textid"]
 	ret = {
 			'jobid': run_id,
-			'statuscode': algorun.status,			### or: 'status': ?
+			'status': algorun.status,			###  status-code
 			'algorithm': algorun.algorithm.name,
+			'textid': text_id,
 			'start_time': str(algorun.start_time),
 			'end_time': str(algorun.end_time),
 			#'newick_path': algorun.newick,
-			#'result': newick_result,
-			'result': nwk,
-			'result_format': 'newick'				### or: 'format': ?
+			#'result': newick_result,          ### unfortunately newick_result is not handed over by parent of this callback function
+			'result': res,					   
+			'format': 'newick'
 			}	
 	
 	"""
@@ -567,7 +576,6 @@ def external_algorithm_run_finished(newick_result, run_id, return_host, return_p
 			return self.do_open(self.http_class, req)
 
 
-
 	source_port = 51000
 	handler = BoundHTTPHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
 	shandler = BoundHTTPSHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
@@ -590,12 +598,12 @@ def external_algorithm_run_finished(newick_result, run_id, return_host, return_p
 	try: 
 		#response = urllib2.urlopen(req)	### standard request, using any free source port
 		response = fixed_sourceport_opener.open(req)	
-		content = response.read()
-		print content
+		# content = response.read()
+		# print content
 	except urllib2.HTTPError, e:
-		print e.code
-		print e.reason
-	
+		# print e.code
+		# print e.reason
+		pass
 
 	#with fixed_sourceport_opener.open(req) as response:
 	##with urllib2.urlopen(req) as response:   

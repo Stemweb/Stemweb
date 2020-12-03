@@ -196,11 +196,13 @@ class AlgorithmRun(models.Model):
 					  ip. Probably the same ip the algorithm run request was
 					  made.
 					  
-		extras		: Extra information stored in json-format.
-
+		extras		: Extra information stored/received in json-format: parameters, textid, userid, return_path, return_host
+		
 		error_msg   : error message (exception, [also traceback wanted?]) if it exists; else this is empty
+
+		
 	  
-		TODO: change images and folder to be in the results, probably.  
+		ProbablyTODO: change images and folder to be in the results, probably.  
 	'''
 	start_time = models.DateTimeField(auto_now_add = True)
 	end_time = models.DateTimeField(auto_now_add = False, null = True)
@@ -216,7 +218,7 @@ class AlgorithmRun(models.Model):
 	ip = models.GenericIPAddressField(null = True)
 	extras = models.CharField(max_length = 10000, blank = True)
 	error_msg = models.CharField(max_length = 10000, blank = True, default = '')
-	
+		
 	# Really we will be wanting to have this as PickleField.
 	#results = dict()
 	

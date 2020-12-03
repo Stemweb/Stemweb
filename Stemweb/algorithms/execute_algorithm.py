@@ -52,7 +52,7 @@ def external(json_data, algo_id, request):
 	TODO: Refactor me
 	'''
 
-	# remoce outdated results in file system and in database compared with value in settings.KEEP_RESULTS_DAYS
+	# remove outdated results in file system and in database compared with value in settings.KEEP_RESULTS_DAYS
 	remove_old_results_fs()
 	remove_old_results_db()
 
@@ -89,32 +89,32 @@ def external(json_data, algo_id, request):
 		input_file_id = input_file.id
 	
 	input_file = InputFile.objects.get(pk = input_file_id)
-	parameters = json_data['parameters']
-	#print input_file
 	
+
+	parameters = json_data['parameters']
+
+	#print input_file
+		
 	input_file_key = ''
 	for arg in algorithm.args.all():
 		if arg.value == 'input_file':
 			input_file_key = arg.key
-	
+		
 	run_args = utils.build_external_args(parameters, input_file_key, input_file,
 			algorithm_name = algorithm.name)
 	current_run = AlgorithmRun.objects.create(input_file = input_file,
-										algorithm = algorithm, 
-                                    	folder = os.path.join(algo_root, run_args['folder_url']),
-                                    	external = True)
-	
+											algorithm = algorithm, 
+											folder = os.path.join(algo_root, run_args['folder_url']),
+											external = True)
+		
 	current_run.extras = json.dumps(json_data, encoding = 'utf8')
 	current_run.save()	# Save to ensure that id generation is not delayed.
 	rid = current_run.id
-	return_host = json_data['return_host']        
-	return_path = json_data['return_path']        
+	return_host = json_data['return_host']
+	return_path = json_data['return_path']
 	kwargs = {'run_args': run_args, 'algorithm_run': rid}
-	call = algorithm.get_callable(kwargs)
 
-	#with_debug = {'debug': True}
-	#kwargs.update(with_debug)
-	#print kwargs
+	call = algorithm.get_callable(kwargs)
 
 	# .s is a celery signature , used to concatenate tasks;  see:
 	#  https://docs.celeryproject.org/en/master/userguide/calling.html
