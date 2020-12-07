@@ -140,9 +140,8 @@ def process(request, algo_id):
 	if request.method == 'POST':
 		try:
 			json_data = JSONParser().parse(request)
-		except Exception as e:			               # raising JSON parse error if JSON structure is invalid		
-			error_message = json.dumps({'error': e})
-			response = HttpResponse(error_message)
+		except Exception as e:			               # raising JSON parse error if JSON structure is invalid	
+			response = HttpResponse(str(e)
 			response.status_code = 400
 			return response
 

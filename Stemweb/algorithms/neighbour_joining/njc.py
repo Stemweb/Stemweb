@@ -246,7 +246,7 @@ class NJ(AlgorithmTask):
 			self.algorithm_run.status = Stemweb.algorithms.settings.STATUS_CODES['failure']
 			self.algorithm_run.save()
 			logger = logging.getLogger('stemweb.algorithm_run')
-			logger.error('AlgorithmRun %s:%s aborted with error %s  and this traceback: %s ' % \
+			logger.error('AlgorithmRun %s:%s aborted with this error: %s  and this traceback: %s ' % \
 			(self.algorithm_run.algorithm.name, self.algorithm_run.id, value, trace_back))
 			self._stop.value = 1
 			return -1
