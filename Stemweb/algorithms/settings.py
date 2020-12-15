@@ -35,9 +35,9 @@ ALGORITHMS_CALLING_DICT = {
 	'3': {  # neighbour joining:
 		'callable': NJ,
 	},
-#	'4': {  # neighbour net:
-#		'callable': NN,
-#	},	
+	'4': {  # neighbour net:
+		'callable': NN,
+	},	
 }
 
 ''' Algorithm runs' status codes. '''

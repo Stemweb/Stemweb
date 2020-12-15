@@ -141,7 +141,7 @@ def process(request, algo_id):
 		try:
 			json_data = JSONParser().parse(request)
 		except Exception as e:			               # raising JSON parse error if JSON structure is invalid	
-			response = HttpResponse(str(e)
+			response = HttpResponse(str(e))
 			response.status_code = 400
 			return response
 

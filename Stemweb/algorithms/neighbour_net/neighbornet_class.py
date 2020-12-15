@@ -32,6 +32,7 @@ class NN(AlgorithmTask):
 		AlgorithmTask.__init_run__(self, *args, **kwargs)
 		if self.algorithm_run:
 			self.algorithm_run.score = 0
+			self.image_path = os.path.join(self.run_args['outfolder'], 'nn_network.png')
 			self.algorithm_run.save()
 
 	def __algorithm__(self, run_args = None):
@@ -336,12 +337,12 @@ class NN(AlgorithmTask):
 		
 		            # update links (some edges will remain at the old node, some
 		            # are changed to the newly created one
-		            for nbr in G.neighbors(n):
+		            for nbr in list(G.neighbors(n)):
 		                if nbr not in splitpart and nbr not in pathnodes:
 		                    G.remove_edge(n,nbr)
 		                    G.add_edge(newnode,nbr)
 		                    edg_lab[(newnode,nbr)]=pos_dist(pos[newnode],pos[nbr])
-		
+
 		            # add edge between old and new node
 		            G.add_edge(n, newnode)
 		            edg_lab[(n,newnode)]=pos_dist(pos[n],pos[newnode])
