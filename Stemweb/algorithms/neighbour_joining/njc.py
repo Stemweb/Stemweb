@@ -22,6 +22,7 @@ class NJ(AlgorithmTask):
 	name = 'Neighbour Joining'
 	has_image = True
 	has_newick = True
+	has_networkx = False
 	input_file_key = 'input_file'
 		
 	def __algorithm__(self, run_args = None):

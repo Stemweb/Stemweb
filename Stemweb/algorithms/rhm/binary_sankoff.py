@@ -16,6 +16,7 @@ class RHM(AlgorithmTask):
 	name = "RHM"
 	has_image = True
 	has_newick = True
+	has_networkx = False
 	input_file_key = 'infolder'
 	
 	def __algorithm__(self, run_args = None):

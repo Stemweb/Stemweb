@@ -44,7 +44,7 @@ def remove_old_results_db():
         run.delete()
         #  logging about deletion is done by utils! It writes the executed SQL statement, e.g.:
         # stemweb_py27_1  | DEBUG 2020-11-11 01:14:31,177 utils 742 140041788659456 (0.001) DELETE FROM `algorithms_algorithmrun` WHERE `algorithms_algorithmrun`.`id` IN (2); args=(2,)
-
+    print "################ end of deleting candidates ###################"
 
 
     

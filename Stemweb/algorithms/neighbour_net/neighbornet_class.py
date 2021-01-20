@@ -20,19 +20,30 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import networkx as nx
+from networkx.readwrite import json_graph
+import json
 
 from Stemweb.algorithms.tasks import AlgorithmTask
+from django.template.defaultfilters import slugify
 
 
 class NN(AlgorithmTask):
 	name = "Neighbour Net"
+	has_image = True
 	score_name = 'score'
-	
+	has_networkx = True
+	has_newick =  False
+
 	def __init_run__(self, *args, **kwargs):
 		AlgorithmTask.__init_run__(self, *args, **kwargs)
 		if self.algorithm_run:
 			self.algorithm_run.score = 0
-			self.image_path = os.path.join(self.run_args['outfolder'], 'nn_network.png')
+			slug_name = slugify(self.algorithm_run.algorithm.name)
+			file_name = self.input_file_name + '_'+ slug_name
+			self.image_path = os.path.join(self.run_args['outfolder'], file_name) # '.png' will be added by plt.savefig()
+			file_name = self.input_file_name + '_'+ slug_name + '.json'
+			self.networkresult_path = os.path.join(self.run_args['outfolder'], file_name)
+			self.algorithm_run.nwresult_path  = self.networkresult_path
 			self.algorithm_run.save()
 
 	def __algorithm__(self, run_args = None):
@@ -371,11 +382,72 @@ class NN(AlgorithmTask):
 		        for n in move_nodes:
 		            pos[n] = [pos[n][i]-vector[i]*Sx[sp] for i in range(2)]
 		
-		# draw graph
-		nx.draw(G,pos=pos,labels=lab,edge_labels=edg_lab,\
-		            node_size=.1,font_size=8,width=.2,title=c)
+
+		# create a dictionary in a node-link format that is suitable for JSON serialization
+		graph_dict = json_graph.node_link_data(G)
+
+		# add the positions and labels dictionaries
+		graph_dict ["positions"] = pos
+		graph_dict ["labels"] = lab
+
+		# store the graph_dict as json object into a file (this will be used as result & will be sent to the requester)
+		try:
+			with open(self.networkresult_path, 'w') as f:
+				json.dump(graph_dict, f)
+		except:
+			logger = logging.getLogger('stemweb.algorithm_run')
+			logger.error('AlgorithmRun %s:%s could not write in file %s.' % \
+			(self.algorithm_run.algorithm.name, self.algorithm_run.id, \
+			self.networkresult_path))
+			return -1
+
+
+		# draw graph & save graph image
+		nx.draw(G,pos=pos,labels=lab, node_size=.1,font_size=8,width=.2,title=c)
 		plt.savefig(self.image_path)
+
+		"""
+		# this code snippet shall demonstrate for other apps how to retrieve & draw the graph from the received json object:
+
+		import matplotlib.pyplot as plt
+		import json
+		import networkx as nx
+		from networkx.readwrite import json_graph
+
+		# transform from json to dictionary
+		graph_dict = json.loads(graph_jsonstring)
+
+		# Return graph G from node-link data format
+		reconstructed_G = json_graph.node_link_graph(graph_dict)
+		posses = graph_dict["positions"]
+
+		# for the positions: replace keys of type string by keys of type int, if the string is convertable to an integer [needed by nx.draw()]:
+		newkeydict = {}
+		for key, value in posses.iteritems() :
+			try:
+				newkey = int(key)
+				newkeydict [newkey] = {}
+				newkeydict [newkey][key] = value
+			except:
+				pass
 		
+		for newkey, oldpair in newkeydict.iteritems():
+			for oldkey, value in oldpair.iteritems():
+				posses[newkey] = value
+				posses.pop(oldkey)
+
+		labs = graph_dict["labels"]
+		labs[0] = labs.pop('0')    # only the key for label 0 needs to be an integer, the other keys can be strings, because none of them is a number
+		### If transfered labels might also be number-strings, then extend INT-ification for all of them  (likewise as done for posses above)
+		
+		# draw & save graph
+		nx.draw(reconstructed_G,pos=posses,labels=labs, node_size=.1,font_size=8,width=.2,title=c)
+		plt.savefig(image_path)
+
+
+		# end of code snippet
+		"""
+
 		# print diagnostic output
 		d_var=mean([x*x for x in d_obs])
 		d_estim = np.matrix(A) * np.matrix(x_estim).transpose()

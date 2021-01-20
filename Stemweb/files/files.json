@@ -5,9 +5,9 @@
 		"fields": {
 			"upload_time": "2019-11-19 10:52:45",
 			"last_access": "2019-11-19 10:52:46",
-			"name": "parzival.nex",
+			"name": "parzival_njreq.nex",
 			"extension": "nex",
-			"file": "datasets/parzival.nex"
+			"file": "datasets/parzival_njreq.nex"
 		}
 	},
 	{
@@ -30,6 +30,17 @@
 			"name": "rhmreq.csv", 
 			"extension": "csv", 
 			"file": "datasets/rhmreq.csv"
+		}
+	},
+	{
+		"model": "files.inputfile",
+		"pk": 4,
+		"fields": {
+			"upload_time": "2021-01-18 08:40:12",
+			"last_access": "2021-01-18 09:52:45",
+			"name": "nnetreq.nex",
+			"extension": "nex",
+			"file": "datasets/nnetreq.nex"
 		}
 	}
 ]

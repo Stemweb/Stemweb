@@ -120,7 +120,7 @@ class AlgorithmTask(Task):
 	# resulting newick tree for the algorithm run. 
 	newick_path = None
 	
-	# AlgorithmRun model instance this algorithm is referencing.
+	# AlgorithmRun model INSTANCE this algorithm is referencing.
 	algorithm_run = None
 	
 	### You don't probably need any of the following. ###
@@ -174,6 +174,7 @@ class AlgorithmTask(Task):
 			file_name = os.path.splitext(os.path.basename(self.run_args[self.input_file_key]))[0]
 			self.input_file_name = file_name
 			self.run_args['outfolder'] = self.algorithm_run.folder
+			# e.g.: self.algorithm_run.folder:   /home/stemweb/Stemweb/media/results/runs/neighbour-net/15/YHDSCLFD
 			if self.has_image:
 				self.algorithm_run.image = os.path.join(self.run_args['folder_url'], \
 					'%s_%s.png' % (file_name, slug_name))
@@ -184,6 +185,15 @@ class AlgorithmTask(Task):
 				'%s_%s.tre' % (file_name, slug_name))
 				self.newick_path = os.path.join(self.algorithm_run.folder,\
 				'%s_%s.tre' % (file_name, slug_name))
+			if self.has_networkx:
+				self.algorithm_run.nwresult_path = os.path.join(self.run_args['folder_url'],\
+				'%s_%s.json' % (file_name, slug_name))
+				# e.g.: results/runs/neighbour-net/15/YHDSCLFD/20210118-170328-YXPGWOPK_neighbour-net.json
+				self.nwresult_path = os.path.join(self.algorithm_run.folder,\
+				'%s_%s.json' % (file_name, slug_name))
+				# e.g.: /home/stemweb/Stemweb/media/results/runs/neighbour-net/15/YHDSCLFD/20210118-170328-YXPGWOPK_neighbour-net.json
+
+
 			self.algorithm_run.save()
 		
 		if 'radial' in self.run_args:
@@ -291,20 +301,28 @@ class AlgorithmTask(Task):
 		self._finalize_()		##  status can be being set either to 'finished' or to 'failure'
 		if self.algorithm_run.status == settings.STATUS_CODES['failure']:			### failure status was set during njc algorithm run
 			request = exc = traceback = ''
-			print '########### calling ext_algo_run_error NOT as errback #######################'
+			#print '########### calling ext_algo_run_error NOT as errback #######################'
 			algorun_extras_dictionary = json.loads(self.algorithm_run.extras)   ###  algorun.extras is of type unicode-string
 			return_host = algorun_extras_dictionary["return_host"]
 			return_path = algorun_extras_dictionary["return_path"]
-			### probably not needed:
+			### probably not needed here:
 			#external_algorithm_run_error(request, exc, traceback, self.algorithm_run.id, return_host, return_path)
 
-		# Return newick as string for simplify callbacks of external runs.
+		# Return newick as string for simplified callbacks of external runs.
 		if self.has_newick: 
 			nwk = ""
 			if self.algorithm_run.status == settings.STATUS_CODES['finished']:
 				with open(self.newick_path, 'r') as f:
 					nwk = f.read()
-			return nwk				
+			return nwk
+
+		# Return network graph (as json object?) for simplified callbacks of external runs.
+		if self.has_networkx:
+			ntwrk = ""
+			if self.algorithm_run.status == settings.STATUS_CODES['finished']:
+				with open(self.nwresult_path, 'r') as f:
+					ntwrk = f.read()
+			return ntwrk
 
 	
 		
@@ -532,8 +550,14 @@ def external_algorithm_run_finished(newick_result, run_id, return_host, return_p
 		res = algorun.error_msg
 	else:	
 		algorun.status = settings.STATUS_CODES['finished']
-		with open(os.path.join(Stemweb.algorithms.settings.ALGORITHM_MEDIA_ROOT, AlgorithmRun.objects.get_or_none(pk = run_id).newick), 'r') as f:
-			res = f.read()						### read newick-string from file
+		if algorun.algorithm.name == 'Neighbour Net' or algorun.algorithm.name == 'neighbour-net':
+			with open(os.path.join(Stemweb.algorithms.settings.ALGORITHM_MEDIA_ROOT, AlgorithmRun.objects.get_or_none(pk = run_id).nwresult_path), 'r') as f:
+				res = f.read()						### read networkx-graph-string from file (stored as json)
+			usedformat = 'networkx-graph as json'
+		else:
+			with open(os.path.join(Stemweb.algorithms.settings.ALGORITHM_MEDIA_ROOT, AlgorithmRun.objects.get_or_none(pk = run_id).newick), 'r') as f:
+				res = f.read()						### read newick-string from file
+			usedformat = 'newick'
 	algorun.save()
 	algorun_extras_dictionary = json.loads(algorun.extras)   ###  algorun.extras is of type unicode-string
 	text_id = algorun_extras_dictionary["textid"]
@@ -547,7 +571,7 @@ def external_algorithm_run_finished(newick_result, run_id, return_host, return_p
 			#'newick_path': algorun.newick,
 			#'result': newick_result,          ### unfortunately newick_result is not handed over by parent of this callback function
 			'result': res,					   
-			'format': 'newick'
+			'format': usedformat
 			}	
 	
 	"""

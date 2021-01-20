@@ -188,6 +188,8 @@ class AlgorithmRun(models.Model):
 					  it can cause rendering issues in browser.
 					  
 		newick		: Resulting newick file of the run. (path + filename)
+
+		nwresult_path: Resulting network file of the run in json format including labels & positions. (path + filename)
 		
 		external	: Boolean, True if external server send this run request, 
 					  false otherwise.
@@ -214,6 +216,7 @@ class AlgorithmRun(models.Model):
 	score = models.FloatField(null = True, verbose_name = "Score")
 	current_iteration = models.PositiveIntegerField(null = True)
 	newick = models.URLField(blank = True, default = '')     ### ToCheck: shouldn't it be a CharField ?!
+	nwresult_path = models.CharField(max_length = 10000, blank = True, default = '')
 	external = models.BooleanField(default = False)
 	ip = models.GenericIPAddressField(null = True)
 	extras = models.CharField(max_length = 10000, blank = True)

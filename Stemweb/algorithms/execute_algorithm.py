@@ -27,6 +27,10 @@ def local(form, algo_id, request):
 	    Returns AlgorithmRun id.
 	'''
 	algorithm = get_object_or_404(Algorithm, pk = algo_id)
+
+	# remove outdated results in file system and in database compared with value in settings.KEEP_RESULTS_DAYS
+	remove_old_results_fs()
+	remove_old_results_db()
 	
 	run_args = utils.build_local_args(form, algorithm_name = algorithm.name, request = request)
 	current_run = AlgorithmRun.objects.create(input_file = InputFile.objects.get(id = run_args['file_id']),
