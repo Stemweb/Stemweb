@@ -161,8 +161,8 @@ def process(request, algo_id):
 					nwk = f.read()
 			message = json.dumps({
 								'jobid': run_id,
-								'status': AlgorithmRun.objects.get_or_none(pk = run_id).status,
-								'newicktree': nwk})	
+								'status': AlgorithmRun.objects.get_or_none(pk = run_id).status
+								})
 			response = HttpResponse(message)
 			response.status_code = 200		
 			return response
@@ -211,31 +211,42 @@ def jobstatus(request, run_id):
 			### algo_run.newick is the path + filename where the newick-string is stored, e.g.:
 			### results/runs/neighbour-joining/15/B4Q6CTMO/20200929-115514-5GKHQ3UU_neighbour-joining.tre
 			### full path is: /home/stemweb/Stemweb/media/results/runs/neighbour-joining/15/B4Q6CTMO/20200929-115514-5GKHQ3UU_neighbour-joining.tre
-			if algo_run.newick == '':
-				msg['error'] = "Could not retrieve the newick."
+			if algo_run.newick == '' and algo_run.nwresult_path == '':
+				msg['error'] = "Could not retrieve newick or network result."
 				### status should be "failure" instead of "finished", but we won't change it in a status request			
 				return HttpResponse(json.dumps(msg, encoding = "utf8"))
 			else:	
-				nwk = ""
-				try:
-					with open(os.path.join(algo_media, algo_run.newick), 'r') as f:
-						nwk = f.read()
-				except:
-					if algo_run.error_msg != '':
-						msg['error'] = algo_run.error_msg
-					else:
-						msg['error'] = "Could not retrieve newick."	
+				result = ""
+				if algo_run.newick != '':
+					msg['format'] = 'newick'
+					try:
+						with open(os.path.join(algo_media, algo_run.newick), 'r') as f:
+							result = f.read()
+					except:
+						if algo_run.error_msg != '':
+							msg['error'] = algo_run.error_msg
+						else:
+							msg['error'] = "Could not retrieve the newick."
+					    ### status should be "failure" instead of "finished", but we won't change it in a status request
+				if algo_run.nwresult_path != '':
+					msg['format'] = 'network'
+					try:
+						with open(os.path.join(algo_media, algo_run.nwresult_path), 'r') as f:
+							result = f.read()
+					except:
+						if algo_run.error_msg != '':
+							msg['error'] = algo_run.error_msg
+						else:
+							msg['error'] = "Could not retrieve the network result."
+					    ### status should be "failure" instead of "finished", but we won't change it in a status request
 
-					### status should be "failure" instead of "finished", but we won't change it in a status request			
-
-				msg['result'] = nwk
-				msg['format'] = 'newick'
+				msg['result'] = result
 				msg['end_time'] = str(algo_run.end_time)
 				return HttpResponse(json.dumps(msg, encoding = "utf8"))
 		if algo_run.status == STATUS_CODES['failure']:
 			msg['result'] = algo_run.error_msg  ### the result field shall contain the error info according to the white paper 
 			msg['end_time'] = str(algo_run.end_time) 
-		return HttpResponse(json.dumps(msg, encoding = "utf8"))
+			return HttpResponse(json.dumps(msg, encoding = "utf8"))
 
 	
 def processtest(request):

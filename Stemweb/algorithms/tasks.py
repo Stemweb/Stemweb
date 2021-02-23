@@ -84,6 +84,9 @@ class AlgorithmTask(Task):
 	
 	# Does this algorithm have resulting newick tree.
 	has_newick = False
+
+	# Does this algorithm have a resulting networkx object
+	has_networkx = False
 	
 	# Name of the key in result-dictionary that is intercepted and stored in 
 	# self.algorithm_run.score at run time (database is updated with the new 
@@ -286,7 +289,9 @@ class AlgorithmTask(Task):
 		self._algorithm_thread = th.Thread(target = self.__algorithm__, 
 										args = (self.run_args,), 
 										name = 'stemweb_algorun')
-
+		if slugify(self.algorithm_run.algorithm.name) == 'rhm':
+			self.algorithm_run.status = settings.STATUS_CODES['running']  # rhm in c-code stays in "not_started" during running
+			self.algorithm_run.save()
 		self._algorithm_thread.start()		## here class NJ(AlgorithmTask)  in  njc.py is called
 		self.algorithm_run.status = settings.STATUS_CODES['running']
 		print 'I am running NOW as thread'
@@ -301,11 +306,11 @@ class AlgorithmTask(Task):
 		self._finalize_()		##  status can be being set either to 'finished' or to 'failure'
 		if self.algorithm_run.status == settings.STATUS_CODES['failure']:			### failure status was set during njc algorithm run
 			request = exc = traceback = ''
-			#print '########### calling ext_algo_run_error NOT as errback #######################'
 			algorun_extras_dictionary = json.loads(self.algorithm_run.extras)   ###  algorun.extras is of type unicode-string
 			return_host = algorun_extras_dictionary["return_host"]
 			return_path = algorun_extras_dictionary["return_path"]
 			### probably not needed here:
+			#print '########### calling ext_algo_run_error NOT as errback #######################'
 			#external_algorithm_run_error(request, exc, traceback, self.algorithm_run.id, return_host, return_path)
 
 		# Return newick as string for simplified callbacks of external runs.

@@ -6,8 +6,7 @@ import sys
 #import djcelery
 #djcelery.setup_loader()
 
-DEBUG = True
-#TEMPLATE_DEBUG = DEBUG
+DEBUG = False   ### if set to True, then Celery raises WARNING: "Using settings.DEBUG leads to a memory leak, never use this setting in production environments!
 
 # Root folder of the site
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))

@@ -2,14 +2,29 @@ version: '3'
 services:
     mysql:
         image: "mysql:5.7"
+        restart: always
         environment:
             MYSQL_ALLOW_EMPTY_PASSWORD: "TRUE"
+            MYSQL_PASSW: "ChangeMe"
         volumes:
             - ./mysqlinit:/docker-entrypoint-initdb.d
     redis:
         image: "redis:alpine"
+        restart: always
+        sysctls:
+            #  change Linux Kernel Parameter within container
+            net.core.somaxconn: 512
+        volumes:
+            - ./redisinit/redis.conf:/usr/local/etc/redis/redis.conf
+        command:
+            redis-server /usr/local/etc/redis/redis.conf
+
     stemweb_py27:
         build: .
+        restart: always
+        depends_on:
+        - mysql
+        - redis
         ports:
             - "10.0.228.35:8000:8000"        ### on test-server
             - "10.0.228.35:51000:51000"      ### on test server
