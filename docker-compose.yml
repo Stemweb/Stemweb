@@ -12,10 +12,12 @@ services:
         image: "redis:alpine"
         restart: always
         sysctls:
-            #  change Linux Kernel Parameter within container
-            net.core.somaxconn: 512
+            # change this Linux Kernel Parameter (default is 128) within container because of this WARNING
+            # "The TCP backlog setting of 511 cannot be enforced
+            # because /proc/sys/net/core/somaxconn is set to the lower value of 128."
+            net.core.somaxconn: 512     # maximal number of connections
         volumes:
-            - ./redisinit/redis.conf:/usr/local/etc/redis/redis.conf
+            - ./redisinit/redis.conf:/usr/local/etc/redis/redis.conf       # version 6 from  https://redis.io/topics/config     ## adapted
         command:
             redis-server /usr/local/etc/redis/redis.conf
 

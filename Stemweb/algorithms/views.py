@@ -154,14 +154,20 @@ def process(request, algo_id):
 			return response
 		else:
 			# JSON ok, will process the algorithm
-			run_id = execute_algorithm.external(json_data, algo_id, request)
-			nwk = ""
-			if AlgorithmRun.objects.get_or_none(pk = run_id).status == STATUS_CODES['finished']:			
-				with open(os.path.join(algo_media, AlgorithmRun.objects.get_or_none(pk = run_id).newick), 'r') as f:
-					nwk = f.read()
+			run_id = execute_algorithm.external(json_data, algo_id, request)   # status will be set to "running" , except for RHM algorithm where it stays in "not_started"
+			run = get_object_or_404(AlgorithmRun, id = run_id)
+
+			if run.status == STATUS_CODES['not_started']:
+				# WORKAROUND: set status to "running" even if it is in state "not_started"
+				# otherwise RHM algorithm-run would be set to "running " too late (i.e. after running/calculation is finished)
+				run.status = statcode = STATUS_CODES['running']
+				run.save()	    # save status also in object/DB; then it's visible in the django GUI as well
+			else:
+				statcode = run.status
+
 			message = json.dumps({
 								'jobid': run_id,
-								'status': AlgorithmRun.objects.get_or_none(pk = run_id).status
+								'status': statcode
 								})
 			response = HttpResponse(message)
 			response.status_code = 200		

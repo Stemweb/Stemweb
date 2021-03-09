@@ -53,7 +53,7 @@ def external(json_data, algo_id, request):
 	
 	Returns AlgorithmRun id.
 	
-	TODO: Refactor me
+	TODO: Refactor me   #  PF: to be refactored in which way? -- intended by previous SW-developer of this module!
 	'''
 
 	# remove outdated results in file system and in database compared with value in settings.KEEP_RESULTS_DAYS

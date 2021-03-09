@@ -6,7 +6,6 @@ admin.autodiscover()
 
 urlpatterns = [
     url(r'^', include('Stemweb.home.urls')),
-    #url(r'^files/', include('Stemweb.files.urls')),
     url(r'^files/', include('Stemweb.files.urls')),
     url(r'^', include('Stemweb.algorithms.urls')),
     url(r'^media/(?P<path>.*)$', static.serve,

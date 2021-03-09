@@ -9,13 +9,13 @@
             "type": "python",
             "request": "attach",
             "port": 3000,
-            "host": "172.21.0.4",  // get right IP-address from "docker inspect <container-id>" command
+            "host": "172.20.0.4",  // get right IP-address from "docker inspect <container-id>" command
                                    // see: NetworkSettings/Networks/IPAddress 
             "django": true,
             "pathMappings": [
                 {
-                    "localRoot": "${workspaceFolder}/..",
-                    //"localRoot": "/home/fugger/repos3/Stemweb/",
+                    //"localRoot": "${workspaceFolder}/..",   // does not work
+                    "localRoot": "/home/fugger/repos3/Stemweb/",
                     "remoteRoot": "/home/stemweb"
                 }
             ]

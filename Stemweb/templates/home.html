@@ -12,7 +12,7 @@
 	<div id="subpage_index" class="box-sizing_border">
 	{% block subpage_index %}
 	
-		#{% if user.is_authenticated %}
+		{#{% if user.is_authenticated %}#}
 			{% block subpage_index_title %}
 			<h1>Recent activity</h1>
 			{% endblock%}
@@ -34,14 +34,16 @@
 				{% endblock %}
 				
 			{% endif %}
-		#{% else %}	
-		#		<h1>New user?</h1>
-		#		<div class="intro">
-		#			<a href={% url "registration_register" %}>Register</a> yourself now to run the 
-		#			<a href={% url "algorithms_base_url" %}>algorithms</a>.	
-		#		</div> 	
-		#{% endif %}
-			
+		{% comment %}
+		{% else %}
+				<h1>New user?</h1>
+				<div class="intro">
+					<a href={% url "registration_register" %}>Register</a> yourself now to run the
+					<a href={% url "algorithms_base_url" %}>algorithms</a>.
+				</div>
+		{% endif %}#}
+		{% endcomment %}
+
 	{% endblock %}
 	</div>
 
@@ -74,14 +76,14 @@
 			</p>
 			{% endblock %}
 		
+		{% comment %}
 		{% if not user.is_authenticated %}
 		<div class="pro_tip">
 				Browse currently implemented <a href={% url "algorithms_base_url" %}>algorithms</a> or
 				<a href={% url "registration_register" %}>register</a> and login to give them a go.
 		</div>
 		{% endif %}
-			
-	
+		{% endcomment %}
 		
 	{% endblock %}
 	</div>

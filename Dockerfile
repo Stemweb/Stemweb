@@ -43,6 +43,7 @@ RUN mkdir Stemweb/logs && chown -R stemweb:stemweb .
 # EXPOSE port 3000 for debugging access from outside of the docker container,
 # EXPOSE port 8000 for the web site
 # EXPOSE port 51000 as fixed http-request outbound src-port
-EXPOSE 3000 8000 51000
+# EXPOSE 3000 8000 51000
+EXPOSE 8000 51000
 USER stemweb
 ENTRYPOINT ["./docker-entrypoint.sh"]

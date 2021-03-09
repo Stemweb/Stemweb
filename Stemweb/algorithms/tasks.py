@@ -141,7 +141,7 @@ class AlgorithmTask(Task):
 	_stop = mp.Value('b', 0)
 	
 	# Child process where __algorithm__ is run.
-	_algorithm_thread = None
+	_algorithm_thread = None		### used indeed!
 	
 	# Observers which are notified when new results are written to file. 
 	_observers = []
@@ -289,9 +289,7 @@ class AlgorithmTask(Task):
 		self._algorithm_thread = th.Thread(target = self.__algorithm__, 
 										args = (self.run_args,), 
 										name = 'stemweb_algorun')
-		if slugify(self.algorithm_run.algorithm.name) == 'rhm':
-			self.algorithm_run.status = settings.STATUS_CODES['running']  # rhm in c-code stays in "not_started" during running
-			self.algorithm_run.save()
+
 		self._algorithm_thread.start()		## here class NJ(AlgorithmTask)  in  njc.py is called
 		self.algorithm_run.status = settings.STATUS_CODES['running']
 		print 'I am running NOW as thread'
@@ -304,12 +302,12 @@ class AlgorithmTask(Task):
 			self._read_from_results_()	
 
 		self._finalize_()		##  status can be being set either to 'finished' or to 'failure'
-		if self.algorithm_run.status == settings.STATUS_CODES['failure']:			### failure status was set during njc algorithm run
+		if self.algorithm_run.status == settings.STATUS_CODES['failure']:			### failure status was set during subtask (e.g.: njc algorithm run)
 			request = exc = traceback = ''
 			algorun_extras_dictionary = json.loads(self.algorithm_run.extras)   ###  algorun.extras is of type unicode-string
 			return_host = algorun_extras_dictionary["return_host"]
 			return_path = algorun_extras_dictionary["return_path"]
-			### probably not needed here:
+			### probably not needed here? ToDo!!! retest failure case (both scenarios: commented out or not)
 			#print '########### calling ext_algo_run_error NOT as errback #######################'
 			#external_algorithm_run_error(request, exc, traceback, self.algorithm_run.id, return_host, return_path)
 
@@ -555,7 +553,8 @@ def external_algorithm_run_finished(newick_result, run_id, return_host, return_p
 		res = algorun.error_msg
 	else:	
 		algorun.status = settings.STATUS_CODES['finished']
-		if algorun.algorithm.name == 'Neighbour Net' or algorun.algorithm.name == 'neighbour-net':
+		if slugify(algorun.algorithm.name) == 'neighbour-net':
+		#if algorun.algorithm.name == 'Neighbour Net' or algorun.algorithm.name == 'neighbour-net':
 			with open(os.path.join(Stemweb.algorithms.settings.ALGORITHM_MEDIA_ROOT, AlgorithmRun.objects.get_or_none(pk = run_id).nwresult_path), 'r') as f:
 				res = f.read()						### read networkx-graph-string from file (stored as json)
 			usedformat = 'networkx-graph as json'
