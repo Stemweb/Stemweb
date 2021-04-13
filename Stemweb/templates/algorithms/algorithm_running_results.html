@@ -50,12 +50,19 @@
 	<div id="algorithm_result_div">
 	
 		{% if algorithm_run.status == 0 %}
+			{% comment " this download link does not work" %}
 			{% if algorithm_run.newick %}
 			<p>
-				<a href="{{ MEDIA_URL }}{{ algorithm_run.newick }}">Download newick tree</a>
+				<a href="{{ MEDIA_URL }}{{ algorithm_run.newick }}">Download newick tree</a> 
 			</p>
 			{% endif %}
-			
+			{% endcomment %}
+
+			{% if algorithm_run.nwresult_path %}
+			<p>
+				<a href="{{ MEDIA_URL }}{{ algorithm_run.nwresult_path }}" download >Download result network</a> 
+			</p>
+			{% endif %}
 			{% if algorithm_run.image %}	
 			<img id="run_result_image" src="{{ algorithm_run.image.url }}" 
 				 alt="{{ algorithm_run.image.url }}" />	 
@@ -64,7 +71,7 @@
 			{% endif %}
 		{% else %}
 			{% if algorithm_run.status == -1 %}
-			    Run did not (yet) start
+			    {#Run did not (yet) start#}
 			{% endif %}			
 			{% if algorithm_run.status > 1 %}
 				Run failed for this reason: {{ algorithm_run.error_msg }}

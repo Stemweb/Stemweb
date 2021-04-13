@@ -28,8 +28,8 @@ services:
         - mysql
         - redis
         ports:
-            - "10.0.228.35:8000:8000"        ### on test-server
-            - "10.0.228.35:51000:51000"      ### on test server
-            #- "127.0.0.1:8000:8000"         ### on dev-laptop
-            #- "127.0.0.1:51000:51000"       ### on dev-laptop
-            #- "127.0.0.1:3000:3000"         ### on dev-laptop
+            #- "10.0.228.35:8000:8000"        ### on test-server
+            #- "10.0.228.35:51000:51000"      ### on test server
+            - "127.0.0.1:8000:8000"         ### on dev-laptop
+            - "127.0.0.1:51000:51000"       ### on dev-laptop
+            - "127.0.0.1:3000:3000"         ### on dev-laptop

@@ -1,1 +1,1 @@
-../Dockerfile_newCelery
+../Dockerfile

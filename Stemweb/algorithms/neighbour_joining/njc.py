@@ -186,7 +186,7 @@ class NJ(AlgorithmTask):
 			# groups of manuscripts)
 			S=[tuple([t]) for t in tax]
 			
-			print "S", len(S)
+			#print "S", len(S)
 			# main loop
 			while len(S)>1:
 				# computed NJ distances
