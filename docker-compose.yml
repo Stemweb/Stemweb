@@ -21,7 +21,7 @@ services:
         command:
             redis-server /usr/local/etc/redis/redis.conf
 
-    stemweb_py27:
+    stemweb_py37:
         build: .
         restart: always
         depends_on:

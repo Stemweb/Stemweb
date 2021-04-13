@@ -7,20 +7,22 @@ from time import sleep
 import tempfile
 import codecs
 import json
-from cleanup import remove_old_results_db, remove_old_results_fs
+from .cleanup import remove_old_results_db, remove_old_results_fs
 
 from django.shortcuts import get_object_or_404
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 #from bs4 import BeautifulSoup as bs
 
-from tasks import external_algorithm_run_error
-from tasks import external_algorithm_run_finished
+from .tasks import external_algorithm_run_error
+from .tasks import external_algorithm_run_finished
 
-from settings import ALGORITHM_MEDIA_ROOT as algo_root
+from .settings import ALGORITHM_MEDIA_ROOT as algo_root
 from .models import InputFile, Algorithm, AlgorithmRun
-import utils
+from . import utils
 
+from celery import task, shared_task, Task
+from inspect import signature, Parameter
 
 def local(form, algo_id, request):
 	''' Make a local algorithm run.
@@ -56,6 +58,16 @@ def external(json_data, algo_id, request):
 	TODO: Refactor me   #  PF: to be refactored in which way? -- intended by previous SW-developer of this module!
 	'''
 
+	print('################# all handed over args in external()####################')
+	for i in signature(external).parameters.items():
+		print(i)
+	print('========================================')
+	print (json_data)
+	print (algo_id)
+	print (request)
+	
+	print('++++++++++++++++++++++++++++++++++++++++')	
+	
 	# remove outdated results in file system and in database compared with value in settings.KEEP_RESULTS_DAYS
 	remove_old_results_fs()
 	remove_old_results_db()
@@ -70,14 +82,14 @@ def external(json_data, algo_id, request):
 		csv_data = json_data.pop('data')
 		ext = ".csv"
 	elif algorithm.file_extension == 'nex': 
-		from csvtonexus import csv2nex
+		from .csvtonexus import csv2nex
 		csv_data = csv2nex(json_data.pop('data'))	
 		ext = ".nex"
 		
 	# First write the file in the temporary file and close it.
 	with codecs.open(csv_file.name, mode = 'w', encoding = 'utf8') as f:
-		f.write(csv_data.encode('ascii', 'replace'))	
-		#json.dump(csv_data, f, indent = 4)
+		#f.write(csv_data.encode('ascii', 'replace'))	
+		json.dump(csv_data, f, indent = 4)
 
 	# Then construct a mock up InMemoryUploadedFile from it for the InputFile
 	mock_file = None
@@ -111,26 +123,35 @@ def external(json_data, algo_id, request):
 											folder = os.path.join(algo_root, run_args['folder_url']),
 											external = True)
 		
-	current_run.extras = json.dumps(json_data, encoding = 'utf8')
+	#current_run.extras = json.dumps(json_data, encoding = 'utf8')
+	current_run.extras = json.dumps(json_data)
 	current_run.save()	# Save to ensure that id generation is not delayed.
 	rid = current_run.id
 	return_host = json_data['return_host']
 	return_path = json_data['return_path']
 	kwargs = {'run_args': run_args, 'algorithm_run': rid}
 
+	
 	call = algorithm.get_callable(kwargs)
 
-	# .s is a celery signature , used to concatenate tasks;  see:
+	# .s is a celery signature, used to concatenate tasks;  see:
 	#  https://docs.celeryproject.org/en/master/userguide/calling.html
 	#  https://docs.celeryproject.org/en/master/userguide/calling.html#linking-callbacks-errbacks
-	call.apply_async(kwargs = kwargs, 					
-					link = external_algorithm_run_finished.s(rid, return_host, return_path),
-					link_error = external_algorithm_run_error.s(rid, return_host, return_path))
+
+	#call.apply_async(kwargs = kwargs,
+	call.apply_async(kwargs = kwargs)
+	#				link = external_algorithm_run_finished.s(rid, return_host, return_path),
+	#				link_error = external_algorithm_run_error.s(rid, return_host, return_path))
 
 
 	#call.apply(kwargs = kwargs, link = external_algorithm_run_finished.s(rid, return_host, return_path))  ### synchronous task; for test purpose 
+	#call.apply(kwargs = kwargs)
+	#Task.apply(call, kwargs = kwargs)
+
+
 
 	sleep(0.3)	### needed for correct setting of task status ; seems to be a timing problem
 	return current_run.id
 
 	
+

@@ -1,6 +1,6 @@
 from django.conf.urls import url
-from views import base, details, delete_runs, run, results, available, process
-from views import jobstatus, processtest, testresponse, testserver
+from .views import base, details, delete_runs, run, results, available, process
+from .views import jobstatus, processtest, testresponse, testserver
 
 from .settings import ALGORITHM_URL_PREFIX as prefix
 

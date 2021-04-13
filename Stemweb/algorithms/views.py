@@ -17,9 +17,11 @@ from django.http import HttpResponseBadRequest
 from django.http import HttpRequest
 
 from django.template import RequestContext
-from django.shortcuts import render_to_response
+#from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.shortcuts import get_object_or_404
-from django.core.urlresolvers import reverse
+#from django.core.urlresolvers import reverse ### Django 2.0 removes the django.core.urlresolvers module, which was moved to django.urls in version 1.10.
+from django.urls import reverse
 from django.core.serializers import serialize
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
@@ -36,10 +38,10 @@ from .settings import ALGORITHM_MEDIA_ROOT as algo_media
 
 def base(request):
 	algorithms = Algorithm.objects.all()
-	c = RequestContext(request, {"all_algorithms" : algorithms}) 
-	#return render_to_response("algorithms_base.html", c)
-	return render_to_response("algorithms_base.html", c.flatten()) # avoids Type error "context must be a dict rather than RequestContext" (necessary since django-1.11)
-        #return render_to_response("algorithms_base.html", {"all_algorithms" : algorithms})
+	#context = RequestContext(request, {"all_algorithms" : algorithms}) 
+    #return render_to_response("algorithms_base.html", {"all_algorithms" : algorithms})
+	#return render(request, 'algorithms_base.html', context)  ### TypeError: context must be a dict rather than RequestContext.
+	return render(request, 'algorithms_base.html', {"all_algorithms" : algorithms})
 
 def details(request, algo_id, form = None):
 	'''
@@ -58,7 +60,8 @@ def details(request, algo_id, form = None):
 	context_dict['all_algorithms'] = Algorithm.objects.all()
 	#c = RequestContext(request, context_dict)
 	#return render_to_response("algorithms_details.html", c)
-        return render_to_response("algorithms_details.html", context_dict)	# avoids Type error "context must be a dict rather than RequestContext" (necessary since django-1.11)
+    #return render_to_response("algorithms_details.html", context_dict)	# avoids Type error "context must be a dict rather than RequestContext" (necessary since django-1.11)
+	return render(request, 'algorithms_details.html', context_dict)
 
 def delete_runs(request):
 	''' Delete runs that are present in request.POST in 'runs' paramater.
@@ -91,7 +94,8 @@ def run(request, algo_id):
 			return HttpResponseRedirect(reverse('algorithms_run_results_url', \
 				kwargs = { 'run_id': run_id }))
 	else:
-		resp = render_to_response('404.html')
+		#resp = render_to_response('404.html')
+		resp = render(None,'404.html',None)
 		resp.status_code = 404
 		return resp
 	
@@ -105,16 +109,16 @@ def results(request, run_id):
 	#run.save()   ### why?
 	#c = RequestContext(request, {'algorithm_run': run})
 	if run.status == STATUS_CODES['finished']:
-		#return render_to_response('algorithm_running_results.html', c)
-        #return render_to_response('algorithm_running_results.html', c.flatten()) 
-                return render_to_response('algorithm_running_results.html', {'algorithm_run': run})
+        #return render_to_response('algorithm_running_results.html', {'algorithm_run': run})
+		return render(request, 'algorithm_running_results.html', {'algorithm_run': run})
 	else:
-		# TODO: different view for non-finished algorithms ####  a MUST ToDo! ==> test with (simulated) long lasting calculations
 		#return render_to_response('algorithm_running_results.html', c)
-                return render_to_response('algorithm_running_results.html', {'algorithm_run': run})
-                #pass 
-
-	#raise Http404
+        #return render_to_response('algorithm_running_results.html', {'algorithm_run': run})
+		return render(request, 'algorithm_running_results.html', {'algorithm_run': run})
+	#else if run.status == STATUS_CODES['running']:
+	# TODO: different view for non-finished algorithms ####  a MUST ToDo! ==> test with (simulated) long lasting calculations
+	#	return render(request, 'algorithm_running_ongoing.html', {'algorithm_run': run})	         
+	#	raise Http404
 
 
 @csrf_exempt
@@ -258,7 +262,7 @@ def jobstatus(request, run_id):
 def processtest(request):
 	#csv_file = "/Users/slinkola/STAM/data_sets/request4.json"
 	csv_file ="/home/stemweb/Stemweb/algorithm/fixtures/02_nj.json"	
-	csv = u""
+	csv = ""
 	import codecs
 	with codecs.open(csv_file, 'r', encoding = 'utf8') as f:
 		csv = f.read()
@@ -271,7 +275,7 @@ def processtest(request):
 	request.META = {}
 	request.META['REMOTE_ADDR'] = '127.0.0.1'
 	request.META['SERVER_PORT'] = 8000
-	execute_algorithm.external(json.loads(csv, encoding = 'utf8'), 3, request)
+	execute_algorithm.external(json.loads(csv), 3, request)
 	return HttpResponse("ok")
 
 
@@ -279,7 +283,7 @@ def processtest(request):
 def testresponse(request):
 	if request.method == "POST":
 		#print json.loads(request.body, encoding = "utf8")
-		print json.loads(request.data, encoding = "utf8")		
+		print(json.loads(request.data, encoding = "utf8"))		
 		return HttpResponse("OK")
 	return HttpResponse("No POST")
 
@@ -289,3 +293,4 @@ def testserver(request):
 	
 
 	
+

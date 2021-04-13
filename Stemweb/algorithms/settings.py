@@ -10,7 +10,7 @@ from .semstem.semstemprob import Semstem
 from .neighbour_net.neighbornet_class import NN
 from .neighbour_joining.njc import NJ
 from .rhm.binary_sankoff import RHM
-import validators
+from . import validators
 #import lsettings
 
 ALGORITHM_URL_PREFIX = settings.ALGORITHM_URL_PREFIX if \

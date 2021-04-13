@@ -2,29 +2,30 @@
 # -*- coding: utf-8 -*-
 
 import time
-from Queue import Queue, Empty
+from queue import Queue, Empty
 import multiprocessing as mp
 import threading as th
 import datetime
 import os
 import logging
-import settings
+from . import settings
 
 import json
 import functools
-import httplib
-import urllib2
+import http.client
+import urllib.request, urllib.error, urllib.parse
 
-from decorators import synchronized
+from .decorators import synchronized
 from django.template.defaultfilters import slugify
 from django.views.decorators.csrf import csrf_exempt
 
 #from celery.task import Task, task
-from celery.task import Task
+from celery import Task
+from celery import group, shared_task
 from celery.registry import tasks
 from celery.result import AsyncResult 
+#from celery.decorators import task
 from celery.decorators import task
-from celery import shared_task
 
 #from Stemweb.algorithms.settings import ALGORITHM_MEDIA_ROOT as algo_media_root ###   ImportError    ="=
 import Stemweb.algorithms.settings 
@@ -51,7 +52,7 @@ class Observer():
 		'''
 		self.listening_to.file_lock.release()
 
-#@task(bind=True)		
+#@shared_task	 ### The @shared_task decorator lets you create tasks without having any concrete app instance; ==> e.g. for subtasks NJ, NN, RHM
 class AlgorithmTask(Task):
 	'''
 		Super class of all algorithms.
@@ -238,7 +239,7 @@ class AlgorithmTask(Task):
 			atleast one argument.
 		'''	
 		assert hasattr(observer,'update')
-		assert observer.update.func_code.co_argcount > 0
+		assert observer.update.__code__.co_argcount > 0
 		if not observer in self._observers:	
 			observer.listening_to = self
 			self._observers.append(observer)
@@ -273,7 +274,8 @@ class AlgorithmTask(Task):
 						NOT be changed during the subclassing algorithm's run!
 		'''
 		pass
-			
+
+	#@shared_task  
 	def run(self, *args, **kwargs):
 		'''
 			Called when task is getting executed. Don't override unless you 
@@ -292,11 +294,11 @@ class AlgorithmTask(Task):
 
 		self._algorithm_thread.start()		## here class NJ(AlgorithmTask)  in  njc.py is called
 		self.algorithm_run.status = settings.STATUS_CODES['running']
-		print 'I am running NOW as thread'
+		print('I am running NOW as thread')
 		#raise Exception("ERROR: this is an INTENDED test case exception from AlgorithmTask level ")   ### a manual test case 
 		self.algorithm_run.save()			## here again class NJ(AlgorithmTask)  in  njc.py is called
 		
-		# TODO: Fix me st000pid busy wait.
+		# TODO: Fix me st000pid busy wait.  #### INSERTED BY PREVIOUS DEVELOPER
 		while self._stop.value == 0:
 			if not self._algorithm_thread.isAlive(): break
 			self._read_from_results_()	
@@ -342,7 +344,7 @@ class AlgorithmTask(Task):
 			'''
 			from Stemweb.algorithms.models import AlgorithmRun
 			self.algorithm_run = AlgorithmRun.objects.get(pk=self.algorithm_run.id)
-			if self.algorithm_run.status != settings.STATUS_CODES['failure']:  # failure was set during njc algorithm run; we want to keep this
+			if self.algorithm_run.status != settings.STATUS_CODES['failure']: #@task # failure was set during njc algorithm run; we want to keep this
 				self.algorithm_run.status = settings.STATUS_CODES['finished']
 			self.algorithm_run.end_time = datetime.datetime.now()
 			self.algorithm_run.pid = -1
@@ -381,13 +383,13 @@ class AlgorithmTask(Task):
 		while not self._results_queue.empty():
 			try:
 				result = self.__get_from_results__()	
-				if self.score_name in result.keys() and self.algorithm_run is not None:
+				if self.score_name in list(result.keys()) and self.algorithm_run is not None:
 					self.algorithm_run.score = result[self.score_name]
 					self.algorithm_run.save()
 					self.logger.info("AlgorithmRun %s:%s got better score %s" % \
 						(self.algorithm_run.algorithm.name, self.algorithm_run.id, \
 						result[self.score_name]))
-				if self.iteration_name in result.keys() and self.algorithm_run is not None:
+				if self.iteration_name in list(result.keys()) and self.algorithm_run is not None:
 					self.algorithm_run.current_iteration = result[self.iteration_name]
 					self.algorithm_run.save()
 					self.logger.info("AlgorithmRun %s:%s advanced to %s iteration" % \
@@ -429,10 +431,9 @@ class AlgorithmTask(Task):
 		'''
 		for o in self._observers:
 			o.update(self)
-	
 
-#@shared_task
-@task
+#@task		# The '@task' decorator is deprecated since celery5.   
+#@shared_task	
 def external_algorithm_run_error(request, exc, traceback, run_id, return_host, return_path):	
 	''' Callback task in case external requested algorithm run fails.  
 		note these 3 "hidden" parameters, handed over but NOT visible in the call execute_algorithm.py/external/call.apply_async()
@@ -440,23 +441,23 @@ def external_algorithm_run_error(request, exc, traceback, run_id, return_host, r
 		- exc: exception / error text
 		- traceback: details about exception
 	'''
-	#print 'external algorithm run failed :-(( '
+	#print ('external algorithm run failed :-(( ')
 	from Stemweb.algorithms.models import AlgorithmRun
 	algorun = AlgorithmRun.objects.get(pk = run_id)
 	if algorun.status == settings.STATUS_CODES['running']:
 		uuid = request.id ### the parent's task id
 		#print('Task {0} raised exception: {1!r}\n{2!r}'.format(uuid, exc, traceback))
-		#print run_id, uuid
+		#print (run_id, uuid)
 		logger = logging.getLogger('stemweb.algorithm_run')
 		#logger.info(uuid)
 		logger.error("the AlgorithmRun %r/Task %r raised this error: %r\n%r" %\
 					(run_id, uuid, exc, traceback))
 
-		#print 'Task {0} raised exception: {1!r}\n{2!r}'.format(uuid, exc, traceback)
+		#print ('Task {0} raised exception: {1!r}\n{2!r}'.format(uuid, exc, traceback))
 
 		#error_message = 'ERROR: ' + str(exc) + '    traceback: ' + str(traceback)
 		error_message = 'ERROR: ' + str(exc) 
-		#print error_message    
+		#print (error_message)
 		
 		
 		algorun.status = settings.STATUS_CODES['failure']
@@ -465,7 +466,7 @@ def external_algorithm_run_error(request, exc, traceback, run_id, return_host, r
 		error_message = algorun.error_msg
 
 	algorun.end_time = datetime.datetime.now()
-	print algorun.end_time
+	print(algorun.end_time)
 	algorun.save()
 	
 	ret = {
@@ -487,21 +488,21 @@ def external_algorithm_run_error(request, exc, traceback, run_id, return_host, r
 	headers = {"Content-type": "application/json; charset=utf-8"}	
 	body = message.encode('utf8')
 	
-	class BoundHTTPHandler(urllib2.HTTPHandler):
+	class BoundHTTPHandler(urllib.request.HTTPHandler):
 
 		def __init__(self, source_address=None, debuglevel=0):
-			urllib2.HTTPHandler.__init__(self, debuglevel)
-			self.http_class = functools.partial(httplib.HTTPConnection, source_address=source_address)
+			urllib.request.HTTPHandler.__init__(self, debuglevel)
+			self.http_class = functools.partial(http.client.HTTPConnection, source_address=source_address)
 	
 		def http_open(self, req):
 			return self.do_open(self.http_class, req)
 
 
-	class BoundHTTPSHandler(urllib2.HTTPSHandler):
+	class BoundHTTPSHandler(urllib.request.HTTPSHandler):
 
 		def __init__(self, source_address=None, debuglevel=0):
-			urllib2.HTTPSHandler.__init__(self, debuglevel)
-			self.http_class = functools.partial(httplib.HTTPSConnection, source_address=source_address)
+			urllib.request.HTTPSHandler.__init__(self, debuglevel)
+			self.http_class = functools.partial(http.client.HTTPSConnection, source_address=source_address)
 	
 		def http_open(self, req):
 			return self.do_open(self.http_class, req)
@@ -511,7 +512,7 @@ def external_algorithm_run_error(request, exc, traceback, run_id, return_host, r
 	source_port = 51000
 	handler = BoundHTTPHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
 	shandler = BoundHTTPSHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
-	fixed_sourceport_opener = urllib2.build_opener(shandler, handler)
+	fixed_sourceport_opener = urllib.request.build_opener(shandler, handler)
 
 	### using urllib2 in python 2.7
 
@@ -520,24 +521,24 @@ def external_algorithm_run_error(request, exc, traceback, run_id, return_host, r
 	headers = {'Content-type': 'application/json; charset=utf-8'}
 	targeturl = 'https://' + return_host + return_path	
 	#targeturl = 'http://' + return_host + return_path
-	req = urllib2.Request(targeturl, data, headers)
+	req = urllib.request.Request(targeturl, data, headers)
 
 	try: 
 		#response = urllib2.urlopen(req)	# standard request; not using dedicated source_port; alternative to next line
 		response = fixed_sourceport_opener.open(req)	
 		#content = response.read()
 		#print content
-	except urllib2.HTTPError, e:
+	except urllib.error.HTTPError as e:
 		#print e.code
 		#print e.reason
 		pass
 
 
+#@task
 #@shared_task
-@task
 def external_algorithm_run_finished(newick_result, run_id, return_host, return_path):
 	''' Callback task in case external algorithm run finishes succesfully. '''
-	print '########### algo_run_finished called #######################'
+	print('########### algo_run_finished called #######################')
 	#return_path = 'stemmaweb/stemweb/result/'
 	hostparts = return_host.split(':')
 	host = hostparts[0]
@@ -584,21 +585,21 @@ def external_algorithm_run_finished(newick_result, run_id, return_host, return_p
 	This gives us a custom urllib2.HTTPHandler implementation that is source_address aware. We can add it to a new urllib2.OpenerDirector
 	"""
 
-	class BoundHTTPHandler(urllib2.HTTPHandler):
+	class BoundHTTPHandler(urllib.request.HTTPHandler):
 
 		def __init__(self, source_address=None, debuglevel=0):
-			urllib2.HTTPHandler.__init__(self, debuglevel)
-			self.http_class = functools.partial(httplib.HTTPConnection, source_address=source_address)
+			urllib.request.HTTPHandler.__init__(self, debuglevel)
+			self.http_class = functools.partial(http.client.HTTPConnection, source_address=source_address)
 	
 		def http_open(self, req):
 			return self.do_open(self.http_class, req)
 
 
-	class BoundHTTPSHandler(urllib2.HTTPSHandler):
+	class BoundHTTPSHandler(urllib.request.HTTPSHandler):
 
 		def __init__(self, source_address=None, debuglevel=0):
-			urllib2.HTTPSHandler.__init__(self, debuglevel)
-			self.http_class = functools.partial(httplib.HTTPSConnection, source_address=source_address)
+			urllib.request.HTTPSHandler.__init__(self, debuglevel)
+			self.http_class = functools.partial(http.client.HTTPSConnection, source_address=source_address)
 	
 		def http_open(self, req):
 			return self.do_open(self.http_class, req)
@@ -607,7 +608,7 @@ def external_algorithm_run_finished(newick_result, run_id, return_host, return_p
 	source_port = 51000
 	handler = BoundHTTPHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
 	shandler = BoundHTTPSHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
-	fixed_sourceport_opener = urllib2.build_opener(shandler, handler)
+	fixed_sourceport_opener = urllib.request.build_opener(shandler, handler)
 
 	### using urllib2 in python 2.7
 
@@ -617,26 +618,26 @@ def external_algorithm_run_finished(newick_result, run_id, return_host, return_p
 	headers = {'Content-type': 'application/json; charset=utf-8'}
 	targeturl = 'https://' + return_host + return_path
 	#targeturl = 'http://' + return_host + return_path
-	#req = urllib2.Request(url, data, headers)	
-	req = urllib2.Request(targeturl, data, headers)
+	#req = urllib.request.Request(url, data, headers)	
+	req = urllib.request.Request(targeturl, data, headers)
 	#print req.get_full_url()		### e.g.: https://stemmaweb.net:443/stemmaweb/stemweb/result/
-    #print req.get_method()          ### POST
-    #print req.(get_data) 
+	#print req.get_method()          ### POST
+	#print req.(get_data) 
             
 	try: 
-		#response = urllib2.urlopen(req)	### standard request, using any free source port
+		#response = urllib.request.urlopen(req)	### standard request, using any free source port
 		response = fixed_sourceport_opener.open(req)	
 		# content = response.read()
-		# print content
-	except urllib2.HTTPError, e:
-		# print e.code
-		# print e.reason
+		# print (content)
+	except urllib.error.HTTPError as e:
+		# print (e.code)
+		# print (e.reason)
 		pass
 
 	#with fixed_sourceport_opener.open(req) as response:
-	##with urllib2.urlopen(req) as response:   
+	##with urllib.request.urlopen(req) as response:   
    	#	resp = response.read()
-	#	print resp
+	#	print (resp)
 
 
 
@@ -692,3 +693,4 @@ def adding_task(x, y, items=[]):
         for x, y in items:
             result += (x + y)
     return result
+

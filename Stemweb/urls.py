@@ -1,4 +1,4 @@
-import settings
+from . import settings
 from django.conf.urls import include, url
 from django.views import static
 from django.contrib import admin
@@ -17,5 +17,5 @@ urlpatterns = [
     #(r'^accounts/', include('registration.backends.default.urls')),
     #url(r'^accounts/', include('Stemweb.third_party_apps.registration.backends.default.urls')),
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
 ]

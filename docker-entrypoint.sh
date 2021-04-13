@@ -16,11 +16,11 @@ python manage.py makemigrations
 python manage.py migrate --run-syncdb
 python manage.py loaddata Stemweb/algorithms/init_algorithms.json
 python manage.py loaddata Stemweb/files/files.json
-python manage.py loaddata Stemweb/home/fixtures/bootstrap.json
+#python manage.py loaddata Stemweb/home/fixtures/bootstrap.json
 
 # Start celery worker
 echo "######### Starting Celery worker #########"
-celery worker -A Stemweb &
+celery -A Stemweb worker &
 
 # Start Django server
 echo "######### Starting Django server #########"

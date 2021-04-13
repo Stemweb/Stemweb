@@ -5,7 +5,7 @@ import django.contrib.auth.models as dj_auth_models
 
 from django.db import models
 
-from forms import DynamicArgs
+from .forms import DynamicArgs
 from Stemweb.files.models import InputFile
 from .settings import ARG_VALUE_CHOICES, STATUS_CODES
 from .settings import ALGORITHMS_CALLING_DICT as call_dict
@@ -115,7 +115,7 @@ class Algorithm(models.Model):
 			Any keys that are present in run_args already are not updated.
 		'''
 		algo_callable = None		
-		for key, value in call_dict[str(self.id)].items():
+		for key, value in list(call_dict[str(self.id)].items()):
 			if key == 'callable':
 				algo_callable = value
 			elif key not in kwargs['run_args']:
@@ -139,7 +139,7 @@ class Algorithm(models.Model):
 					populate the fields.
 		'''
 		if len(self.args.all()) == 0: return None
-                return DynamicArgs(arguments = self.args, post = post)
+		return DynamicArgs(arguments = self.args, post = post)
                
 	
 	def get_external_args(self):
@@ -209,8 +209,8 @@ class AlgorithmRun(models.Model):
 	start_time = models.DateTimeField(auto_now_add = True)
 	end_time = models.DateTimeField(auto_now_add = False, null = True)
 	status = models.IntegerField(default = STATUS_CODES['not_started'])
-	algorithm = models.ForeignKey(Algorithm)        
-	input_file = models.ForeignKey(InputFile)   
+	algorithm = models.ForeignKey(Algorithm, on_delete=models.CASCADE)        
+	input_file = models.ForeignKey(InputFile, on_delete=models.CASCADE)   
 	folder = models.CharField(max_length = 300, blank = True) 
 	image = models.ImageField(upload_to = folder, null = True) 
 	score = models.FloatField(null = True, verbose_name = "Score")
@@ -266,3 +266,4 @@ class AlgorithmRun(models.Model):
 	
 	
 	
+

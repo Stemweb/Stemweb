@@ -37,7 +37,7 @@ class NJ(AlgorithmTask):
 		            n=n+1
 		            if r[i] != s[i]: diff=diff+1
 		    if n == 0: return 0
-		    #print diff*1.0/n
+		    #print (diff*1.0/n)
 		    return diff*1.0/n
 		
 		def mean(l): return sum(l)*1.0/len(l)
@@ -79,7 +79,7 @@ class NJ(AlgorithmTask):
 		
 		# tree output
 		def printtree(node):
-		    print _printtree(node, '')
+		    print (_printtree(node, ''))
 		    
 		
 		# tree output
@@ -127,9 +127,9 @@ class NJ(AlgorithmTask):
 				data[tax[-1]]=line.strip().split()[-1]
 				if data[tax[-1]][-1]==';': data[tax[-1]]=data[tax[-1]][0:-1]; break # end matrix
 			
-			#print "these Taxas", len(tax)
-			#print len(data[tax[0]])
-			#print len(data[tax[-1]])
+			#print ("these Taxas", len(tax))
+			#print (len(data[tax[0]]))
+			#print (len(data[tax[-1]]))
 
 			taxa=len(tax)         # number of taxa
 			d={}                  # observed distances between pairs
@@ -186,7 +186,7 @@ class NJ(AlgorithmTask):
 			# groups of manuscripts)
 			S=[tuple([t]) for t in tax]
 			
-			#print "S", len(S)
+			#print ("S", len(S))
 			# main loop
 			while len(S)>1:
 				# computed NJ distances
@@ -231,7 +231,7 @@ class NJ(AlgorithmTask):
 			
 
 
-			# print out tree
+			# save tree
 			save_tree(nodes[tuple(new)])
 			
 			self._stop.value = 1

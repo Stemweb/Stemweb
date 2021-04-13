@@ -347,4 +347,4 @@ d_var=mean([x*x for x in d_obs])
 d_estim = np.matrix(A) * np.matrix(x_estim).transpose()
 res_var=mean([(d_obs[i]-d_estim[i])**2 for i in range(len(d_obs))])
 # fit value describing how well distances in the network match actual ones
-print (math.sqrt(d_var)-math.sqrt(res_var))/math.sqrt(d_var)
+print ((math.sqrt(d_var)-math.sqrt(res_var))/math.sqrt(d_var))

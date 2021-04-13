@@ -2,11 +2,12 @@ import logging
 
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
-from django.shortcuts import render_to_response
+#from django.shortcuts import render_to_response  # The render_to_response shortcut was deprecated in Django 2.0, and is removed in Django 3.0. 
+from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 
-from models import InputFile
-from forms import UploadFile
+from .models import InputFile
+from .forms import UploadFile
 
 def details(request, file_id, form = None):
 	'''
@@ -19,8 +20,9 @@ def details(request, file_id, form = None):
 	
 	#allfiles = InputFile.objects.all()
 	#context = RequestContext(request, {'file': details_file, 'form': form})
-	#return render_to_response('files_details.html', context.flatten())
-        return render_to_response('files_details.html',  {'file': details_file, 'form': form}) 
+	context_dict = {'file': details_file, 'form': form}
+	# return render_to_response('files_details.html',  {'file': details_file, 'form': form}) ### used in py2.7 ; django 1.11
+	return render(request, 'files_details.html', context_dict) 
 
 def base(request, form = None):
 	'''
@@ -31,9 +33,9 @@ def base(request, form = None):
 	
 	allfiles = InputFile.objects.all()
 	#context = RequestContext(request, { 'all_files': allfiles, 'form': form })
-	#return render_to_response('files_base.html', context.flatten())
-	return render_to_response('files_base.html', { 'all_files': allfiles, 'form': form })
-
+	context_dict = {'all_files': allfiles, 'form': form}
+	#return render_to_response('files_base.html', { 'all_files': allfiles, 'form': form })   ### used in py2.7 ; django 1.11
+	return render(request, 'files_base.html', context_dict)
 
 def upload(request):
 	'''
@@ -50,9 +52,11 @@ def upload(request):
 			return HttpResponseRedirect('/files/%s' % (input_file.id))
 		else:
 			form = UploadFile()
-	#context = RequestContext(request) 
-	return render_to_response('/files/',
-                              { 'form': form },
-                              #context_instance=context)
-                              request = request)	
+	context = RequestContext(request) 
+	#return render_to_response('/files/',
+    #                          { 'form': form },
+    #                          #context_instance=context)
+    #                          request = request)
+	return render(request, '/files/',{ 'form': form }, context=context)	
 	
+

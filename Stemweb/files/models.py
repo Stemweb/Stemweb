@@ -6,7 +6,7 @@
 
 from django.db import models
 from django.utils.encoding import smart_str
-import utils
+from . import utils
 
 class GetOrNoneManager(models.Manager):
 	''' Adds get_or_none method to objects. '''

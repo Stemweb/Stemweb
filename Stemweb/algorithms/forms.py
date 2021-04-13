@@ -36,8 +36,8 @@ class DynamicArgs(forms.Form):
 			if value == 'input_file': 
 				field = ftypes[value](**kwargs)
 				#print "%s" % ( len(field.queryset))
- 				#if field is not EmptyQuerySet():         ## raises TypeError("EmptyQuerySet can't be instantiated")
-                                if field:                                 ## using simpler check instead   
+				#if field is not EmptyQuerySet():         ## raises TypeError("EmptyQuerySet can't be instantiated")
+				if field:                                 ## using simpler check instead   
 					self.input_files.append(key)
 					self.fields[key] = field
 			else: 			
@@ -47,7 +47,7 @@ class DynamicArgs(forms.Form):
 			key values.
 		'''				
 		if post is not None:
-			for key in post.keys():
+			for key in list(post.keys()):
 				self.data[key] = post[key]
 			self.is_bound = True
 	

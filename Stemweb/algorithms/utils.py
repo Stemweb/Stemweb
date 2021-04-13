@@ -17,12 +17,12 @@ import matplotlib.pyplot as plt
 
 from threading import Lock
 
-from models import Algorithm
+from .models import Algorithm
 from .settings import ARG_VALUE_FIELD_TYPE_KEYS as field_types
 # from .settings import TRUSTED_SERVERS
 from .settings import ALGORITHM_MEDIA_ROOT as algo_media
 from Stemweb.files.models import InputFile
-from decorators import synchronized
+from .decorators import synchronized
 
 pylab_lock = Lock()
 
@@ -108,7 +108,7 @@ def build_local_args(form = None, algorithm_name = None, request = None):
        	    Returns dictionary with running arguments.
 	'''
 	run_args = {}
-	for key in form.cleaned_data.keys():
+	for key in list(form.cleaned_data.keys()):
 		if type(form.fields[key]) == field_types['input_file']:
 			input_file = form.cleaned_data[key]
 			run_args[key] = input_file.file.path
@@ -121,13 +121,13 @@ def build_local_args(form = None, algorithm_name = None, request = None):
 	''' Create run folder based on input file's id and algorithm's name. '''
 	run_args['folder_url'] = create_run_folder(run_args['file_id'], algorithm_name)
 	
-        return run_args
+	return run_args
 
 
 def build_external_args(parameters, input_file_key, input_file, \
 					algorithm_name = None):
 	run_args = {}
-	for key, value in parameters.items():
+	for key, value in list(parameters.items()):
 		run_args[key] = value
 	run_args[input_file_key] = input_file.file.path
 	#run_args['folder_url'] = create_run_folder(None, input_file.id, algorithm_name)
@@ -185,7 +185,7 @@ def validate_json(json_data, algo_id):
 
 	params = json_data['parameters']
 	for arg in algorithm.args.all().filter(external = True):
-		if params.has_key(arg.key):
+		if arg.key in params:
 			value = params[arg.key]
 			if not validate_parameter(value, arg.value):
 				return (False, "Parameter %s = %s had wrong type. Expected %s." %\
@@ -215,3 +215,4 @@ def validate_parameter(value, param_type):
 	if param_type == "string":
 		return type(str(value)) == str
 	return False
+

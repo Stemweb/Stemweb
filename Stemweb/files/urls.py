@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from views import details, base, upload
+from .views import details, base, upload
 
 urlpatterns = [
     url(r'^(?P<file_id>\d+)/$', details, name='files_details_url'),

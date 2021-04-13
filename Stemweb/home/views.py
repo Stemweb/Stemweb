@@ -14,7 +14,7 @@ def get_recent_activities():
 	started_runs = AlgorithmRun.objects.filter(start_time__gte = datetime.now()-timedelta(days=delta))
 	ended_runs = AlgorithmRun.objects.filter(end_time__gte = datetime.now()-timedelta(days=delta))
 	
-	if len(uploaded) is 0 and len(started_runs) is 0 and len(ended_runs) is 0:
+	if len(uploaded) == 0 and len(started_runs) == 0 and len(ended_runs) == 0:
 		return None
 	
 	for u in uploaded: 
@@ -41,7 +41,7 @@ def home(request):
 	# In Django 1.8+, the template's render method takes a dictionary for the context parameter. Support for passing a Context instance is deprecated, and gives an error in Django 1.10+.
 	# hence let us just use a regular dict instead of a Context instance:
 	#return HttpResponse(t.render(c.flatten()))
-        return HttpResponse(t.render({'recent_activities': recent_activities}))
+	return HttpResponse(t.render({'recent_activities': recent_activities}))
 
 def server_error(request):
 	return HttpResponse('Internal Server Error: We are sorry, but we could not handle your request.')

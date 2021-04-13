@@ -5,7 +5,7 @@ import os
 from django import forms
 from django.db.models.query import EmptyQuerySet
 
-from models import InputFile
+from .models import InputFile
 
 def validate_upload_file(FileField):
 	'''
