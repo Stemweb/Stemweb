@@ -1,0 +1,38 @@
+version: '3'
+services:
+    mysql:
+        image: "mysql:5.7"
+        restart: always
+        environment:
+            MYSQL_ALLOW_EMPTY_PASSWORD: "TRUE"
+            MYSQL_PASSW: ${MYSQL_PASSW}
+        volumes:
+            - ./mysqlinit:/docker-entrypoint-initdb.d
+    redis:
+        image: "redis:alpine"
+        restart: always
+        sysctls:
+            # change this Linux Kernel Parameter (default is 128) within container because of this WARNING
+            # "The TCP backlog setting of 511 cannot be enforced
+            # because /proc/sys/net/core/somaxconn is set to the lower value of 128."
+            net.core.somaxconn: 512     # maximal number of connections
+        volumes:
+            - ./redisinit/redis.conf:/usr/local/etc/redis/redis.conf       # version 6 from  https://redis.io/topics/config     ## adapted
+        command:
+            redis-server /usr/local/etc/redis/redis.conf
+
+    stemweb_py37:
+        image: "dhuniwien/stemweb_py37:latest"
+        restart: always
+        environment:
+            MYSQL_PASSW: ${MYSQL_PASSW}
+        depends_on:
+        - mysql
+        - redis
+        volumes:
+        - ./config/local_settings.py:/home/stemweb/Stemweb/local_settings.py
+        ports:
+            #- "10.0.228.35:8000:8000"        ### on test-server
+            #- "10.0.228.35:51000:51000"      ### on test server
+            - "127.0.0.1:8000:8000"         ### on dev-laptop
+            - "127.0.0.1:51000:51000"       ### on dev-laptop

@@ -1,13 +1,9 @@
 Django
 Pillow-PIL
 networkx
-#celery<4.0,>=3.1.15
-#celery>=4.3.0
 celery<5.0,>=4.3.0
 kombu
 redis
-#mqp
-#django-picklefield
 numpy
 matplotlib
 scipy

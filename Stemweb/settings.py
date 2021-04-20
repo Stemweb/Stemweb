@@ -1,9 +1,12 @@
 # Import locally configured settings 
-from . import local_settings as ls
+import local_settings as ls
 import os
 import sys
 
-DEBUG = True   ### if set to True, then Celery raises WARNING: "Using settings.DEBUG leads to a memory leak, never use this setting in production environments!
+#import djcelery
+#djcelery.setup_loader()
+
+DEBUG = False   ### if set to True, then Celery raises WARNING: "Using settings.DEBUG leads to a memory leak, never use this setting in production environments!
 
 # Root folder of the site
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
@@ -14,7 +17,7 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-ALLOWED_HOSTS = ['10.0.0.137', '10.0.0.192', 'localhost', '127.0.0.1', '10.0.228.35']
+ALLOWED_HOSTS = ls.allowed_hosts
 
 DATABASES = {
     'default': {
@@ -95,14 +98,14 @@ STATICFILES_FINDERS = (
 SECRET_KEY = ls.secret_key
 
 
-MIDDLEWARE = [
+MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+#    'django.middleware.csrf.CsrfViewMiddleware',                # disabled as workaround
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    #'Stemweb.third_party_apps.pagination.middleware.PaginationMiddleware',
-    #'django.middleware.csrf.CsrfViewMiddleware',            # disabled as workaround
-]
+    'Stemweb.third_party_apps.pagination.middleware.PaginationMiddleware',
+)
 
 ROOT_URLCONF = ls.root_urls
 
@@ -128,7 +131,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 #'django.template.context_processors.static',
                 #'django.template.context_processors.tz',
-                'django.contrib.messages.context_processors.messages',
+                #'django.contrib.messages.context_processors.messages',
             ],
             'loaders': [
                 # insert your TEMPLATE_LOADERS here
@@ -153,11 +156,12 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'kombu',
     'redis',   
-#    'rest_framework', 
-
+    'rest_framework', 
+#    'djcelery',
+#    "djkombu",
     
 #    'Stemweb.third_party_apps.recaptcha_works',
-#    'Stemweb.third_party_apps.registration',
+    'Stemweb.third_party_apps.registration',
     'Stemweb.third_party_apps.pagination',
     
     # Own apps
@@ -175,12 +179,11 @@ INSTALLED_APPS = (
 #BROKER_VHOST = "/"
 
 # celery  configurations 
-CELERY_BROKER_URL = 'redis://redis:6379'
-CELERY_RESULT_BACKEND = 'redis://redis:6379'
+CELERY_BROKER_URL = ls.redis_server
+CELERY_RESULT_BACKEND = ls.redis_server
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
-#CELERY_TASK_ALWAYS_EAGER = True   ### always sync instead of async call; you can set it for debug purposes
 
 
 
@@ -319,4 +322,3 @@ LOGGING = {
 
     }
 }
-
