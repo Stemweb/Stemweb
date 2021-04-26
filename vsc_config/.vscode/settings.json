@@ -1,5 +1,0 @@
-{
-    "python.pythonPath": "/usr/bin/python",
-    "debug.allowBreakpointsEverywhere": true,
-    "debug.inlineValues": true
-}
