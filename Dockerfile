@@ -1,6 +1,6 @@
-# install everything based on image "python:2.7"
+# install everything based on image "python:3.7"
 
-FROM python:2.7
+FROM python:3.7
 LABEL vendor=DHUniWien
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -28,7 +28,7 @@ COPY Stemweb Stemweb
 # initialization of relevant variables as floating-point numbers in binarysankoff_linux.c
 # is already done in the repository on the host server
 WORKDIR /home/stemweb/Stemweb/algorithms/rhm
-RUN gcc -I/usr/local/include/python2.7/ -I/usr/include/python2.7 -lpython2.7 -I/usr/local/include -L/usr/local/lib -fPIC -g -Wall -c binarysankoff_linux.c
+RUN gcc -I/usr/local/include/python3.7/ -I/usr/include/python3.7 -lpython3.7 -I/usr/local/include -L/usr/local/lib -fPIC -g -Wall -c binarysankoff_linux.c
 RUN gcc -shared -fPIC -Wall -I/usr/local/include -L/usr/local/lib binarysankoff_linux.o -o binarysankoff.so -lz
 
 #============ make the log directory and set permissions ===============
