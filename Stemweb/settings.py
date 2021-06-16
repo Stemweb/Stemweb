@@ -156,9 +156,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'kombu',
     'redis',   
-    'rest_framework', 
-#    'djcelery',
-#    "djkombu",
+#    'rest_framework', 
     
 #    'Stemweb.third_party_apps.recaptcha_works',
     'Stemweb.third_party_apps.registration',
@@ -170,13 +168,6 @@ INSTALLED_APPS = (
     'Stemweb.files',
 )
 
-#BROKER_BACKEND = "django"  ## async not working
-## Django-celery configurations
-#BROKER_HOST = "localhost"
-#BROKER_PORT = 5672
-#BROKER_USER = "guest"
-#BROKER_PASSWORD = "guest"
-#BROKER_VHOST = "/"
 
 # celery  configurations 
 CELERY_BROKER_URL = ls.redis_server
@@ -184,8 +175,8 @@ CELERY_RESULT_BACKEND = ls.redis_server
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
-
-
+INCLUDE=['Stemweb.algorithms.tasks']
+#CELERY_TASK_ALWAYS_EAGER = True   ### always sync instead of async call; you can set it for debug purposes
 
 
 # registration apps own setting. Configures how many days

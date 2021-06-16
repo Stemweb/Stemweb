@@ -39,5 +39,6 @@ def csv2nex(csv_data):
         ret = "#NEXUS\nMATRIX\n"
         for c in taxas:
                 ret += c + "\t" + data[c]  + "\n"
-
+        ### workaround in py37; don't know yet when double backslashes come in:
+        ret.replace('\\\\', '\\')        ### replace 2 backslashes by 1 backslash; each time escaped character
         return ret +";"

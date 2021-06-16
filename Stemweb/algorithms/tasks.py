@@ -19,13 +19,8 @@ from .decorators import synchronized
 from django.template.defaultfilters import slugify
 from django.views.decorators.csrf import csrf_exempt
 
-#from celery.task import Task, task
-from celery import Task
-from celery import group, shared_task
-from celery.registry import tasks
-from celery.result import AsyncResult 
-#from celery.decorators import task
-from celery.decorators import task
+from celery import Task, shared_task
+from Stemweb._celery import celery_app
 
 #from Stemweb.algorithms.settings import ALGORITHM_MEDIA_ROOT as algo_media_root ###   ImportError    ="=
 import Stemweb.algorithms.settings 
@@ -52,7 +47,6 @@ class Observer():
 		'''
 		self.listening_to.file_lock.release()
 
-#@shared_task	 ### The @shared_task decorator lets you create tasks without having any concrete app instance; ==> e.g. for subtasks NJ, NN, RHM
 class AlgorithmTask(Task):
 	'''
 		Super class of all algorithms.
@@ -275,7 +269,7 @@ class AlgorithmTask(Task):
 		'''
 		pass
 
-	#@shared_task  
+	  
 	def run(self, *args, **kwargs):
 		'''
 			Called when task is getting executed. Don't override unless you 
@@ -304,7 +298,7 @@ class AlgorithmTask(Task):
 			self._read_from_results_()	
 
 		self._finalize_()		##  status can be being set either to 'finished' or to 'failure'
-		if self.algorithm_run.status == settings.STATUS_CODES['failure']:			### failure status was set during subtask (e.g.: njc algorithm run)
+		if self.algorithm_run.status == settings.STATUS_CODES['failure']:			### failure status was set inherited classtask (e.g.: njc algorithm run); we want to keep this
 			request = exc = traceback = ''
 			algorun_extras_dictionary = json.loads(self.algorithm_run.extras)   ###  algorun.extras is of type unicode-string
 			return_host = algorun_extras_dictionary["return_host"]
@@ -432,11 +426,10 @@ class AlgorithmTask(Task):
 		for o in self._observers:
 			o.update(self)
 
-#@task		# The '@task' decorator is deprecated since celery5.   
-#@shared_task	
-def external_algorithm_run_error(request, exc, traceback, run_id, return_host, return_path):	
+@shared_task	
+def external_algorithm_run_error(*args, run_id=None, return_host=None, return_path=None):	
 	''' Callback task in case external requested algorithm run fails.  
-		note these 3 "hidden" parameters, handed over but NOT visible in the call execute_algorithm.py/external/call.apply_async()
+		note these 3 in *args packed arguments, handed over but NOT visible in the call execute_algorithm.py/external/call.apply_async(link_error = ....)
 		- request
 		- exc: exception / error text
 		- traceback: details about exception
@@ -514,8 +507,6 @@ def external_algorithm_run_error(request, exc, traceback, run_id, return_host, r
 	shandler = BoundHTTPSHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
 	fixed_sourceport_opener = urllib.request.build_opener(shandler, handler)
 
-	### using urllib2 in python 2.7
-
 	message = json.dumps(ret)
 	data = message.encode('utf8')
 	headers = {'Content-type': 'application/json; charset=utf-8'}
@@ -524,7 +515,7 @@ def external_algorithm_run_error(request, exc, traceback, run_id, return_host, r
 	req = urllib.request.Request(targeturl, data, headers)
 
 	try: 
-		#response = urllib2.urlopen(req)	# standard request; not using dedicated source_port; alternative to next line
+		#response = urllib.request.urlopen(req)	# standard request; not using dedicated source_port; alternative to next line
 		response = fixed_sourceport_opener.open(req)	
 		#content = response.read()
 		#print content
@@ -534,11 +525,10 @@ def external_algorithm_run_error(request, exc, traceback, run_id, return_host, r
 		pass
 
 
-#@task
-#@shared_task
-def external_algorithm_run_finished(newick_result, run_id, return_host, return_path):
+@shared_task
+def external_algorithm_run_finished(*args, run_id=None, return_host=None, return_path=None):
 	''' Callback task in case external algorithm run finishes succesfully. '''
-	print('########### algo_run_finished called #######################')
+	#print('########### algo_run_finished called #######################')
 	#return_path = 'stemmaweb/stemweb/result/'
 	hostparts = return_host.split(':')
 	host = hostparts[0]
@@ -583,6 +573,8 @@ def external_algorithm_run_finished(newick_result, run_id, return_host, return_p
 	according to a proposal at:
 	https://stackoverflow.com/questions/1150332/source-interface-with-python-and-urllib2
 	This gives us a custom urllib2.HTTPHandler implementation that is source_address aware. We can add it to a new urllib2.OpenerDirector
+	
+	the same works for urllib.request used in python3 (instead of urllib2 used in python2.7) 
 	"""
 
 	class BoundHTTPHandler(urllib.request.HTTPHandler):
@@ -609,8 +601,6 @@ def external_algorithm_run_finished(newick_result, run_id, return_host, return_p
 	handler = BoundHTTPHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
 	shandler = BoundHTTPSHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
 	fixed_sourceport_opener = urllib.request.build_opener(shandler, handler)
-
-	### using urllib2 in python 2.7
 
 	#url = 'https://stemmaweb.net:443/stemmaweb/stemweb/result/'
 	message = json.dumps(ret)
@@ -640,51 +630,16 @@ def external_algorithm_run_finished(newick_result, run_id, return_host, return_p
 	#	print (resp)
 
 
+class ClassBasedAddingTask(Task):
+	def __init__(self, *args, **kwargs):
+		pass
 
-	"""
-	### urllib.request  is to be used in python 3.x (instead of urllib2 in python 2.7)
-	import json
-	import urllib.request
-	#url = 'https://stemmaweb.net:443/stemmaweb/stemweb/result/'
+	def run(self, *args, **kwargs):
+		result = args[0] + args[1]
+		print('############ AddingTasks result: ###############', result, '+++++++++++++++++++++++++++++++')
+		return	result
 
-	message = json.dumps(ret)
-	data = message.encode('utf8')
-	headers = {'Content-type': 'application/json; charset=utf-8'}
-	targeturl = 'https://' + return_host + return_path
-	req = urllib.request.Request(targeturl, data, headers)
-	#req = urllib.request.Request(url, data, headers)
-
-	with urllib.request.urlopen(req) as response:
-   		resp = response.read()
-
-	print resp
-	"""
-
-
-	"""
-	### approach with httplib2; could not be changed to source_address/port aware
-	
-	import httplib2, json
-	h = httplib2.Http()
-	message = json.dumps(ret)
-	#body = message.encode('utf8')
-	targeturl = 'https://' + return_host + return_path
-	#resp, content = h.request(targeturl,
-	resp, content = h.request("https://stemmaweb.net:443/stemmaweb/stemweb/result/", 
-	#resp, content = h.request("http://127.0.0.1:7000/sendreceiverequest/", 
-                       method="POST", 
-                       headers = {'Content-type': 'application/json; charset=utf-8'},
-                       body = message.encode('utf8') )
-	print resp
-	print content
-	
-
-	"""
-
-
-
-
-
+ClassBasedAddingTask = celery_app.register_task(ClassBasedAddingTask())
 
 @shared_task
 def adding_task(x, y, items=[]):

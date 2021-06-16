@@ -26,6 +26,7 @@ import json
 from Stemweb.algorithms.tasks import AlgorithmTask
 from django.template.defaultfilters import slugify
 
+from Stemweb._celery import celery_app
 
 class NN(AlgorithmTask):
 	name = "Neighbour Net"
@@ -457,3 +458,6 @@ class NN(AlgorithmTask):
 		self._put_in_results_({'score': fit_value })
 		
 		self._stop.value = 1
+
+NN = celery_app.register_task(NN())
+

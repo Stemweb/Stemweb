@@ -9,6 +9,7 @@ from time import sleep
 import logging
 import platform
 from Stemweb.algorithms.tasks import AlgorithmTask
+from Stemweb._celery import celery_app
 
 #import binarysankoff	### temporarily deactivated; c-extension needs to be adopted for python3
 
@@ -30,4 +31,6 @@ class RHM(AlgorithmTask):
 		
 		sleep(0.1)
 		self._stop.value = 1
-		
+
+RHM = celery_app.register_task(RHM())
+

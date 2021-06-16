@@ -10,6 +10,8 @@ from time import sleep
 from Stemweb.algorithms.tasks import AlgorithmTask
 import Stemweb.algorithms.settings
 
+from Stemweb._celery import celery_app
+
 # node structure for storing the tree
 class Node:
     len = 0.0
@@ -103,7 +105,8 @@ class NJ(AlgorithmTask):
 		
 		f = None
 		try:
-			f = open(run_args['input_file'], 'r')
+			#f = open(run_args['input_file'], 'r')
+			f = open(run_args['input_file'], 'r', encoding='utf-8')
 		except:
 			logger = logging.getLogger('stemweb.algorithm_run')
 			logger.error('AlgorithmRun %s:%s could\'t open file in %s. Aborting run.' % \
@@ -251,6 +254,9 @@ class NJ(AlgorithmTask):
 			(self.algorithm_run.algorithm.name, self.algorithm_run.id, value, trace_back))
 			self._stop.value = 1
 			return -1
-		#finally: 
+		finally: 
+			f.close()
 			#del tb
+			
+NJ = celery_app.register_task(NJ())			
 

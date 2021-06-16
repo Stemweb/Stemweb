@@ -12,17 +12,16 @@ from .cleanup import remove_old_results_db, remove_old_results_fs
 from django.shortcuts import get_object_or_404
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
-#from bs4 import BeautifulSoup as bs
-
-from .tasks import external_algorithm_run_error
-from .tasks import external_algorithm_run_finished
+from Stemweb.algorithms.tasks import external_algorithm_run_error
+from Stemweb.algorithms.tasks import external_algorithm_run_finished
 
 from .settings import ALGORITHM_MEDIA_ROOT as algo_root
-from .models import InputFile, Algorithm, AlgorithmRun
+from Stemweb.algorithms.models import InputFile, Algorithm, AlgorithmRun
 from . import utils
 
 from celery import task, shared_task, Task
-from inspect import signature, Parameter
+from celery import signature
+from inspect import signature as signat
 
 def local(form, algo_id, request):
 	''' Make a local algorithm run.
@@ -58,15 +57,14 @@ def external(json_data, algo_id, request):
 	TODO: Refactor me   #  PF: to be refactored in which way? -- intended by previous SW-developer of this module!
 	'''
 
-	print('################# all handed over args in external()####################')
-	for i in signature(external).parameters.items():
-		print(i)
-	print('========================================')
-	print (json_data)
-	print (algo_id)
-	print (request)
-	
-	print('++++++++++++++++++++++++++++++++++++++++')	
+	#print('################# all handed over args in external()####################')
+	#for i in signat(external).parameters.items():
+	#	print(i)
+	#print('========================================')
+	#print (json_data)
+	#print (algo_id)
+	#print (request)
+	#print('++++++++++++++++++++++++++++++++++++++++')	
 	
 	# remove outdated results in file system and in database compared with value in settings.KEEP_RESULTS_DAYS
 	remove_old_results_fs()
@@ -86,11 +84,13 @@ def external(json_data, algo_id, request):
 		csv_data = csv2nex(json_data.pop('data'))	
 		ext = ".nex"
 		
-	# First write the file in the temporary file and close it.
-	with codecs.open(csv_file.name, mode = 'w', encoding = 'utf8') as f:
-		#f.write(csv_data.encode('ascii', 'replace'))	
-		json.dump(csv_data, f, indent = 4)
+	### PF: Don't use codecs.open, use io.open or open instead in py3.x (already since py2.6)
+	#with codecs.open(csv_file.name, mode = 'w', encoding = 'utf8') as f:
+	with open(csv_file.name, mode = 'w', encoding = 'utf8') as f:
+		f.write(csv_data)
 
+    ### PF: do we really need this mock-file?! Why does it need to be used? 
+	### just to involve a timestamp and a unique id via utils.id_generator() ?  
 	# Then construct a mock up InMemoryUploadedFile from it for the InputFile
 	mock_file = None
 	input_file_id = None
@@ -109,7 +109,7 @@ def external(json_data, algo_id, request):
 
 	parameters = json_data['parameters']
 
-	#print input_file
+	#print (input_file)
 		
 	input_file_key = ''
 	for arg in algorithm.args.all():
@@ -123,7 +123,7 @@ def external(json_data, algo_id, request):
 											folder = os.path.join(algo_root, run_args['folder_url']),
 											external = True)
 		
-	#current_run.extras = json.dumps(json_data, encoding = 'utf8')
+	#current_run.extras = json.dumps(json_data, encoding = 'utf8')   ### only valid in python2, encoding is depricated since py3.1
 	current_run.extras = json.dumps(json_data)
 	current_run.save()	# Save to ensure that id generation is not delayed.
 	rid = current_run.id
@@ -132,21 +132,23 @@ def external(json_data, algo_id, request):
 	kwargs = {'run_args': run_args, 'algorithm_run': rid}
 
 	
-	call = algorithm.get_callable(kwargs)
-
-	# .s is a celery signature, used to concatenate tasks;  see:
+	inherited_AlgorithmTask = algorithm.get_callable(kwargs)	### inherited: class NJ(AlgorithmTask) or class NN(AlgorithmTask) or class RHM(AlgorithmTask)
+		
+	#  the celery signature is used to concatenate tasks and to call the errorback;  see:
 	#  https://docs.celeryproject.org/en/master/userguide/calling.html
 	#  https://docs.celeryproject.org/en/master/userguide/calling.html#linking-callbacks-errbacks
+	#  Callbacks can be added to any task using the link argument to apply_async
+	#  The callback (->link) will only be applied if the task exited successfully, and it should be applied with the 
+	#  return value of the parent task as argument.
+	#  If the tasks fails then the errorback (using the link_error argument) is called
+	#  Any arguments you add to a signature, will be prepended to the arguments specified by the signature itself!
 
-	#call.apply_async(kwargs = kwargs,
-	call.apply_async(kwargs = kwargs)
-	#				link = external_algorithm_run_finished.s(rid, return_host, return_path),
-	#				link_error = external_algorithm_run_error.s(rid, return_host, return_path))
+	inherited_AlgorithmTask.apply_async(kwargs = kwargs,
+				link = external_algorithm_run_finished.signature(kwargs = {'run_id': rid, 'return_host': return_host , 'return_path': return_path}, options={}),
+				link_error = external_algorithm_run_error.signature(kwargs = {'run_id': rid, 'return_host': return_host , 'return_path': return_path}, options={}))
+ 
+	#inherited_AlgorithmTask.apply(kwargs = kwargs, link = external_algorithm_run_finished.s(rid, return_host, return_path))  ### use synchronous task for DEBUGGING purpose 
 
-
-	#call.apply(kwargs = kwargs, link = external_algorithm_run_finished.s(rid, return_host, return_path))  ### synchronous task; for test purpose 
-	#call.apply(kwargs = kwargs)
-	#Task.apply(call, kwargs = kwargs)
 
 
 

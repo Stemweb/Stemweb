@@ -6,10 +6,10 @@ from django.conf import settings
 
 from Stemweb.files import forms as files_forms
 
-from .semstem.semstemprob import Semstem
+#from .semstem.semstemprob import Semstem
 from .neighbour_net.neighbornet_class import NN
 from .neighbour_joining.njc import NJ
-from .rhm.binary_sankoff import RHM
+#from .rhm.binary_sankoff import RHM
 from . import validators
 #import lsettings
 
@@ -29,9 +29,9 @@ ALGORITHMS_CALLING_DICT = {
 #	'1': { 
 #		'callable': Semstem,	
 #	},
-	'2': {
-		'callable': RHM,
-	},
+#	'2': {
+#		'callable': RHM,
+#	},
 	'3': {  # neighbour joining:
 		'callable': NJ,
 	},
