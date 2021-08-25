@@ -224,7 +224,8 @@ def jobstatus(request, run_id):
 			if algo_run.newick == '' and algo_run.nwresult_path == '':
 				msg['error'] = "Could not retrieve newick or network result."
 				### status should be "failure" instead of "finished", but we won't change it in a status request			
-				return HttpResponse(json.dumps(msg, encoding = "utf8"))
+				#return HttpResponse(json.dumps(msg, encoding = "utf8"))
+				return HttpResponse(json.dumps(msg))
 			else:	
 				result = ""
 				if algo_run.newick != '':
@@ -252,20 +253,28 @@ def jobstatus(request, run_id):
 
 				msg['result'] = result
 				msg['end_time'] = str(algo_run.end_time)
-				return HttpResponse(json.dumps(msg, encoding = "utf8"))
+				#return HttpResponse(json.dumps(msg, encoding = "utf8"))
+				return HttpResponse(json.dumps(msg))
 		if algo_run.status == STATUS_CODES['failure']:
 			msg['result'] = algo_run.error_msg  ### the result field shall contain the error info according to the white paper 
 			msg['end_time'] = str(algo_run.end_time) 
-			return HttpResponse(json.dumps(msg, encoding = "utf8"))
+			#return HttpResponse(json.dumps(msg, encoding = "utf8"))
+			return HttpResponse(json.dumps(msg))
 
 	
 def processtest(request):
 	#csv_file = "/Users/slinkola/STAM/data_sets/request4.json"
-	csv_file ="/home/stemweb/Stemweb/algorithm/fixtures/02_nj.json"	
+	#csv_file ="/home/stemweb/Stemweb/algorithm/fixtures/02_nj.json"	
+	data_json = {"userid":"chrysaphi@gmail.com","parameters":{},"return_host":"stemmaweb.net:443","return_path":"/stemmaweb/stemweb/result","data":"_A_p1\t_A_p10\t_A_p11\t_A_p12\t_A_p13\t_A_p14\t_A_p15\t_A_p16\t_A_p2\t_A_p3\t_A_p4\t_A_p5\t_A_p6\t_A_p7\t_A_p8\t_A_p9\nIf\tIf\tIf\tIf\tIf\tIf\tIf\tIf\tIf\tIf\tIf\tIf\tIf\tIf\tIf\tIf\nvaccilation\tvacillation\tvacillation\tvacillation\tvacillation\tvacillation\tvacillation\tvacillation\tvacillation\tvacillation\tvaccilation\tvacillation\tvacillation\tvacillation\tvacillation\tvacillation\ndwell\tdwell\tdwell\tdwell\tdwell\tdwell\tdwell\tdwell\tdwell\tdwell\tdwell\tdwell\tdwell\tdwell\tdwell\tdwell\nwith\twith\twith\twith\twith\twith\twith\twith\twith\twith\twith\twith\twithin\twith\twith\twith\nthe\tthe\tthe\tthe\tthe\tthe\tthe\tthe\tthe\tthe\tthe\tthe\tthe\tthe\tthe\tthe\nheart\theart\theart\theart\theart\theart\theart\theart\theart\theat\theart\theart\theart\theat\theart\theat\n,\t\t\t\t\t\t\t\t\tof\t,\t\t\t\t\t\nthe soul will\tthe soul will\tthe soul will\tthe soul will\tthe soul will\tthe soul will\tthe soul will\tthe soul will\tthe soul will\tthe soul will\tthe soul will\tthe soul will\tthe soul will\tthe soul will\tthe soul will\tthe soul" ,"textid":"B7D3FE44-B08E-11E1-A0A2-C59DFFF7791D"}
+
 	csv = ""
 	import codecs
-	with codecs.open(csv_file, 'r', encoding = 'utf8') as f:
-		csv = f.read()
+
+	### PF: ToDo: Don't use codecs.open, use io.open instead.
+	#with codecs.open(csv_file, 'r', encoding = 'utf8') as f:
+	#with open(csv_file, 'r', encoding = 'utf8') as f:
+	#	csv = f.read()
+	
 
 	msg = csv
 	request = HttpRequest()
@@ -275,8 +284,10 @@ def processtest(request):
 	request.META = {}
 	request.META['REMOTE_ADDR'] = '127.0.0.1'
 	request.META['SERVER_PORT'] = 8000
-	execute_algorithm.external(json.loads(csv), 3, request)
-	return HttpResponse("ok")
+	#execute_algorithm.external(json.loads(csv), 3, request)
+	#return HttpResponse("ok")
+	result = execute_algorithm.external(data_json, 11, request)
+	return HttpResponse(result)
 
 
 @csrf_exempt

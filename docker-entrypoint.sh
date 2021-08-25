@@ -9,6 +9,8 @@ echo "######### waiting finihed #########"
 now=$(date)
 echo $now
 
+su stemweb
+
 # Do the necessary DB migrations
 echo "######### Doing database migrations #########"
 cd /home/stemweb
@@ -20,7 +22,9 @@ python manage.py loaddata Stemweb/files/files.json
 
 # Start celery worker
 echo "######### Starting Celery worker #########"
-celery -A Stemweb worker &
+#celery -A Stemweb worker &
+#celery -A Stemweb worker --loglevel=DEBUG --config=settings &
+celery -A Stemweb worker --config=settings &
 
 # Start Django server
 echo "######### Starting Django server #########"

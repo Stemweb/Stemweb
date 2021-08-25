@@ -25,6 +25,7 @@ from Stemweb._celery import celery_app
 #from Stemweb.algorithms.settings import ALGORITHM_MEDIA_ROOT as algo_media_root ###   ImportError    ="=
 import Stemweb.algorithms.settings 
 
+
 class Observer():
 	'''
 		Small test class to demonstrate AlgorithmTask's observers
@@ -152,7 +153,6 @@ class AlgorithmTask(Task):
 	# Lock for _results_queue. 
 	result_lock = th.Lock()
 
-
 			
 	def __init_run__(self, *args, **kwargs):
 		''' Celery calls __init__ only once when it is started for every task.
@@ -169,7 +169,14 @@ class AlgorithmTask(Task):
 			from Stemweb.algorithms.models import AlgorithmRun
 			self.algorithm_run = AlgorithmRun.objects.get(pk = run_id)
 			slug_name = slugify(self.algorithm_run.algorithm.name)
+			#for item in self.run_args.items():
+				#print('######### key-value pair = ', item)
+				#print ('############## arg.value= ',arg.value ,'==================' )
+				#print ('############## arg.key= ',arg.key ,'==================' )
+
+			#print ('###### self.input_file_key =', self.input_file_key, '++++++++++++++++++')
 			file_name = os.path.splitext(os.path.basename(self.run_args[self.input_file_key]))[0]
+			#print ('###### AlgorithmTask.__init_run__.file_name =', file_name, '++++++++++++++++++')
 			self.input_file_name = file_name
 			self.run_args['outfolder'] = self.algorithm_run.folder
 			# e.g.: self.algorithm_run.folder:   /home/stemweb/Stemweb/media/results/runs/neighbour-net/15/YHDSCLFD
@@ -269,7 +276,7 @@ class AlgorithmTask(Task):
 		'''
 		pass
 
-	  
+	
 	def run(self, *args, **kwargs):
 		'''
 			Called when task is getting executed. Don't override unless you 
@@ -285,7 +292,7 @@ class AlgorithmTask(Task):
 		self._algorithm_thread = th.Thread(target = self.__algorithm__, 
 										args = (self.run_args,), 
 										name = 'stemweb_algorun')
-
+		print('after _algorithm_thread initialized')
 		self._algorithm_thread.start()		## here class NJ(AlgorithmTask)  in  njc.py is called
 		self.algorithm_run.status = settings.STATUS_CODES['running']
 		print('I am running NOW as thread')
@@ -298,7 +305,7 @@ class AlgorithmTask(Task):
 			self._read_from_results_()	
 
 		self._finalize_()		##  status can be being set either to 'finished' or to 'failure'
-		if self.algorithm_run.status == settings.STATUS_CODES['failure']:			### failure status was set inherited classtask (e.g.: njc algorithm run); we want to keep this
+		if self.algorithm_run.status == settings.STATUS_CODES['failure']:			### failure status was set during inherited classtask (e.g.: njc algorithm run)
 			request = exc = traceback = ''
 			algorun_extras_dictionary = json.loads(self.algorithm_run.extras)   ###  algorun.extras is of type unicode-string
 			return_host = algorun_extras_dictionary["return_host"]
@@ -338,7 +345,7 @@ class AlgorithmTask(Task):
 			'''
 			from Stemweb.algorithms.models import AlgorithmRun
 			self.algorithm_run = AlgorithmRun.objects.get(pk=self.algorithm_run.id)
-			if self.algorithm_run.status != settings.STATUS_CODES['failure']: #@task # failure was set during njc algorithm run; we want to keep this
+			if self.algorithm_run.status != settings.STATUS_CODES['failure']: ## failure was set during njc algorithm run; we want to keep this
 				self.algorithm_run.status = settings.STATUS_CODES['finished']
 			self.algorithm_run.end_time = datetime.datetime.now()
 			self.algorithm_run.pid = -1
@@ -426,40 +433,45 @@ class AlgorithmTask(Task):
 		for o in self._observers:
 			o.update(self)
 
+
 @shared_task	
 def external_algorithm_run_error(*args, run_id=None, return_host=None, return_path=None):	
 	''' Callback task in case external requested algorithm run fails.  
-		note these 3 in *args packed arguments, handed over but NOT visible in the call execute_algorithm.py/external/call.apply_async(link_error = ....)
-		- request
-		- exc: exception / error text
-		- traceback: details about exception
+		note these in *args packed arguments, handed over but NOT visible in the call execute_algorithm.py/external/call.apply_async(link_error = ....)
+		- args[0]:  various celery task request infos, e.g.:
+			stemweb_py37_1  | [2021-07-21 18:57:20,935: WARNING/MainProcess] <Context: {'lang': 'py', 'task': 'RHM', 'id': '9ab8f80e-d59e-4c9c-a171-72f112b37be6', 'shadow': None, 'eta': None, 'expires': None, 'group': None, 'group_index': None, 'retries': 0, 'timelimit': [None, None], 'root_id': '9ab8f80e-d59e-4c9c-a171-72f112b37be6', 'parent_id': None, 'argsrepr': '()', 'kwargsrepr': "{'run_args': {'imax': 1000000, 'infolder': '/home/stemweb/Stemweb/media/files/csv/20210721-185720-IPTMRYJA.csv', 'folder_url': 'results/runs/rhm/5/ZZLF7CT5'}, 'algorithm_run': 1}", 'origin': 'gen68@4eb7f48633ed', 'reply_to': 'b605934d-b5ea-3a17-b482-f80ff1486dec', 'correlation_id': '9ab8f80e-d59e-4c9c-a171-72f112b37be6', 'hostname': 'celery@4eb7f48633ed', 'delivery_info': {'exchange': '', 'routing_key': 'celery', 'priority': 0, 'redelivered': None}, 'args': [], 'kwargs': {'run_args': {'imax': 1000000, 'infolder': '/home/stemweb/Stemweb/media/files/csv/20210721-185720-IPTMRYJA.csv', 'folder_url': 'results/runs/rhm/5/ZZLF7CT5'}, 'algorithm_run': 1}, 'callbacks': [{'task': 'Stemweb.algorithms.tasks.external_algorithm_run_finished', 'args': [], 'kwargs': {'run_id': 1, 'return_host': 'stemmaweb.net:443', 'return_path': '/stemmaweb/stemweb/result'}, 'options': {}, 'subtask_type': None, 'immutable': False, 'chord_size': None}], 'errbacks': [{'task': 'Stemweb.algorithms.tasks.external_algorithm_run_error', 'args': [], 'kwargs': {'run_id': 1, 'return_host': 'stemmaweb.net:443', 'return_path': '/stemmaweb/stemweb/result'}, 'options': {}, 'subtask_type': None, 'immutable': False, 'chord_size': None}], 'chain': None, 'chord': None, '_children': []}>
+		- args[1]:  exception / error text, e.g.:
+			Worker exited prematurely: signal 11 (SIGSEGV) Job: 0.
+			or e.g.:
+			[Errno 2] No such file or directory: '/home/stemweb/Stemweb/media/results/runs/rhm/5/7OCRD3Y4/20210804-181608-BSBLR3EH_rhm.tre'
+		- args[2]: Traceback, e.g:
+			stemweb_py37_1  | [2021-08-04 18:16:09,243: WARNING/ForkPoolWorker-3] Traceback (most recent call last):
+			stemweb_py37_1  |   File "/usr/local/lib/python3.7/site-packages/celery/app/trace.py", line 412, in trace_task
+			stemweb_py37_1  |     R = retval = fun(*args, **kwargs)
+			stemweb_py37_1  |   File "/usr/local/lib/python3.7/site-packages/celery/app/trace.py", line 704, in __protected_call__
+			stemweb_py37_1  |     return self.run(*args, **kwargs)
+			stemweb_py37_1  |   File "/home/stemweb/Stemweb/algorithms/tasks.py", line 318, in run
+			stemweb_py37_1  |     with open(self.newick_path, 'r') as f:
+			stemweb_py37_1  | FileNotFoundError: [Errno 2] No such file or directory: '/home/stemweb/Stemweb/media/results/runs/rhm/5/7OCRD3Y4/20210804-181608-BSBLR3EH_rhm.tre'
+
+			or None
+
 	'''
-	#print ('external algorithm run failed :-(( ')
+	print ('######################## external algorithm run failed :-(( ################################')
+	print ('args[0]=', args[0], '+++++++++++++++++' )
+	print ('args[1]=', args[1], '+++++++++++++++++' )
+	print ('args[2]=', args[2], '+++++++++++++++++' )
 	from Stemweb.algorithms.models import AlgorithmRun
 	algorun = AlgorithmRun.objects.get(pk = run_id)
 	if algorun.status == settings.STATUS_CODES['running']:
-		uuid = request.id ### the parent's task id
-		#print('Task {0} raised exception: {1!r}\n{2!r}'.format(uuid, exc, traceback))
-		#print (run_id, uuid)
-		logger = logging.getLogger('stemweb.algorithm_run')
-		#logger.info(uuid)
-		logger.error("the AlgorithmRun %r/Task %r raised this error: %r\n%r" %\
-					(run_id, uuid, exc, traceback))
-
-		#print ('Task {0} raised exception: {1!r}\n{2!r}'.format(uuid, exc, traceback))
-
-		#error_message = 'ERROR: ' + str(exc) + '    traceback: ' + str(traceback)
-		error_message = 'ERROR: ' + str(exc) 
+		error_message = args[1]
 		#print (error_message)
-		
-		
 		algorun.status = settings.STATUS_CODES['failure']
 		algorun.error_msg = error_message   ### for later usage in algorithms/views.py/jobstatus()
 	else:									### else: status 'failure' was already set during njc-run
 		error_message = algorun.error_msg
 
 	algorun.end_time = datetime.datetime.now()
-	print(algorun.end_time)
 	algorun.save()
 	
 	ret = {
@@ -476,10 +488,7 @@ def external_algorithm_run_error(*args, run_id=None, return_host=None, return_pa
 		ret.update(extra_json)
 	except: 
 		pass
-	
-	message = json.dumps(ret, encoding = "utf8")
-	headers = {"Content-type": "application/json; charset=utf-8"}	
-	body = message.encode('utf8')
+
 	
 	class BoundHTTPHandler(urllib.request.HTTPHandler):
 
@@ -501,7 +510,6 @@ def external_algorithm_run_error(*args, run_id=None, return_host=None, return_pa
 			return self.do_open(self.http_class, req)
 
 
-
 	source_port = 51000
 	handler = BoundHTTPHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
 	shandler = BoundHTTPSHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
@@ -518,17 +526,17 @@ def external_algorithm_run_error(*args, run_id=None, return_host=None, return_pa
 		#response = urllib.request.urlopen(req)	# standard request; not using dedicated source_port; alternative to next line
 		response = fixed_sourceport_opener.open(req)	
 		#content = response.read()
-		#print content
+		#print (content)
 	except urllib.error.HTTPError as e:
-		#print e.code
-		#print e.reason
+		#print (e.code)
+		#print (e.reason)
 		pass
-
 
 @shared_task
 def external_algorithm_run_finished(*args, run_id=None, return_host=None, return_path=None):
 	''' Callback task in case external algorithm run finishes succesfully. '''
 	#print('########### algo_run_finished called #######################')
+
 	#return_path = 'stemmaweb/stemweb/result/'
 	hostparts = return_host.split(':')
 	host = hostparts[0]
@@ -641,6 +649,7 @@ class ClassBasedAddingTask(Task):
 
 ClassBasedAddingTask = celery_app.register_task(ClassBasedAddingTask())
 
+
 @shared_task
 def adding_task(x, y, items=[]):
     result = x + y
@@ -649,3 +658,10 @@ def adding_task(x, y, items=[]):
             result += (x + y)
     return result
 
+import adding ### adding is a c-extension (see addingmodule.c and setup_c_addingmodule.py)
+@shared_task
+def adding_c_task(x, y):
+	result = adding.add(x,y)
+	return result
+
+### adding_c_task(3,2)

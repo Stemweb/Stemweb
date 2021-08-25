@@ -40,5 +40,5 @@ def csv2nex(csv_data):
         for c in taxas:
                 ret += c + "\t" + data[c]  + "\n"
         ### workaround in py37; don't know yet when double backslashes come in:
-        ret.replace('\\\\', '\\')        ### replace 2 backslashes by 1 backslash; each time escaped character
+        ret.replace('\\\\', '\\')        ### replace 2 backslashes by 1 backslash; each time escaped character  
         return ret +";"

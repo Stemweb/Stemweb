@@ -84,14 +84,13 @@ def external(json_data, algo_id, request):
 		csv_data = csv2nex(json_data.pop('data'))	
 		ext = ".nex"
 		
-	### PF: Don't use codecs.open, use io.open or open instead in py3.x (already since py2.6)
-	#with codecs.open(csv_file.name, mode = 'w', encoding = 'utf8') as f:
 	with open(csv_file.name, mode = 'w', encoding = 'utf8') as f:
 		f.write(csv_data)
 
     ### PF: do we really need this mock-file?! Why does it need to be used? 
 	### just to involve a timestamp and a unique id via utils.id_generator() ?  
-	# Then construct a mock up InMemoryUploadedFile from it for the InputFile
+
+	# Construct a mock up InMemoryUploadedFile from it for the InputFile
 	mock_file = None
 	input_file_id = None
 	with open(csv_file.name, "r") as f:
@@ -123,7 +122,6 @@ def external(json_data, algo_id, request):
 											folder = os.path.join(algo_root, run_args['folder_url']),
 											external = True)
 		
-	#current_run.extras = json.dumps(json_data, encoding = 'utf8')   ### only valid in python2, encoding is depricated since py3.1
 	current_run.extras = json.dumps(json_data)
 	current_run.save()	# Save to ensure that id generation is not delayed.
 	rid = current_run.id
