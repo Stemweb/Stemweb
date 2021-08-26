@@ -101,7 +101,7 @@ SECRET_KEY = ls.secret_key
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-#    'django.middleware.csrf.CsrfViewMiddleware',                # disabled as workaround
+    'django.middleware.csrf.CsrfViewMiddleware',    # can be disabled as workaround
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'Stemweb.third_party_apps.pagination.middleware.PaginationMiddleware',
@@ -156,7 +156,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'kombu',
     'redis',   
-#    'rest_framework', 
+    'rest_framework', 
     
 #    'Stemweb.third_party_apps.recaptcha_works',
     'Stemweb.third_party_apps.registration',
@@ -216,7 +216,7 @@ RECAPTCHA_OPTIONS = {
 
 # Add small random delay to concurrency. 
 # TODO: change when in production to False
-CONCURRENT_RANDOM_DELAY = True
+CONCURRENT_RANDOM_DELAY = False
 
 ROOT_LOG_DIR = os.path.join(SITE_ROOT, 'logs')
 if not os.path.exists(ROOT_LOG_DIR):
