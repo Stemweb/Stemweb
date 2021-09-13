@@ -131,7 +131,7 @@ def build_external_args(parameters, input_file_key, input_file, \
 		run_args[key] = value
 	run_args[input_file_key] = input_file.file.path
 	#run_args['folder_url'] = create_run_folder(None, input_file.id, algorithm_name)
-	run_args['folder_url'] = create_run_folder(input_file.id, algorithm_name)
+	run_args['folder_url'] = create_run_folder(input_file.id, algorithm_name)  ### e.g.: run_args['folder_url']: 'results/runs/rhm/5/WO1FG7GE'
 	return run_args
 
 

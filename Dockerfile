@@ -15,9 +15,9 @@ COPY Stemweb Stemweb
 COPY Stemweb/requirements/requirements.txt requirements.txt
 
 #======================== install tools ================================
-RUN apt-get update && apt-get -y install graphviz libgraphviz-dev pkg-config wget libffi-dev libssl-dev r-base-core curl vim tree python3-dev sudo gcc
+RUN apt-get update && apt-get -y install graphviz libgraphviz-dev pkg-config wget libffi-dev libssl-dev r-base-core curl vim tree python3-dev sed gawk sudo gcc 
 # with debugging tools:
-#RUN apt-get update && apt-get -y install graphviz libgraphviz-dev pkg-config wget libffi-dev libssl-dev r-base-core curl vim tree python3-dev sudo gdb gcc gdbserver
+#RUN apt-get update && apt-get -y install graphviz libgraphviz-dev pkg-config wget libffi-dev libssl-dev r-base-core curl vim tree python3-dev sed gawk sudo gdb gcc gdbserver
 RUN pip install -U setuptools
 RUN pip install pyopenssl ndg-httpsclient pyasn1 rpy2 mysqlclient ptvsd pygraphviz pymysql djangorestframework
 
@@ -50,16 +50,14 @@ RUN python setup_c_addingmodule.py install
 WORKDIR /home/stemweb
 RUN mkdir Stemweb/logs && chown -R stemweb:stemweb .
 
-#============ for finding errors in c-code =============================
-#ENV PYTHONFAULTHANDLER=1
+#============ for reporting errors in c-code ===========================
+ENV PYTHONFAULTHANDLER=1
 
 #====================== start the server ===============================
 # EXPOSE port 3000 for debugging access from outside of the docker container,
 # EXPOSE port 8000 for the web site
 # EXPOSE port 51000 as fixed http-request outbound src-port
-# EXPOSE 3000 8000 51000
+#EXPOSE 3000 8000 51000
 EXPOSE 8000 51000
 USER stemweb
-#USER root
 ENTRYPOINT ["./docker-entrypoint.sh"]
-

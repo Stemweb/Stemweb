@@ -292,7 +292,7 @@ class AlgorithmTask(Task):
 		self._algorithm_thread = th.Thread(target = self.__algorithm__, 
 										args = (self.run_args,), 
 										name = 'stemweb_algorun')
-		print('after _algorithm_thread initialized')
+		
 		self._algorithm_thread.start()		## here class NJ(AlgorithmTask)  in  njc.py is called
 		self.algorithm_run.status = settings.STATUS_CODES['running']
 		print('I am running NOW as thread')

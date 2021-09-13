@@ -75,17 +75,20 @@ def external(json_data, algo_id, request):
 	algorithm = get_object_or_404(Algorithm, pk = algo_id)
 	csv_file = tempfile.NamedTemporaryFile(mode = 'w', delete = False)
 	ext = ""
-	csv_data = None
-	if algorithm.file_extension == 'csv': 
-		csv_data = json_data.pop('data')
+
+	structured_data = None
+	if algorithm.file_extension == 'csv': 		# RHM: algo_id = '2'
+		file_data = json_data.pop('data')	##### e.g.:   {'Aq': 'das', 'B': 'ist ', 'Di': 'jetzt', 'Ge': 'nur', 'Id': 'mal', 'J': 'ein', 'Ju': 'ganz', 'Ki': 'simpler', 'Ory': 'und', 'Oy': 'sehr', 'U': 'kurzer', 'Vo': 'Text'}
+		if isinstance(file_data, dict):
+			structured_data = json.dumps(file_data)    ### later f.write() needs string instead of dict
 		ext = ".csv"
-	elif algorithm.file_extension == 'nex': 
+	elif algorithm.file_extension == 'nex':  	# Neighbour Joining or Neighbour Net
 		from .csvtonexus import csv2nex
-		csv_data = csv2nex(json_data.pop('data'))	
+		structured_data = csv2nex(json_data.pop('data'))
 		ext = ".nex"
 		
 	with open(csv_file.name, mode = 'w', encoding = 'utf8') as f:
-		f.write(csv_data)
+		f.write(structured_data)
 
     ### PF: do we really need this mock-file?! Why does it need to be used? 
 	### just to involve a timestamp and a unique id via utils.id_generator() ?  
@@ -104,7 +107,25 @@ def external(json_data, algo_id, request):
 		input_file_id = input_file.id
 	
 	input_file = InputFile.objects.get(pk = input_file_id)
-	
+
+	if algo_id == '2':	# ONLY for RHM
+		file_path = os.path.join(algo_root, input_file.file.path)	### '/home/stemweb/Stemweb/media/files/csv/20210908-075706-BSQQ3HII.csv'
+		file_dir = os.path.dirname(file_path)	                    ### '/home/stemweb/Stemweb/media/files/csv'
+		name_without_ext = os.path.splitext(os.path.basename(file_path))[0]	### '20210908-075706-BSQQ3HII'
+		multi_file_dir = os.path.join(file_dir, name_without_ext)	### '/home/stemweb/Stemweb/media/files/csv/20210908-075706-BSQQ3HII'
+		#print('##########RHM input path / multi_file_dir = ', multi_file_dir, '++++++++++++++++++++++++++')
+		os.mkdir(multi_file_dir)
+		os.chdir(multi_file_dir)
+
+		### file_data contains content of unaligned files; write it into separate files
+		### This input format is expected  by binarysankoff_linux.c (=new rhm.c by Teemu Roos)
+		try:
+			for key, value in file_data.items():
+				with open(key, mode = 'w', encoding = 'utf8') as fp:
+					json.dump(value, fp)
+		except:
+			print ("\n######### could not write input file:", key, " +++++++++++++++++++\n")
+			#pass
 
 	parameters = json_data['parameters']
 
@@ -117,6 +138,9 @@ def external(json_data, algo_id, request):
 		
 	run_args = utils.build_external_args(parameters, input_file_key, input_file,
 			algorithm_name = algorithm.name)
+
+
+
 	current_run = AlgorithmRun.objects.create(input_file = input_file,
 											algorithm = algorithm, 
 											folder = os.path.join(algo_root, run_args['folder_url']),

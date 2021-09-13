@@ -140,7 +140,7 @@ def process(request, algo_id):
 		response = HttpResponse(error_message)
 		response.status_code = 403
 		return response
-		
+
 	if request.method == 'POST':
 		try:
 			json_data = JSONParser().parse(request)
@@ -161,7 +161,7 @@ def process(request, algo_id):
 			run_id = execute_algorithm.external(json_data, algo_id, request)   # status will be set to "running" , except for RHM algorithm where it stays in "not_started"
 			run = get_object_or_404(AlgorithmRun, id = run_id)
 
-			if run.status == STATUS_CODES['not_started']:
+			if (run.status == STATUS_CODES['not_started']) and (algo_id == 2):	# algo_id 2: RHM algorithm
 				# WORKAROUND: set status to "running" even if it is in state "not_started"
 				# otherwise RHM algorithm-run would be set to "running " too late (i.e. after running/calculation is finished)
 				run.status = statcode = STATUS_CODES['running']

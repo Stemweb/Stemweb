@@ -25,7 +25,7 @@
 
 #define QUADRATIC_TEMP
 
-#define TIMING
+//#define TIMING
 
 #ifdef TIMING
 struct timeval timer;
@@ -740,8 +740,17 @@ void print_subtree(struct node_st *node)
 void open_output()
 {
   char fname[256];
-  sprintf(fname, "sankoff-tree_%d.dot", boot);
+  //sprintf(fname, "sankoff-tree_%d.dot", boot);
+  //sprintf(fname, outfolder, "/", outfilename, "_rhm.tre");
+  strcpy (fname, outfolder);
+  strcat (fname, "/");
+  strcat (fname, outfilename);
+  strcat (fname, "_rhm.dot");
+  //fprintf(stderr, "\n ##################################### openING RESULT-file:\n");
+  //fprintf(stderr, fname);
   fout = fopen(fname, "w+");
+  //fprintf(stderr, "\n ##################################### openED RESULT-file\n\n");
+
 }
 
 void close_output()
@@ -1368,7 +1377,7 @@ static PyObject* method_binsankoff(PyObject* self, PyObject* args)
       free_tree(tree);
   }
   
-  //free_mem();
+  //free_mem();  // ?!
   
 
   // Remove temp-file after the run.
