@@ -23,6 +23,8 @@ from celery import task, shared_task, Task
 from celery import signature
 from inspect import signature as signat
 
+from .reformat import re_format
+
 def local(form, algo_id, request):
 	''' Make a local algorithm run.
 	    Returns AlgorithmRun id.
@@ -40,9 +42,9 @@ def local(form, algo_id, request):
 	current_run.save()	# Save to ensure that id generation is not delayed.
 	rid = current_run.id
 	kwargs = {'run_args': run_args, 'algorithm_run': rid}
-	call = algorithm.get_callable(kwargs)
-	call.apply_async(kwargs = kwargs)
-	#call.apply(kwargs = kwargs)    # synchronous call for dev and test purpose
+	inherited_AlgorithmTask = algorithm.get_callable(kwargs)
+	inherited_AlgorithmTask.apply_async(kwargs = kwargs)
+	#inherited_AlgorithmTask.apply(kwargs = kwargs)    # synchronous call for dev and test purpose
 	return current_run.id
 
 
@@ -78,9 +80,12 @@ def external(json_data, algo_id, request):
 
 	structured_data = None
 	if algorithm.file_extension == 'csv': 		# RHM: algo_id = '2'
-		file_data = json_data.pop('data')	##### e.g.:   {'Aq': 'das', 'B': 'ist ', 'Di': 'jetzt', 'Ge': 'nur', 'Id': 'mal', 'J': 'ein', 'Ju': 'ganz', 'Ki': 'simpler', 'Ory': 'und', 'Oy': 'sehr', 'U': 'kurzer', 'Vo': 'Text'}
-		if isinstance(file_data, dict):
+		file_data = json_data.pop('data')	
+		if isinstance(file_data, dict):		##### e.g.:   {'Aq': 'das', 'B': 'ist ', 'Di': 'jetzt', 'Ge': 'nur', 'Id': 'mal', 'J': 'ein', 'Ju': 'ganz', 'Ki': 'simpler', 'Ory': 'und', 'Oy': 'sehr', 'U': 'kurzer', 'Vo': 'Text'}
 			structured_data = json.dumps(file_data)    ### later f.write() needs string instead of dict
+		else:		#### old input data format
+			file_data = re_format(file_data)	### needed later to iterate over and write the files
+			structured_data = json.dumps(file_data)
 		ext = ".csv"
 	elif algorithm.file_extension == 'nex':  	# Neighbour Joining or Neighbour Net
 		from .csvtonexus import csv2nex
