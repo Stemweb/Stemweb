@@ -51,7 +51,7 @@ WORKDIR /home/stemweb
 RUN mkdir Stemweb/logs && chown -R stemweb:stemweb .
 
 #============ for reporting errors in c-code ===========================
-ENV PYTHONFAULTHANDLER=1
+#ENV PYTHONFAULTHANDLER=1
 
 #====================== start the server ===============================
 # EXPOSE port 3000 for debugging access from outside of the docker container,

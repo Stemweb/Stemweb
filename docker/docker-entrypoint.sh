@@ -9,7 +9,9 @@ echo "######### waiting finihed #########"
 now=$(date)
 echo $now
 
-su stemweb
+#su stemweb
+#actualuser=$(whoami)
+#echo $actualuser        # should be: stemweb
 
 # Do the necessary DB migrations
 echo "######### Doing database migrations #########"

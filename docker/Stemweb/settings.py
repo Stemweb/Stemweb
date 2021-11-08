@@ -1,5 +1,5 @@
 # Import locally configured settings 
-import local_settings as ls
+from . import local_settings as ls
 import os
 import sys
 
@@ -98,14 +98,23 @@ STATICFILES_FINDERS = (
 SECRET_KEY = ls.secret_key
 
 
-MIDDLEWARE_CLASSES = (
+#MIDDLEWARE_CLASSES = (
+#    'django.middleware.common.CommonMiddleware',
+#    'django.contrib.sessions.middleware.SessionMiddleware',
+#    'django.middleware.csrf.CsrfViewMiddleware',    # can be disabled as workaround
+#    'django.contrib.auth.middleware.AuthenticationMiddleware',
+#    'django.contrib.messages.middleware.MessageMiddleware',
+#    'Stemweb.third_party_apps.pagination.middleware.PaginationMiddleware',
+#)
+
+MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',    # can be disabled as workaround
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'Stemweb.third_party_apps.pagination.middleware.PaginationMiddleware',
-)
+]
 
 ROOT_URLCONF = ls.root_urls
 
@@ -131,7 +140,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 #'django.template.context_processors.static',
                 #'django.template.context_processors.tz',
-                #'django.contrib.messages.context_processors.messages',
+                'django.contrib.messages.context_processors.messages',
             ],
             'loaders': [
                 # insert your TEMPLATE_LOADERS here
@@ -158,8 +167,8 @@ INSTALLED_APPS = (
     'redis',   
     'rest_framework', 
     
-#    'Stemweb.third_party_apps.recaptcha_works',
-    'Stemweb.third_party_apps.registration',
+    #'Stemweb.third_party_apps.recaptcha_works',
+    #'Stemweb.third_party_apps.registration',
     'Stemweb.third_party_apps.pagination',
     
     # Own apps
@@ -215,7 +224,7 @@ RECAPTCHA_OPTIONS = {
 }
 
 # Add small random delay to concurrency. 
-# TODO: change when in production to False
+# WATCHOUT: change when in production to False
 CONCURRENT_RANDOM_DELAY = False
 
 ROOT_LOG_DIR = os.path.join(SITE_ROOT, 'logs')
