@@ -1,1 +1,0 @@
-/home/fugger/repos5_py3/Stemweb/docker/Stemweb/local_settings.py
