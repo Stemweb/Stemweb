@@ -462,7 +462,21 @@ def external_algorithm_run_error(*args, run_id=None, return_host=None, return_pa
 	print ('args[1]=', args[1], '+++++++++++++++++' )
 	print ('args[2]=', args[2], '+++++++++++++++++' )
 	from Stemweb.algorithms.models import AlgorithmRun
-	algorun = AlgorithmRun.objects.get(pk = run_id)
+
+	try:
+		algorun = AlgorithmRun.objects.get(pk = run_id)			### django-DB connection can be lost after errors in RHM c-extension 
+	except OperationalError:
+		print '\n ############ close and restore damaged DB connections #############\n'
+		for conn in connections.all():
+			conn.close_if_unusable_or_obsolete()			### close damaged DB connections
+
+		#cursor = connection.cursor()	### Will result in: jango.db.utils.InterfaceError: connection already closed
+		
+		connection.cursor().execute('SELECT 1;')			### restore DB connections
+
+		### get object again from DB:
+		algorun = AlgorithmRun.objects.get(pk = run_id)
+
 	if algorun.status == settings.STATUS_CODES['running']:
 		error_message = args[1]
 		#print (error_message)

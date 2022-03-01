@@ -1417,13 +1417,14 @@ static struct PyModuleDef binarysankoff =
 // the name keyword argument in setup.py's setup() call.
 PyMODINIT_FUNC PyInit_binarysankoff(void)
 {
-    /*
+    
     PyObject *m;
 
     m = PyModule_Create(&binarysankoff);
     if (m == NULL)
         return NULL;
     
+    /*
     binarysankoffError = PyErr_NewException("binarysankoff.error", NULL, NULL);
     Py_XINCREF(binarysankoffError);
     if (PyModule_AddObject(m, "error", binarysankoffError) < 0) {
@@ -1434,7 +1435,8 @@ PyMODINIT_FUNC PyInit_binarysankoff(void)
     }
      
     return m;
-    */
+
     
     return PyModule_Create(&binarysankoff);
+    */
 }
