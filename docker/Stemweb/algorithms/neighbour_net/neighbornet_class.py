@@ -404,7 +404,8 @@ class NN(AlgorithmTask):
 
 
 		# draw graph & save graph image
-		nx.draw(G,pos=pos,labels=lab, node_size=.1,font_size=8,width=.2,title=c)
+		#nx.draw(G,pos=pos,labels=lab, node_size=.1,font_size=8,width=.2,title=c) ### title ==> ValueError: Received invalid argument(s): title	; don't need a title
+		nx.draw(G,pos=pos,labels=lab, node_size=.1,font_size=8,width=.2)
 		plt.savefig(self.image_path)
 
 		"""
