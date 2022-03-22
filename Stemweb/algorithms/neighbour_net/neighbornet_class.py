@@ -322,7 +322,7 @@ class NN(AlgorithmTask):
 		    if sp==None or (sp[1]-sp[0]>0 and sp[1]-sp[0]<len(O)-2 and Sx[sp]>0):
 		#        plt.subplot(5,5,c)
 		#        nx.draw(G,pos=pos,labels=lab,edge_labels=edg_lab,\
-		#                    node_size=.1,font_size=4,width=.2,title=c)
+		#                    node_size=.1,font_size=4,width=.2)
 		        if sp==None: 
 		            break
 		        c=c+1
@@ -443,7 +443,7 @@ class NN(AlgorithmTask):
 		### If transfered labels might also be number-strings, then extend INT-ification for all of them  (likewise as done for posses above)
 		
 		# draw & save graph
-		nx.draw(reconstructed_G,pos=posses,labels=labs, node_size=.1,font_size=8,width=.2,title=c)
+		nx.draw(reconstructed_G,pos=posses,labels=labs, node_size=.1,font_size=8,width=.2)
 		plt.savefig(image_path)
 
 

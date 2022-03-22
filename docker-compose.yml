@@ -9,7 +9,6 @@ services:
             #MYSQL_PASSW: 'ChangeMe'
             MYSQL_USER: "stemweb"
             MYSQL_RANDOM_ROOT_PASSWORD: "YES"
-            #MYSQL_USER: "stemweb"
             MYSQL_DATABASE: "stemwebdb_v1"
         #volumes:
         #    - ./mysqlinit:/docker-entrypoint-initdb.d
@@ -32,11 +31,12 @@ services:
         restart: always
         environment:
             MYSQL_PASSW: "${MYSQL_PASSW}"
+            MYSQL_PASSWORD: "${MYSQL_PASSW}"
         depends_on:
         - mysql
         - redis
-        volumes:
-        - ./config/local_settings.py:/home/stemweb/Stemweb/local_settings.py
+        #volumes:
+        #- ./config/local_settings.py:/home/stemweb/Stemweb/local_settings.py
         ports:
             #- "10.0.228.35:8000:8000"        ### on test-server
             #- "10.0.228.35:51000:51000"      ### on test server

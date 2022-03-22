@@ -18,6 +18,8 @@ ADMINS = (
 MANAGERS = ADMINS
 
 ALLOWED_HOSTS = ls.allowed_hosts
+#ALLOWED_HOSTS = ['stemweb', 'localhost', '127.0.0.1']
+#ALLOWED_HOSTS = ['*']
 
 DATABASES = {
     'default': {
@@ -110,7 +112,7 @@ SECRET_KEY = ls.secret_key
 MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',    # can be disabled as workaround
+    #'django.middleware.csrf.CsrfViewMiddleware',    # can be disabled as workaround
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'Stemweb.third_party_apps.pagination.middleware.PaginationMiddleware',
@@ -165,7 +167,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'kombu',
     'redis',   
-    'rest_framework', 
+    #'rest_framework', 
     
     #'Stemweb.third_party_apps.recaptcha_works',
     #'Stemweb.third_party_apps.registration',
@@ -234,6 +236,10 @@ if not os.path.exists(ROOT_LOG_DIR):
 ALGORITHMS_LOG_DIR = os.path.join(ROOT_LOG_DIR, 'algorithms')
 if not os.path.exists(ALGORITHMS_LOG_DIR):
 	os.makedirs(ALGORITHMS_LOG_DIR);
+	
+DJANGO_LOG_DIR = os.path.join(ROOT_LOG_DIR, '_django')
+if not os.path.exists(DJANGO_LOG_DIR):
+	os.makedirs(DJANGO_LOG_DIR);
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -283,6 +289,16 @@ LOGGING = {
 			'when': 'D',
 			#'interval': 1,
 		},
+		
+		'file': {
+			'level':'DEBUG',
+			'class':'logging.handlers.TimedRotatingFileHandler',
+			'formatter': 'verbose',
+			'filename': os.path.join(DJANGO_LOG_DIR, 'myLogFile.txt'),
+			'when': 'D',
+			#'filemode': 'a'
+			#'interval': 1,
+		},
     	#'celery_tasks': {
 		#	'level':'DEBUG',
 		#	'class':'logging.handlers.TimedRotatingFileHandler',
@@ -299,7 +315,7 @@ LOGGING = {
 			'level': 'DEBUG',
 		},
         'django': {
-            'handlers':['console'],
+            'handlers':['console', 'file'],
             'propagate': True,
             'level':'DEBUG',
         },

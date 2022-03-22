@@ -466,7 +466,7 @@ def external_algorithm_run_error(*args, run_id=None, return_host=None, return_pa
 	try:
 		algorun = AlgorithmRun.objects.get(pk = run_id)			### django-DB connection can be lost after errors in RHM c-extension 
 	except OperationalError:
-		print '\n ############ close and restore damaged DB connections #############\n'
+		print ('\n ############ close and restore damaged DB connections #############\n')
 		for conn in connections.all():
 			conn.close_if_unusable_or_obsolete()			### close damaged DB connections
 
