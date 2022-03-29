@@ -22,6 +22,8 @@ from django.views.decorators.csrf import csrf_exempt
 from celery import Task, shared_task
 from Stemweb._celery import celery_app
 
+from django.db import connection, connections
+
 #from Stemweb.algorithms.settings import ALGORITHM_MEDIA_ROOT as algo_media_root ###   ImportError    ="=
 import Stemweb.algorithms.settings 
 

@@ -3,10 +3,7 @@ from . import local_settings as ls
 import os
 import sys
 
-#import djcelery
-#djcelery.setup_loader()
-
-DEBUG = False   ### if set to True, then Celery raises WARNING: "Using settings.DEBUG leads to a memory leak, never use this setting in production environments!
+DEBUG = True   ### if set to True, then Celery raises WARNING: "Using settings.DEBUG leads to a memory leak, never use this setting in production environments!
 
 # Root folder of the site
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
@@ -115,7 +112,7 @@ MIDDLEWARE = [
     #'django.middleware.csrf.CsrfViewMiddleware',    # can be disabled as workaround
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'Stemweb.third_party_apps.pagination.middleware.PaginationMiddleware',
+    #'Stemweb.third_party_apps.pagination.middleware.PaginationMiddleware',
 ]
 
 ROOT_URLCONF = ls.root_urls

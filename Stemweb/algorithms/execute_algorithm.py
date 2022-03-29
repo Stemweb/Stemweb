@@ -36,9 +36,44 @@ def local(form, algo_id, request):
 	remove_old_results_db()
 	
 	run_args = utils.build_local_args(form, algorithm_name = algorithm.name, request = request)
-	current_run = AlgorithmRun.objects.create(input_file = InputFile.objects.get(id = run_args['file_id']),
-						algorithm = Algorithm.objects.get(id = algo_id), 
-                                        	folder = os.path.join(algo_root, run_args['folder_url']))
+	input_file = InputFile.objects.get(id = run_args['file_id'])
+	# =====================
+	if algo_id == '2': 		# RHM: algo_id = '2' ;   algorithm.file_extension == 'csv'
+		infile_path = run_args['infolder']			
+		with open(infile_path, 'r',  encoding = 'utf8') as f:
+				file_data = f.read()
+		if isinstance(file_data, dict):		##### with e.g. such a format:   {'Aq': 'das', 'B': 'ist ', 'Di': 'jetzt', 'Ge': 'nur', 'Id': 'mal', 'J': 'ein', 'Ju': 'ganz', 'Ki': 'simpler', 'Ory': 'und', 'Oy': 'sehr', 'U': 'kurzer', 'Vo': 'Text'}
+			pass
+		else:		#### old input data format
+			file_data = re_format(file_data)	### needed later to iterate over and write the files
+
+		file_dir = os.path.dirname(infile_path)	                    ### '/home/stemweb/Stemweb/media/datasets'
+		stamped_dir =  datetime.now().strftime("%Y%m%d-%H%M%S") + "-" + utils.id_generator()	### e.g.: '20220125-213519-5JRTPJMI'
+		multi_file_dir = os.path.join(file_dir, stamped_dir)    	### '/home/stemweb/Stemweb/media/datasets/20220125-213519-5JRTPJMI'
+		#print('########## exec_algo.py: RHM input path / multi_file_dir = ', multi_file_dir, '++++++++++++')
+		os.mkdir(multi_file_dir)
+		os.chdir(multi_file_dir)
+
+		### file_data contains content of unaligned files; write it into separate files
+		### This input format is expected  by binarysankoff_linux.c (=new rhm.c by Teemu Roos 2018)
+		try:
+			for key, value in file_data.items():
+				with open(key, mode = 'w', encoding = 'utf8') as fp:
+					json.dump(value, fp)
+		except:
+			print ("\n######### could not write input file:", key, " +++++++++++++++++++\n")
+			#pass
+
+		input_file_key = ''
+		for arg in algorithm.args.all():
+			if arg.value == 'input_file':
+				input_file_key = arg.key
+		run_args[input_file_key] = multi_file_dir
+
+	current_run = AlgorithmRun.objects.create(input_file = input_file,
+						algorithm = Algorithm.objects.get(id = algo_id),                                         	
+											folder = os.path.join(algo_root, run_args['folder_url'])) # output folder
+											
 	current_run.save()	# Save to ensure that id generation is not delayed.
 	rid = current_run.id
 	kwargs = {'run_args': run_args, 'algorithm_run': rid}
@@ -79,7 +114,8 @@ def external(json_data, algo_id, request):
 	ext = ""
 
 	structured_data = None
-	if algorithm.file_extension == 'csv': 		# RHM: algo_id = '2'
+	#if algorithm.file_extension == 'csv': 		# RHM: algo_id = '2'
+	if algo_id == '2':	# RHM: algo_id = '2' ;   algorithm.file_extension = 'csv'
 		file_data = json_data.pop('data')	
 		if isinstance(file_data, dict):		##### e.g.:   {'Aq': 'das', 'B': 'ist ', 'Di': 'jetzt', 'Ge': 'nur', 'Id': 'mal', 'J': 'ein', 'Ju': 'ganz', 'Ki': 'simpler', 'Ory': 'und', 'Oy': 'sehr', 'U': 'kurzer', 'Vo': 'Text'}
 			structured_data = json.dumps(file_data)    ### later f.write() needs string instead of dict
@@ -109,11 +145,11 @@ def external(json_data, algo_id, request):
 		input_file = InputFile(name = name, file = mock_file)  
 		input_file.extension = ext
 		input_file.save() # Save to be sure input_file.id is created 
-		input_file_id = input_file.id
+		input_file_id = input_file.id		### ToCheck: where is input_file.id set?
 	
 	input_file = InputFile.objects.get(pk = input_file_id)
 
-	if algo_id == '2':	# ONLY for RHM
+	if algo_id == '2':	# ONLY for RHM: split content to multiple input files (new input format for new RHM.c version 2018 of Teem Roos))
 		file_path = os.path.join(algo_root, input_file.file.path)	### '/home/stemweb/Stemweb/media/files/csv/20210908-075706-BSQQ3HII.csv'
 		file_dir = os.path.dirname(file_path)	                    ### '/home/stemweb/Stemweb/media/files/csv'
 		name_without_ext = os.path.splitext(os.path.basename(file_path))[0]	### '20210908-075706-BSQQ3HII'
