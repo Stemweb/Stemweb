@@ -7,6 +7,7 @@ from time import sleep
 import tempfile
 import codecs
 import json
+import csv
 from .cleanup import remove_old_results_db, remove_old_results_fs
 
 from django.shortcuts import get_object_or_404
@@ -38,14 +39,14 @@ def local(form, algo_id, request):
 	run_args = utils.build_local_args(form, algorithm_name = algorithm.name, request = request)
 	input_file = InputFile.objects.get(id = run_args['file_id'])
 	# =====================
-	if algo_id == '2': 		# RHM: algo_id = '2' ;   algorithm.file_extension == 'csv'
+	if algo_id == '2': 		# RHM: algo_id = '2' ;   algorithm.file_extension = 'csv'
 		infile_path = run_args['infolder']			
 		with open(infile_path, 'r',  encoding = 'utf8') as f:
-				file_data = f.read()
+			file_data = f.read()
 		if isinstance(file_data, dict):		##### with e.g. such a format:   {'Aq': 'das', 'B': 'ist ', 'Di': 'jetzt', 'Ge': 'nur', 'Id': 'mal', 'J': 'ein', 'Ju': 'ganz', 'Ki': 'simpler', 'Ory': 'und', 'Oy': 'sehr', 'U': 'kurzer', 'Vo': 'Text'}
 			pass
 		else:		#### old input data format
-			file_data = re_format(file_data)	### needed later to iterate over and write the files
+			file_data = re_format(infile_path)	### needed later to iterate over and write the files
 
 		file_dir = os.path.dirname(infile_path)	                    ### '/home/stemweb/Stemweb/media/datasets'
 		stamped_dir =  datetime.now().strftime("%Y%m%d-%H%M%S") + "-" + utils.id_generator()	### e.g.: '20220125-213519-5JRTPJMI'
@@ -114,7 +115,6 @@ def external(json_data, algo_id, request):
 	ext = ""
 
 	structured_data = None
-	#if algorithm.file_extension == 'csv': 		# RHM: algo_id = '2'
 	if algo_id == '2':	# RHM: algo_id = '2' ;   algorithm.file_extension = 'csv'
 		file_data = json_data.pop('data')	
 		if isinstance(file_data, dict):		##### e.g.:   {'Aq': 'das', 'B': 'ist ', 'Di': 'jetzt', 'Ge': 'nur', 'Id': 'mal', 'J': 'ein', 'Ju': 'ganz', 'Ki': 'simpler', 'Ory': 'und', 'Oy': 'sehr', 'U': 'kurzer', 'Vo': 'Text'}
@@ -145,7 +145,7 @@ def external(json_data, algo_id, request):
 		input_file = InputFile(name = name, file = mock_file)  
 		input_file.extension = ext
 		input_file.save() # Save to be sure input_file.id is created 
-		input_file_id = input_file.id		### ToCheck: where is input_file.id set?
+		input_file_id = input_file.id
 	
 	input_file = InputFile.objects.get(pk = input_file_id)
 
