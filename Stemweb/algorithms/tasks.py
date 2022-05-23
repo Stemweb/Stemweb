@@ -9,7 +9,7 @@ import datetime
 import os
 import logging
 from . import settings
-
+import re
 import json
 import functools
 import http.client
@@ -553,10 +553,17 @@ def external_algorithm_run_finished(*args, run_id=None, return_host=None, return
 	''' Callback task in case external algorithm run finishes succesfully. '''
 	#print('########### algo_run_finished called #######################')
 
+	targeturl = None
 	#return_path = 'stemmaweb/stemweb/result/'
 	hostparts = return_host.split(':')
-	host = hostparts[0]
-	port = hostparts[1]
+	match = re.search("^http(s)?:", return_host)		# check if return_host also contains the protocol http or https
+	if match:
+			host = (hostparts[1]).replace('/','')		# remove  //
+			port = hostparts[2]
+			targeturl = return_host + return_path
+	else:
+		host = hostparts[0]
+		port = hostparts[1]
 
 	#logger = logging.getLogger('stemweb.algorithm_run')
 		
@@ -626,14 +633,23 @@ def external_algorithm_run_finished(*args, run_id=None, return_host=None, return
 	shandler = BoundHTTPSHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
 	fixed_sourceport_opener = urllib.request.build_opener(shandler, handler)
 
-	#url = 'https://stemmaweb.net:443/stemmaweb/stemweb/result/'
 	message = json.dumps(ret)
 	data = message.encode('utf8')
 	headers = {'Content-type': 'application/json; charset=utf-8'}
-	targeturl = 'https://' + return_host + return_path
-	#targeturl = 'http://' + return_host + return_path
-	#req = urllib.request.Request(url, data, headers)	
-	req = urllib.request.Request(targeturl, data, headers)
+	#url = 'https://stemmaweb.net:443/stemmaweb/stemweb/result/'
+	#req = urllib.request.Request(url, data, headers)
+
+	if targeturl != None:
+		req = urllib.request.Request(targeturl, data, headers)
+	else:
+		targeturl = 'https://' + return_host + return_path
+		try:
+			req = urllib.request.Request(targeturl, data, headers)
+		except:
+			targeturl = 'http://' + return_host + return_path
+			req = urllib.request.Request(targeturl, data, headers)
+
+
 	#print req.get_full_url()		### e.g.: https://stemmaweb.net:443/stemmaweb/stemweb/result/
 	#print req.get_method()          ### POST
 	#print req.(get_data) 
@@ -647,11 +663,6 @@ def external_algorithm_run_finished(*args, run_id=None, return_host=None, return
 		# print (e.code)
 		# print (e.reason)
 		pass
-
-	#with fixed_sourceport_opener.open(req) as response:
-	##with urllib.request.urlopen(req) as response:   
-   	#	resp = response.read()
-	#	print (resp)
 
 
 class ClassBasedAddingTask(Task):
