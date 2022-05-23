@@ -9,6 +9,7 @@ import sys
 from time import sleep
 import logging
 import platform
+import Stemweb.algorithms.settings
 from Stemweb.algorithms.tasks import AlgorithmTask
 from Stemweb._celery import celery_app
 import binarysankoff
@@ -61,8 +62,20 @@ class RHM(AlgorithmTask):
 		#print ('############## shell_command =', shell_command, '++++++++++++++++++++')
 
 		os.chdir(out_folder)
-		#subprocess.run(shell_command, shell = True, check = True) ### ?!
-		subprocess.run(shell_command, shell = True)
+		#subprocess.run(shell_command, shell = True, check = True)
+		#subprocess.run(shell_command, shell = True)
+		proc = subprocess.Popen(shell_command, shell = True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		(stdout, stderr) = proc.communicate()
+		if stderr:
+			#print ("\n############### rhm.sh script gave some error ############################\n")
+			#print (type(stderr))
+			#print ("\n\n")
+			#print (stderr)
+			#print ("\n###########################################\n")
+
+			self.algorithm_run.error_msg = stderr
+			self.algorithm_run.status = Stemweb.algorithms.settings.STATUS_CODES['failure']
+			self.algorithm_run.save()
 
 		# rename result files to target file-names:
 		newick_file_name = file_name + '_rhm.tre'

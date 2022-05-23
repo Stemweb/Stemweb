@@ -571,8 +571,13 @@ def external_algorithm_run_finished(*args, run_id=None, return_host=None, return
 	algorun = AlgorithmRun.objects.get(pk = run_id)
 
 	res = ""
-	if algorun.status == settings.STATUS_CODES['failure']: # if failure status was set in njc.py then keep it  (not detectable during tasks execution level)
+	usedformat = ""
+	if algorun.status == settings.STATUS_CODES['failure']: # if failure status was set in njc.py or during rhm calc, then keep it  (not detectable during tasks execution level)
 		res = algorun.error_msg
+		if slugify(algorun.algorithm.name) == 'neighbour-net':
+			usedformat = 'networkx-graph as json'
+		else:
+			usedformat = 'newick'
 	else:	
 		algorun.status = settings.STATUS_CODES['finished']
 		if slugify(algorun.algorithm.name) == 'neighbour-net':
