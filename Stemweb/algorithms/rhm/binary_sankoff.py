@@ -15,6 +15,7 @@ from Stemweb._celery import celery_app
 import binarysankoff
 import subprocess
 import shutil
+import re
 
 
 class RHM(AlgorithmTask):
@@ -73,9 +74,13 @@ class RHM(AlgorithmTask):
 			#print (stderr)
 			#print ("\n###########################################\n")
 
-			self.algorithm_run.error_msg = stderr
-			self.algorithm_run.status = Stemweb.algorithms.settings.STATUS_CODES['failure']
-			self.algorithm_run.save()
+			match = re.search("warning?:", str(stderr))
+			if match:
+				pass		### do not exit bacause of warnings
+			else:
+				self.algorithm_run.error_msg = stderr
+				self.algorithm_run.status = Stemweb.algorithms.settings.STATUS_CODES['failure']
+				self.algorithm_run.save()
 
 		# rename result files to target file-names:
 		newick_file_name = file_name + '_rhm.tre'

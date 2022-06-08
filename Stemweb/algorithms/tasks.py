@@ -446,7 +446,7 @@ def external_algorithm_run_error(*args, run_id=None, return_host=None, return_pa
 			Worker exited prematurely: signal 11 (SIGSEGV) Job: 0.
 			or e.g.:
 			[Errno 2] No such file or directory: '/home/stemweb/Stemweb/media/results/runs/rhm/5/7OCRD3Y4/20210804-181608-BSBLR3EH_rhm.tre'
-		- args[2]: Traceback, e.g:
+		- args[2]: empty or Traceback, e.g:
 			stemweb_py37_1  | [2021-08-04 18:16:09,243: WARNING/ForkPoolWorker-3] Traceback (most recent call last):
 			stemweb_py37_1  |   File "/usr/local/lib/python3.7/site-packages/celery/app/trace.py", line 412, in trace_task
 			stemweb_py37_1  |     R = retval = fun(*args, **kwargs)
@@ -462,7 +462,7 @@ def external_algorithm_run_error(*args, run_id=None, return_host=None, return_pa
 	print ('######################## external algorithm run failed :-(( ################################')
 	print ('args[0]=', args[0], '+++++++++++++++++' )
 	print ('args[1]=', args[1], '+++++++++++++++++' )
-	print ('args[2]=', args[2], '+++++++++++++++++' )
+	#print ('args[2]=', args[2], '+++++++++++++++++' )
 	from Stemweb.algorithms.models import AlgorithmRun
 
 	try:

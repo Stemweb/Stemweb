@@ -10,14 +10,14 @@ def re_format(input_data):
 
 	input example:
 	"taxum-1 \t taxum-2 \t taxum-3 \t taxum-4\n
-	Text1-line1 \t Text2-line1 \t Text3-line1 \t Text4-line1 \n		# line:  [Text1-line1 Text2-line1 Text3-line1 Text4-line1] // all texts - same line
+	Text1-line1 \t Text2-line1 \t Text3-line1 \t Text4-line1 \n		# line:  [Text1-line1 Text2-line1 Text3-line1 Text4-line1] // all texts - same (particular) line
 	Text1-line2 \t Text2-line2 \t Text3-line2 \t Text4-line2 \n
 	Text1-line3 \t Text2-line3 \t Text3-line3 \t Text4-line3"
 
 
 	returns such a data-dictionary:
 	{
-	"taxum-1": "Text1-line1 \n Text1-line2 \n Text1-line3",			# dict value: tmp  // specific (same) text - all lines
+	"taxum-1": "Text1-line1 \n Text1-line2 \n Text1-line3",			# dict value:  particular (same) text - all lines
 	"taxum-2": "Text2-line1 \n Text2-line2 \n Text2-line3",	
 	"taxum-3": "Text3-line1 \n Text3-line2 \n Text3-line3",
 	"taxum-4": "Text4-line1 \n Text4-line2 \n Text4-line3"
@@ -25,14 +25,31 @@ def re_format(input_data):
 
 	'''
 
+	data_dict = {}
+	read_tsv = csv.DictReader(input_data.split('\n'), delimiter='\t')	### TSV-parsing
+	taxas = read_tsv.fieldnames
+	number_of_taxas = len(taxas)
+	data_dict=dict.fromkeys(taxas, "")	### initialze keys in data_dict from taxas; init all values with ""
+	for index, tax in enumerate(taxas):  # tax is each value in line 1
+			for idx, row in enumerate(read_tsv, start=2): # row is the dictionary produced for each of lines 2-N
+				#thisreading = row[tax] # thisreading is the cell value for the given tax at the given row
+				particular_line_asList = list(row.values())		### .values() returns a view, rather than a list
+				if number_of_taxas > len(particular_line_asList):
+					expt = "format error: row " + str(idx) + " has fewer entries than line 1 which contains the taxas"
+					#raise Exception(expt)
+					return expt
+				if number_of_taxas < len(particular_line_asList):
+					expt = "format error: row " + str(idx) + " has more entries than line 1 which contains the taxas"
+					#raise Exception(expt)
+					return expt
+				#particular_line_asList[:] = [x + '\n' for x in particular_line_asList]   ### add '\n' to each element in the list
+				for c, key in enumerate(data_dict):
+					data_dict[key]="\n".join( [data_dict[key],(particular_line_asList[c]) ])
+
+	"""
+	### previous solution ####
 	tmp = ""
 	elem = ""
-	data_dict = {}
-
-	lines = input_data.split('\n')
-	read_tsv = csv.reader(lines, delimiter='\t', quoting=csv.QUOTE_NONE)	### TSV-parsing
-	tsv_parsed_content = list(read_tsv)
-		
 	taxas = [name.strip() for name in tsv_parsed_content[0]]
 	number_of_taxas = len(taxas)
 	for tax in taxas: data_dict[tax] = ""
@@ -53,6 +70,7 @@ def re_format(input_data):
 				tmp += (elem + '\n')
 		data_dict[taxas[z]] = tmp
 		tmp = ""
+	"""
 
 	return data_dict
 
