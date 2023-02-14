@@ -4,14 +4,10 @@ services:
         image: "mysql:5.7"
         restart: always
         environment:
-            #MYSQL_ALLOW_EMPTY_PASSWORD: "TRUE"
             MYSQL_PASSWORD: "${MYSQL_PASSW}"
-            #MYSQL_PASSW: 'ChangeMe'
             MYSQL_USER: "stemweb"
             MYSQL_RANDOM_ROOT_PASSWORD: "YES"
             MYSQL_DATABASE: "stemwebdb_v1"
-        #volumes:
-        #    - ./mysqlinit:/docker-entrypoint-initdb.d
     redis:
         image: "redis:alpine"
         restart: always
@@ -26,8 +22,7 @@ services:
             redis-server /usr/local/etc/redis/redis.conf
 
     stemweb_py37:
-        #image: "dhuniwien/stemweb_py37:new_deployment_structure"
-        build: .
+        image: "dhuniwien/stemweb_py37:latest"
         restart: always
         environment:
             MYSQL_PASSW: "${MYSQL_PASSW}"
@@ -35,11 +30,7 @@ services:
         depends_on:
         - mysql
         - redis
-        #volumes:
-        #- ./config/local_settings.py:/home/stemweb/Stemweb/local_settings.py
         ports:
-            #- "10.0.228.35:8000:8000"        ### on test-server
-            #- "10.0.228.35:51000:51000"      ### on test server
-            - "127.0.0.1:8000:8000"         ### on dev-laptop
-            - "127.0.0.1:51000:51000"       ### on dev-laptop
-            #- "127.0.0.1:3000:3000"         ### on dev-laptop
+            - "127.0.0.1:8000:8000"
+            - "127.0.0.1:51000:51000"
+
