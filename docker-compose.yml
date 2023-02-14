@@ -4,10 +4,11 @@ services:
         image: "mysql:5.7"
         restart: always
         environment:
-            MYSQL_PASSWORD: "${MYSQL_PASSW}"
-            MYSQL_USER: "stemweb"
+            MYSQL_PASSWORD: "${STEMWEB_DBPASS}"
+            MYSQL_USER: "${STEMWEB_DBUSER}"
             MYSQL_RANDOM_ROOT_PASSWORD: "YES"
-            MYSQL_DATABASE: "stemwebdb_v1"
+            MYSQL_DATABASE: "${STEMWEB_DBNAME}"
+
     redis:
         image: "redis:alpine"
         restart: always
@@ -22,14 +23,19 @@ services:
             redis-server /usr/local/etc/redis/redis.conf
 
     stemweb_py37:
-        image: "dhuniwien/stemweb_py37:latest"
+        image: dhuniwien/stemweb_py37:latest
         restart: always
-        environment:
-            MYSQL_PASSW: "${MYSQL_PASSW}"
-            MYSQL_PASSWORD: "${MYSQL_PASSW}"
         depends_on:
-        - mysql
-        - redis
+            - mysql
+            - redis
+        environment:
+            - STEMWEB_DBENGINE=${STEMWEB_DBENGINE}
+            - STEMWEB_DBNAME=${STEMWEB_DBNAME}
+            - STEMWEB_DBUSER=${STEMWEB_DBUSER}
+            - STEMWEB_DBPASS=${STEMWEB_DBPASS}
+            - STEMWEB_DBHOST=${STEMWEB_DBHOST}
+            - STEMWEB_DBPORT=${STEMWEB_DBPORT}
+            - STEMWEB_SECRET_KEY=${STEMWEB_SECRET_KEY}
         ports:
             - "127.0.0.1:8000:8000"
             - "127.0.0.1:51000:51000"

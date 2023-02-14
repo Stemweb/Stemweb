@@ -3,8 +3,6 @@ from . import local_settings as ls
 import os
 import sys
 
-DEBUG = True   ### if set to True, then Celery raises WARNING: "Using settings.DEBUG leads to a memory leak, never use this setting in production environments!
-
 # Root folder of the site
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 

@@ -8,12 +8,6 @@ RUN adduser stemweb --gecos ""
 RUN usermod -aG sudo stemweb
 WORKDIR /home/stemweb
 
-#=========== copy configured stemweb repository from host server =======
-COPY manage.py .
-COPY docker-entrypoint.sh .
-COPY Stemweb Stemweb
-COPY Stemweb/requirements/requirements.txt requirements.txt
-
 #======================== install tools ================================
 RUN apt-get update && apt-get -y install graphviz libgraphviz-dev pkg-config wget libffi-dev libssl-dev r-base-core curl vim tree python3-dev sed gawk sudo gcc 
 # with debugging tools:
@@ -22,7 +16,14 @@ RUN pip install -U setuptools
 RUN pip install pyopenssl ndg-httpsclient pyasn1 rpy2 mysqlclient ptvsd pygraphviz pymysql djangorestframework
 
 #===================== install requirements ============================
+COPY Stemweb/requirements/requirements.txt requirements.txt
 RUN pip install -r requirements.txt
+
+#=========== copy configured stemweb repository from host server =======
+COPY manage.py .
+COPY docker-entrypoint.sh .
+COPY wait-for-it.sh .
+COPY Stemweb Stemweb
 
 #=====  compile & build the c-extension "binarysankoff" for python =====
 WORKDIR /home/stemweb/Stemweb/algorithms/rhm
@@ -60,4 +61,6 @@ RUN mkdir Stemweb/logs && chown -R stemweb:stemweb .
 #EXPOSE 3000 8000 51000
 EXPOSE 8000 51000
 USER stemweb
+ENV sw_host ${STEMWEB_DBHOST}
+ENV sw_port ${STEMWEB_DBPORT}
 ENTRYPOINT ["./docker-entrypoint.sh"]

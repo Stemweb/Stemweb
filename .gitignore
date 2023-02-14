@@ -1,4 +1,5 @@
 *.pyc
+.env
 Stemweb/logs/
 Stemweb/algorithms/rhm/binarysankoff
 Stemweb/media/users/

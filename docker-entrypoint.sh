@@ -1,19 +1,25 @@
 #!/bin/bash
 
-# Wait for MySQL to come up
-echo "######### waiting 60 secs for MySQL to come up #########"
-now=$(date)
-echo $now
-sleep 60 
-echo "######### waiting finihed #########"
-now=$(date)
-echo $now
-
-#su stemweb
+cd /home/stemweb
+# Wait for the database if necessary
+if [ -n "${STEMWEB_DBHOST}" ]; then
+    dbport=$STEMWEB_DBPORT
+    if [ -z "${STEMWEB_DBPORT}" ]; then
+        case $STEMWEB_DBENGINE in
+            mysql)
+            dbport="3306"
+            ;;
+            postgresql_psycopg2)
+            dbport="5432"
+            ;;
+        esac
+    fi
+    echo "Waiting for ${STEMWEB_DBHOST}:${dbport} to come online"
+    ./wait-for-it.sh "${STEMWEB_DBHOST}:${dbport}" -t 60 -- echo "######### Initialising Stemweb #########"
+fi
 
 # Do the necessary DB migrations
 echo "######### Doing database migrations #########"
-cd /home/stemweb
 python manage.py makemigrations
 python manage.py migrate --run-syncdb
 python manage.py loaddata Stemweb/algorithms/init_algorithms.json
@@ -22,7 +28,6 @@ python manage.py loaddata Stemweb/files/files.json
 
 # Start celery worker
 echo "######### Starting Celery worker #########"
-#celery -A Stemweb worker &
 #celery -A Stemweb worker --loglevel=DEBUG --config=settings &
 celery -A Stemweb worker --config=settings &
 
