@@ -13,6 +13,10 @@ import os
 # NOR DO NOT REMOVE lstring.py FROM .gitignore IN ANY
 # CIRCUMSTANCES. 
 
+# Don't set this in production!
+DEBUG = os.getenv("STEMWEB_DEBUG", "False").lower() == "true" 
+
+
 # Hostnames that Stemweb should be serving from
 allowed_hosts = ['stemweb', 'localhost', '127.0.0.1']
 
@@ -31,18 +35,17 @@ db_email = ''
 # postgresql_psycopg2 needs psycopg2-packet installed to 
 # work. Add the name of the engine after already filled text.
 #db_engine = 'django.db.backends.sqlite3'
-db_engine = 'django.db.backends.mysql'
+db_engine = 'django.db.backends.%s' % os.getenv("STEMWEB_DBENGINE", 'sqlite3')
 
 # Name of your db. In sqlite3 this is absolute path for
 # your database-file.
 #db_name = '/home/stemweb/sqlite3db/stemweb_v1.db'
-db_name = 'stemwebdb_v1' 
+db_name = os.getenv("STEMWEB_DBNAME", 'stemwebdb_v1') 
 
-db_user = 'stemweb'                 # Your db user. Not needed in sqlite3
-db_pwd = os.getenv("MYSQL_PASSW")  # Your db password. Not needed in sqlite3
-#db_pwd = 'ChangeMe'  		     # Your db password. Not needed in sqlite3
-db_host = 'mysql'           # Host, leave blank if db is on local computer.
-db_port = '3306'            # Port to your db. Can be left blank
+db_user = os.getenv("STEMWEB_DBUSER")  # Your db user. Not needed in sqlite3
+db_pwd  = os.getenv("STEMWEB_DBPASS")  # Your db password. Not needed in sqlite3
+db_host = os.getenv("STEMWEB_DBHOST")  # Host, leave blank if db is on local computer.
+db_port = os.getenv("STEMWEB_DBPORT")  # Port to your db. Can be left blank
 
 # name of your ROOT_URLCONF. Needs to be in here, because
 # of some inconsisties in package naming on linux vs. mac.
@@ -50,8 +53,7 @@ db_port = '3306'            # Port to your db. Can be left blank
 root_urls = 'Stemweb.urls'
 
 # Veeerry secret key. Cannot be empty string.
-secret_key = 'ThisIsVewwySekrit'
-#secret_key = os.environ['SECRET_KEY']
+secret_key = os.getenv('STEMWEB_SECRET_KEY', "SetABetterSecretKey")
 
 # Default email backend. For private use console will suffice, but for public use either
 # dummy or smtp.
