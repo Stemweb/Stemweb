@@ -61,6 +61,4 @@ RUN mkdir Stemweb/logs && chown -R stemweb:stemweb .
 #EXPOSE 3000 8000 51000
 EXPOSE 8000 51000
 USER stemweb
-ENV sw_host ${STEMWEB_DBHOST}
-ENV sw_port ${STEMWEB_DBPORT}
 ENTRYPOINT ["./docker-entrypoint.sh"]
