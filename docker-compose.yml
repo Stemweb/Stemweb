@@ -1,7 +1,7 @@
 version: '3'
 services:
     mysql:
-        image: "mysql:5.7"
+        image: "mariadb:10.4"
         restart: always
         environment:
             MYSQL_PASSWORD: "${STEMWEB_DBPASS}"
@@ -22,21 +22,24 @@ services:
         command:
             redis-server /usr/local/etc/redis/redis.conf
 
-    stemweb_py37:
-        image: dhuniwien/stemweb_py37:latest
+    stemweb:
+        build: .
         restart: always
         depends_on:
             - mysql
             - redis
-        environment:
-            - STEMWEB_DBENGINE=${STEMWEB_DBENGINE}
-            - STEMWEB_DBNAME=${STEMWEB_DBNAME}
-            - STEMWEB_DBUSER=${STEMWEB_DBUSER}
-            - STEMWEB_DBPASS=${STEMWEB_DBPASS}
-            - STEMWEB_DBHOST=${STEMWEB_DBHOST}
-            - STEMWEB_DBPORT=${STEMWEB_DBPORT}
-            - STEMWEB_SECRET_KEY=${STEMWEB_SECRET_KEY}
+        env_file:
+            - .env
         ports:
             - "127.0.0.1:8000:8000"
             - "127.0.0.1:51000:51000"
 
+    client:
+        build: client/
+        restart: always
+        depends_on:
+            - stemweb
+        volumes:
+            - ./client:/src/app
+        ports:
+            - "127.0.0.1:8001:8001"
