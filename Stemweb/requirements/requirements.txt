@@ -1,4 +1,4 @@
-Django
+Django<4.0
 Pillow-PIL
 networkx
 celery<5.0,>=4.3.0
@@ -8,6 +8,7 @@ numpy
 matplotlib
 scipy
 importlib-metadata==4.13.0
+requests
 
 # For drawing newicks
 #biopython>=1.62

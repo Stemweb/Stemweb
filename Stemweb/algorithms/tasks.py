@@ -11,9 +11,8 @@ import logging
 from . import settings
 import re
 import json
-import functools
-import http.client
-import urllib.request, urllib.error, urllib.parse
+import requests
+from requests.exceptions import SSLError, HTTPError
 
 from .decorators import synchronized
 from django.template.defaultfilters import slugify
@@ -297,7 +296,7 @@ class AlgorithmTask(Task):
 		
 		self._algorithm_thread.start()		## here class NJ(AlgorithmTask)  in  njc.py is called
 		self.algorithm_run.status = settings.STATUS_CODES['running']
-		print('I am running NOW as thread')
+		logging.info('I am running NOW as thread')
 		#raise Exception("ERROR: this is an INTENDED test case exception from AlgorithmTask level ")   ### a manual test case 
 		self.algorithm_run.save()			## here again class NJ(AlgorithmTask)  in  njc.py is called
 		
@@ -459,16 +458,16 @@ def external_algorithm_run_error(*args, run_id=None, return_host=None, return_pa
 			or None
 
 	'''
-	print ('######################## external algorithm run failed :-(( ################################')
-	print ('args[0]=', args[0], '+++++++++++++++++' )
-	print ('args[1]=', args[1], '+++++++++++++++++' )
+	logging.warn ('######################## external algorithm run failed :-(( ################################')
+	logging.warn ('args[0]=', args[0], '+++++++++++++++++' )
+	logging.warn ('args[1]=', args[1], '+++++++++++++++++' )
 	#print ('args[2]=', args[2], '+++++++++++++++++' )
 	from Stemweb.algorithms.models import AlgorithmRun
 
 	try:
 		algorun = AlgorithmRun.objects.get(pk = run_id)			### django-DB connection can be lost after errors in RHM c-extension 
 	except OperationalError:
-		print ('\n ############ close and restore damaged DB connections #############\n')
+		logging.warn ('\n ############ close and restore damaged DB connections #############\n')
 		for conn in connections.all():
 			conn.close_if_unusable_or_obsolete()			### close damaged DB connections
 
@@ -506,47 +505,23 @@ def external_algorithm_run_error(*args, run_id=None, return_host=None, return_pa
 		pass
 
 	
-	class BoundHTTPHandler(urllib.request.HTTPHandler):
-
-		def __init__(self, source_address=None, debuglevel=0):
-			urllib.request.HTTPHandler.__init__(self, debuglevel)
-			self.http_class = functools.partial(http.client.HTTPConnection, source_address=source_address)
-	
-		def http_open(self, req):
-			return self.do_open(self.http_class, req)
-
-
-	class BoundHTTPSHandler(urllib.request.HTTPSHandler):
-
-		def __init__(self, source_address=None, debuglevel=0):
-			urllib.request.HTTPSHandler.__init__(self, debuglevel)
-			self.http_class = functools.partial(http.client.HTTPSConnection, source_address=source_address)
-	
-		def http_open(self, req):
-			return self.do_open(self.http_class, req)
-
-
-	source_port = 51000
-	handler = BoundHTTPHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
-	shandler = BoundHTTPSHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
-	fixed_sourceport_opener = urllib.request.build_opener(shandler, handler)
-
-	message = json.dumps(ret)
-	data = message.encode('utf8')
-	headers = {'Content-type': 'application/json; charset=utf-8'}
-	targeturl = 'https://' + return_host + return_path	
-	#targeturl = 'http://' + return_host + return_path
-	req = urllib.request.Request(targeturl, data, headers)
+	# Does the return host have a schema defined?
+	targeturl = return_host + return_path
+	EXPLICIT_SCHEMA = return_host.startswith('https://') or return_host.startswith('http://')
+	if EXPLICIT_SCHEMA:
+		r = requests.post(targeturl, json=ret)
+	else:
+		# We will have to try both
+		try:
+			r = requests.post('https://%s' % targeturl, json=ret)
+		except SSLError:
+			r = requests.post('http://%s' % targeturl, json=ret)
 
 	try: 
-		#response = urllib.request.urlopen(req)	# standard request; not using dedicated source_port; alternative to next line
-		response = fixed_sourceport_opener.open(req)	
-		#content = response.read()
-		#print (content)
-	except urllib.error.HTTPError as e:
-		#print (e.code)
-		#print (e.reason)
-		pass
+		r.raise_for_status()
+	except HTTPError as e:
+		logging.warn("Attempt to return response to %s got an error: %s" % (targeturl, e.message))
+
 
 @shared_task
 def external_algorithm_run_finished(*args, run_id=None, return_host=None, return_path=None):
@@ -605,69 +580,22 @@ def external_algorithm_run_finished(*args, run_id=None, return_host=None, return
 			'format': usedformat
 			}	
 	
-	"""
-	according to a proposal at:
-	https://stackoverflow.com/questions/1150332/source-interface-with-python-and-urllib2
-	This gives us a custom urllib2.HTTPHandler implementation that is source_address aware. We can add it to a new urllib2.OpenerDirector
-	
-	the same works for urllib.request used in python3 (instead of urllib2 used in python2.7) 
-	"""
-
-	class BoundHTTPHandler(urllib.request.HTTPHandler):
-
-		def __init__(self, source_address=None, debuglevel=0):
-			urllib.request.HTTPHandler.__init__(self, debuglevel)
-			self.http_class = functools.partial(http.client.HTTPConnection, source_address=source_address)
-	
-		def http_open(self, req):
-			return self.do_open(self.http_class, req)
-
-
-	class BoundHTTPSHandler(urllib.request.HTTPSHandler):
-
-		def __init__(self, source_address=None, debuglevel=0):
-			urllib.request.HTTPSHandler.__init__(self, debuglevel)
-			self.http_class = functools.partial(http.client.HTTPSConnection, source_address=source_address)
-	
-		def http_open(self, req):
-			return self.do_open(self.http_class, req)
-
-
-	source_port = 51000
-	handler = BoundHTTPHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
-	shandler = BoundHTTPSHandler(source_address=("0.0.0.0", source_port), debuglevel = 0)
-	fixed_sourceport_opener = urllib.request.build_opener(shandler, handler)
-
-	message = json.dumps(ret)
-	data = message.encode('utf8')
-	headers = {'Content-type': 'application/json; charset=utf-8'}
-	#url = 'https://stemmaweb.net:443/stemmaweb/stemweb/result/'
-	#req = urllib.request.Request(url, data, headers)
-
-	if targeturl != None:
-		req = urllib.request.Request(targeturl, data, headers)
+	# Does the return host have a schema defined?
+	targeturl = return_host + return_path
+	EXPLICIT_SCHEMA = return_host.startswith('https://') or return_host.startswith('http://')
+	if EXPLICIT_SCHEMA:
+		r = requests.post(targeturl, json=ret)
 	else:
-		targeturl = 'https://' + return_host + return_path
+		# We will have to try both
 		try:
-			req = urllib.request.Request(targeturl, data, headers)
-		except:
-			targeturl = 'http://' + return_host + return_path
-			req = urllib.request.Request(targeturl, data, headers)
+			r = requests.post('https://%s' % targeturl, json=ret)
+		except SSLError:
+			r = requests.post('http://%s' % targeturl, json=ret)
 
-
-	#print req.get_full_url()		### e.g.: https://stemmaweb.net:443/stemmaweb/stemweb/result/
-	#print req.get_method()          ### POST
-	#print req.(get_data) 
-            
 	try: 
-		#response = urllib.request.urlopen(req)	### standard request, using any free source port
-		response = fixed_sourceport_opener.open(req)	
-		# content = response.read()
-		# print (content)
-	except urllib.error.HTTPError as e:
-		# print (e.code)
-		# print (e.reason)
-		pass
+		r.raise_for_status()
+	except HTTPError:
+		logging.warn("Attempt to return response to %s got an error: %d %s" % (targeturl, r.status_code, r.text))
 
 
 class ClassBasedAddingTask(Task):
@@ -676,7 +604,7 @@ class ClassBasedAddingTask(Task):
 
 	def run(self, *args, **kwargs):
 		result = args[0] + args[1]
-		print('############ AddingTasks result: ###############', result, '+++++++++++++++++++++++++++++++')
+		logging.info('############ AddingTasks result: ###############', result, '+++++++++++++++++++++++++++++++')
 		return	result
 
 ClassBasedAddingTask = celery_app.register_task(ClassBasedAddingTask())
