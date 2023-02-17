@@ -21,7 +21,7 @@ DEBUG = os.getenv("STEMWEB_DEBUG", "False").lower() == "true"
 allowed_hosts = ['stemweb', 'localhost', '127.0.0.1']
 
 # Location of the Redis server for Stemweb
-redis_server = 'redis://redis:6379'
+redis_server = os.getenv("STEMWEB_REDIS", 'redis://redis:6379')
 
 # Local db admin name and email. Don't really need these
 # in local testing. But it's good to fill these, since
