@@ -32,7 +32,6 @@ services:
             - .env
         ports:
             - "127.0.0.1:8000:8000"
-            - "127.0.0.1:51000:51000"
 
     client:
         build: client/
