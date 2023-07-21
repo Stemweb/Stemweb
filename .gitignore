@@ -1,10 +1,12 @@
 *.pyc
-local_settings.py
+.env
 Stemweb/logs/
 Stemweb/algorithms/rhm/binarysankoff
 Stemweb/media/users/
 Stemweb/media/external/
 Stemweb/media/javascript/jquery-1.7.1.js
+client/received/
+client/venv/
 *.db
 .DS_Store
 binarysankoff.so
@@ -19,3 +21,5 @@ binarysankoff.dylib
 tmp.gz
 notes_for_stemmawed.txt
 lsettings.py
+vsc_config/
+Stemweb/.vscode

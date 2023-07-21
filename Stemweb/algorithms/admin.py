@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from models import Algorithm, AlgorithmArg
+from .models import Algorithm, AlgorithmArg
 
 class AlgorithmAdmin(admin.ModelAdmin):
 	list_display = ('name', 'desc')

@@ -1442,11 +1442,11 @@ int main(int argc, char *argv[])
 PyObject* py_main(PyObject* self, PyObject* args)
 {
 	PyObject* run_args = NULL;
-	PyObject* p_outfolder = PyString_FromString("outfolder");
-	PyObject* p_infolder = PyString_FromString("infolder");
-	PyObject* p_imax = PyString_FromString("imax");
-	PyObject* p_strap = PyString_FromString("strap");
-	PyObject* p_filename = PyString_FromString("file_name");
+	PyObject* p_outfolder = PyBytes_FromString("outfolder");
+	PyObject* p_infolder = PyBytes_FromString("infolder");
+	PyObject* p_imax = PyBytes_FromString("imax");
+	PyObject* p_strap = PyBytes_FromString("strap");
+	PyObject* p_filename = PyBytes_FromString("file_name");
 	
 	PyArg_UnpackTuple(args, "ref", 1, 1, &run_args);
 	
@@ -1455,11 +1455,11 @@ PyObject* py_main(PyObject* self, PyObject* args)
 	
 	set_random_seed();
 	
-	filename = PyString_AsString(PyDict_GetItem(run_args, p_filename));
-	outfolder = PyString_AsString(PyDict_GetItem(run_args, p_outfolder));
-	strap = (int)PyInt_AsLong(PyDict_GetItem(run_args, p_strap));
-	imax = (int)PyInt_AsLong(PyDict_GetItem(run_args, p_imax));	
-	read_file(PyString_AsString(PyDict_GetItem(run_args, p_infolder)));
+	filename = PyBytes_AsString(PyDict_GetItem(run_args, p_filename));
+	outfolder = PyBytes_AsString(PyDict_GetItem(run_args, p_outfolder));
+	strap = (int)PyLong_AsLong(PyDict_GetItem(run_args, p_strap));
+	imax = (int)PyLong_AsLong(PyDict_GetItem(run_args, p_imax));	
+	read_file(PyBytes_AsString(PyDict_GetItem(run_args, p_infolder)));
 	
 	sprintf(gfilepath, "%s/tmp.gz", outfolder);
 	
@@ -1474,9 +1474,9 @@ PyObject* py_main(PyObject* self, PyObject* args)
   	
   	// Remove temp-file after the run.
   	if (remove(gfilepath) != 0)
-  		return PyInt_FromLong(-1);
+  		return PyLong_FromLong(-1);
   	
-  	return PyInt_FromLong(0);	
+  	return PyLong_FromLong(0);	
 }
 
 /*

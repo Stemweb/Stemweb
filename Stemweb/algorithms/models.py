@@ -1,11 +1,11 @@
 import os
 import shutil
 import logging
+import django.contrib.auth.models as dj_auth_models
 
 from django.db import models
-from django.contrib.auth.models import User, AnonymousUser
 
-from forms import DynamicArgs
+from .forms import DynamicArgs
 from Stemweb.files.models import InputFile
 from .settings import ARG_VALUE_CHOICES, STATUS_CODES
 from .settings import ALGORITHMS_CALLING_DICT as call_dict
@@ -115,7 +115,7 @@ class Algorithm(models.Model):
 			Any keys that are present in run_args already are not updated.
 		'''
 		algo_callable = None		
-		for key, value in call_dict[str(self.id)].items():
+		for key, value in list(call_dict[str(self.id)].items()):
 			if key == 'callable':
 				algo_callable = value
 			elif key not in kwargs['run_args']:
@@ -124,7 +124,7 @@ class Algorithm(models.Model):
 		return algo_callable
 	
 
-	def args_form(self, user = AnonymousUser, post = None):
+	def args_form(self, post = None):
 		'''
 			Build form from args of this algorithm instance. The form is build
 			again for each call of this function and is not stored to this model 
@@ -134,19 +134,16 @@ class Algorithm(models.Model):
 			arguments as fields. If there are no arguments in args then returns
 			None.
 			
-			user:	User who is currently active in this session. Only this 
-					user's files will be shown as possible input files.
-			
 			post:	request.POST to populate form fields so that is_valid() 
 					can be called. Don't use this if you expect user's to 
 					populate the fields.
 		'''
 		if len(self.args.all()) == 0: return None
-		return DynamicArgs(arguments = self.args, user = user, post = post)
-	
+		return DynamicArgs(arguments = self.args, post = post)
+               
 	
 	def get_external_args(self):
-		''' Get all algorithms arguments that will be send to external server. 
+		''' Get all algorithms arguments that will be sent to external server. 
 		'''
 		external_args = []
 		for arg in self.args.all():
@@ -179,14 +176,9 @@ class AlgorithmRun(models.Model):
 		input_file	: Input file used for this run if the run is not external. 
 					  Foreign key to InputFile-model.
 					  
-		folder		: Absolute path to folder where results are, is run is not
+		folder		: Absolute path to folder where results are, if run is not
 					  external. Max length 200.
 		
-		user		: User who started this run. This cannot be AnonymousUser. 
-					  If no user field is blank, external must be True and ip
-					  should have valid response ip when this algorithm run 
-					  finishes.
-					  
 		image		: Image of this run's resulting graph of best scored 
 					  network structure (if available).
 					  
@@ -195,7 +187,9 @@ class AlgorithmRun(models.Model):
 					  value to other than null when initiating run. Otherwise
 					  it can cause rendering issues in browser.
 					  
-		newick		: Resulting newick file of the run.
+		newick		: Resulting newick file of the run. (path + filename)
+
+		nwresult_path: Resulting network file of the run in json format including labels & positions. (path + filename)
 		
 		external	: Boolean, True if external server send this run request, 
 					  false otherwise.
@@ -204,25 +198,30 @@ class AlgorithmRun(models.Model):
 					  ip. Probably the same ip the algorithm run request was
 					  made.
 					  
-		extras		: Extra information stored in json-format.
-					  
-		TODO: change images and folder to be in the results, probably.  
+		extras		: Extra information stored/received in json-format: parameters, textid, userid, return_path, return_host
+		
+		error_msg   : error message (exception, [also traceback wanted?]) if it exists; else this is empty
+
+		
+	  
+		ProbablyTODO: change images and folder to be in the results, probably.  
 	'''
 	start_time = models.DateTimeField(auto_now_add = True)
 	end_time = models.DateTimeField(auto_now_add = False, null = True)
 	status = models.IntegerField(default = STATUS_CODES['not_started'])
-	algorithm = models.ForeignKey(Algorithm)        
-	input_file = models.ForeignKey(InputFile)   
+	algorithm = models.ForeignKey(Algorithm, on_delete=models.CASCADE)        
+	input_file = models.ForeignKey(InputFile, on_delete=models.CASCADE)   
 	folder = models.CharField(max_length = 300, blank = True) 
-	user = models.ForeignKey(User, null = True)
 	image = models.ImageField(upload_to = folder, null = True) 
 	score = models.FloatField(null = True, verbose_name = "Score")
 	current_iteration = models.PositiveIntegerField(null = True)
-	newick = models.URLField(blank = True, default = '')
+	newick = models.URLField(blank = True, default = '')     ### ToCheck: shouldn't it be a CharField ?!
+	nwresult_path = models.CharField(max_length = 10000, blank = True, default = '')
 	external = models.BooleanField(default = False)
-	ip = models.IPAddressField(null = True)
+	ip = models.GenericIPAddressField(null = True)
 	extras = models.CharField(max_length = 10000, blank = True)
-	
+	error_msg = models.CharField(max_length = 10000, blank = True, default = '')
+		
 	# Really we will be wanting to have this as PickleField.
 	#results = dict()
 	
@@ -230,10 +229,6 @@ class AlgorithmRun(models.Model):
 		'''	
 			Deletes all the run's results from hard drive so that there are no
 			files in users/-subfolders with zero links to them in database.
-			
-			IMPORTANT: Caller needs to verify that current active user has the
-			rights to delete this run. For now it means that self.user is the
-			same as request.user.
 		'''
 		
 		# TODO: we need to first check that run has been finished before any
@@ -251,7 +246,8 @@ class AlgorithmRun(models.Model):
 			logger = logging.getLogger('stemweb.algorithm_run')
 			logger.error('AlgorithmRun could not delete files: %s:%s folder:%s' \
 				% (self.algorithm.name, self.id, self.folder))
-			
+
+		# delete meta data in database:	
 		models.Model.delete(self)
 	
 	def __str__(self):
@@ -270,3 +266,4 @@ class AlgorithmRun(models.Model):
 	
 	
 	
+

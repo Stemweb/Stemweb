@@ -1,13 +1,7 @@
 # Import locally configured settings 
-import local_settings as ls
+from . import local_settings as ls
 import os
 import sys
-
-import djcelery
-djcelery.setup_loader()
-
-DEBUG = True
-TEMPLATE_DEBUG = DEBUG
 
 # Root folder of the site
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
@@ -17,6 +11,10 @@ ADMINS = (
 )
 
 MANAGERS = ADMINS
+
+ALLOWED_HOSTS = ls.allowed_hosts
+#ALLOWED_HOSTS = ['stemweb', 'localhost', '127.0.0.1']
+#ALLOWED_HOSTS = ['*']
 
 DATABASES = {
     'default': {
@@ -36,7 +34,7 @@ DATABASES = {
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'Europe/Helsinki'
+TIME_ZONE = 'Europe/Berlin'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -96,40 +94,62 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = ls.secret_key
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
 
-MIDDLEWARE_CLASSES = (
+#MIDDLEWARE_CLASSES = (
+#    'django.middleware.common.CommonMiddleware',
+#    'django.contrib.sessions.middleware.SessionMiddleware',
+#    'django.middleware.csrf.CsrfViewMiddleware',    # can be disabled as workaround
+#    'django.contrib.auth.middleware.AuthenticationMiddleware',
+#    'django.contrib.messages.middleware.MessageMiddleware',
+#    'Stemweb.third_party_apps.pagination.middleware.PaginationMiddleware',
+#)
+
+MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware',    # can be disabled as workaround
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'Stemweb.third_party_apps.pagination.middleware.PaginationMiddleware',
-)
+    #'Stemweb.third_party_apps.pagination.middleware.PaginationMiddleware',
+]
 
 ROOT_URLCONF = ls.root_urls
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-	"django.contrib.auth.context_processors.auth",
-	"django.core.context_processors.debug",
-	"django.core.context_processors.i18n",
-	"django.core.context_processors.media",
-	"django.core.context_processors.request"
-)
 
-TEMPLATE_DIRS = template_dirs = ( 
-    os.path.join(SITE_ROOT, 'templates/'),
-    os.path.join(SITE_ROOT, 'templates/stemweb'),
-    os.path.join(SITE_ROOT, 'templates/algorithms'),
-    os.path.join(SITE_ROOT, 'templates/registration'),
-    os.path.join(SITE_ROOT, 'templates/files'),
-   
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            # insert your TEMPLATE_DIRS here
+            os.path.join(SITE_ROOT, 'templates/'),
+            os.path.join(SITE_ROOT, 'templates/stemweb'),
+            os.path.join(SITE_ROOT, 'templates/algorithms'),
+            os.path.join(SITE_ROOT, 'templates/registration'),
+            os.path.join(SITE_ROOT, 'templates/files'),
+        ],
+        'OPTIONS': {
+            'context_processors': [
+                # Insert your TEMPLATE_CONTEXT_PROCESSORS here
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.request',
+                #'django.template.context_processors.static',
+                #'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+            ],
+            'loaders': [
+                # insert your TEMPLATE_LOADERS here
+                # List of callables that know how to import templates from various sources
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+                #'django.template.loaders.eggs.Loader',
+            ]
+        },
+    },
+]
+
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -140,12 +160,12 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
+    'kombu',
+    'redis',   
+    #'rest_framework', 
     
-    'djcelery',
-	"djkombu",
-    
-    'Stemweb.third_party_apps.recaptcha_works',
-    'Stemweb.third_party_apps.registration',
+    #'Stemweb.third_party_apps.recaptcha_works',
+    #'Stemweb.third_party_apps.registration',
     'Stemweb.third_party_apps.pagination',
     
     # Own apps
@@ -154,18 +174,25 @@ INSTALLED_APPS = (
     'Stemweb.files',
 )
 
-BROKER_BACKEND = "django"
-# Django-celery configurations
-BROKER_HOST = "localhost"
-BROKER_PORT = 5672
-BROKER_USER = "guest"
-BROKER_PASSWORD = "guest"
-BROKER_VHOST = "/"
+
+# celery  configurations 
+CELERY_BROKER_URL = ls.redis_server
+CELERY_RESULT_BACKEND = ls.redis_server
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+INCLUDE=['Stemweb.algorithms.tasks']
+#CELERY_TASK_ALWAYS_EAGER = True   ### always sync instead of async call; you can set it for debug purposes
+
 
 # registration apps own setting. Configures how many days
 # user has to activate account before it expires.
-ACCOUNT_ACTIVATION_DAYS = 7
+ACCOUNT_ACTIVATION_DAYS = 99
 LOGIN_REDIRECT_URL = '/'
+
+# number of days the results shall be kept as files and the meta infos shall be kept in DB
+# used to prevent filling the file system and the database
+KEEP_RESULTS_DAYS = 60
 
 # Email backend
 EMAIL_BACKEND = ls.email_backend
@@ -194,8 +221,8 @@ RECAPTCHA_OPTIONS = {
 }
 
 # Add small random delay to concurrency. 
-# TODO: change when in production to False
-CONCURRENT_RANDOM_DELAY = True
+# WATCHOUT: change when in production to False
+CONCURRENT_RANDOM_DELAY = False
 
 ROOT_LOG_DIR = os.path.join(SITE_ROOT, 'logs')
 if not os.path.exists(ROOT_LOG_DIR):
@@ -204,6 +231,10 @@ if not os.path.exists(ROOT_LOG_DIR):
 ALGORITHMS_LOG_DIR = os.path.join(ROOT_LOG_DIR, 'algorithms')
 if not os.path.exists(ALGORITHMS_LOG_DIR):
 	os.makedirs(ALGORITHMS_LOG_DIR);
+	
+DJANGO_LOG_DIR = os.path.join(ROOT_LOG_DIR, '_django')
+if not os.path.exists(DJANGO_LOG_DIR):
+	os.makedirs(DJANGO_LOG_DIR);
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -229,7 +260,7 @@ LOGGING = {
     'handlers': {
         'null': {
             'level':'DEBUG',
-            'class':'django.utils.log.NullHandler',
+            'class':'logging.NullHandler',
         },
         'console':{
             'level':'DEBUG',
@@ -252,7 +283,25 @@ LOGGING = {
 			'filename': os.path.join(ALGORITHMS_LOG_DIR, 'auth'),
 			'when': 'D',
 			#'interval': 1,
-		}
+		},
+		
+		'file': {
+			'level':'DEBUG',
+			'class':'logging.handlers.TimedRotatingFileHandler',
+			'formatter': 'verbose',
+			'filename': os.path.join(DJANGO_LOG_DIR, 'myLogFile.txt'),
+			'when': 'D',
+			#'filemode': 'a'
+			#'interval': 1,
+		},
+    	#'celery_tasks': {
+		#	'level':'DEBUG',
+		#	'class':'logging.handlers.TimedRotatingFileHandler',
+		#	'formatter': 'verbose',
+		#	'filename': os.path.join(ALGORITHMS_LOG_DIR, 'tasks'),
+		#	'when': 'D',
+		#	#'interval': 1,    
+        #}    
     },
     'loggers': {
 		'stemweb.algorithm_run': {
@@ -261,15 +310,26 @@ LOGGING = {
 			'level': 'DEBUG',
 		},
         'django': {
-            'handlers':['null'],
+            'handlers':['console', 'file'],
             'propagate': True,
-            'level':'INFO',
+            'level':'DEBUG',
         },
 		'stemweb.auth': {
 			'handlers': ['console', 'authentication'],
 			'propagate': False,
 			'level': 'DEBUG',
-		}
+		},
+        'django.template': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'celery': {
+            #'handlers': ['console','celery_tasks'],
+            'handlers': ['console'],            
+            'level': 'DEBUG',
+            'propagate': True
+        }      
 
     }
 }

@@ -1331,10 +1331,10 @@ PyObject* py_main(PyObject* self, PyObject* args)
 {
 	int itermaxin;
 	PyObject* run_args = NULL;
-	PyObject* p_outfolder = PyString_FromString("outfolder");
-	PyObject* p_infolder = PyString_FromString("infolder");
-	PyObject* p_itermaxin = PyString_FromString("itermaxin");
-	PyObject* p_strap = PyString_FromString("strap");
+	PyObject* p_outfolder = PyBytes_FromString("outfolder");
+	PyObject* p_infolder = PyBytes_FromString("infolder");
+	PyObject* p_itermaxin = PyBytes_FromString("itermaxin");
+	PyObject* p_strap = PyBytes_FromString("strap");
 	
 	PyArg_UnpackTuple(args, "ref", 1, 1, &run_args);
 	
@@ -1343,10 +1343,10 @@ PyObject* py_main(PyObject* self, PyObject* args)
 	
 	set_random_seed();
 	
-	outfolder = PyString_AsString(PyDict_GetItem(run_args, p_outfolder));
-	strap = (int)PyInt_AsLong(PyDict_GetItem(run_args, p_strap));
-	itermaxin = (int)PyInt_AsLong(PyDict_GetItem(run_args, p_itermaxin));	
-	read_file(PyString_AsString(PyDict_GetItem(run_args, p_infolder)));
+	outfolder = PyBytes_AsString(PyDict_GetItem(run_args, p_outfolder));
+	strap = (int)PyLong_AsLong(PyDict_GetItem(run_args, p_strap));
+	itermaxin = (int)PyLong_AsLong(PyDict_GetItem(run_args, p_itermaxin));	
+	read_file(PyBytes_AsString(PyDict_GetItem(run_args, p_infolder)));
 	
 	for (boot = 0; boot < strap; boot++)
   	{
@@ -1357,7 +1357,7 @@ PyObject* py_main(PyObject* self, PyObject* args)
   	}
   	//free_mem();
   	
-  	return PyInt_FromLong(0);	
+  	return PyLong_FromLong(0);	
 }
 
 /*

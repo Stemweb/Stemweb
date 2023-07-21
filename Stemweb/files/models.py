@@ -5,9 +5,8 @@
 # these tables with "python manage.py syncdb" -command.
 
 from django.db import models
-from django.contrib.auth.models import User
 from django.utils.encoding import smart_str
-import utils
+from . import utils
 
 class GetOrNoneManager(models.Manager):
 	''' Adds get_or_none method to objects. '''
@@ -19,13 +18,7 @@ class GetOrNoneManager(models.Manager):
 
 class InputFile(models.Model):
 	''' Basic table for all input files to any of the scripts. 
-	
-		user		: User who uploaded the input file. If null, external must
-					  be set to True.
-	
 	'''
-
-	user = models.ForeignKey(User, null = True)     # User who uploaded the file
 	upload_time = models.DateTimeField(auto_now_add = True) # Uploading time 
 	last_access = models.DateTimeField(auto_now = True)
 	name = models.CharField(max_length = 80)        # Base name of the input file

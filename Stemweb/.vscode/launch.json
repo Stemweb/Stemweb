@@ -1,0 +1,25 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "dbg stemweb container",
+            "type": "python",
+            "request": "attach",
+            "port": 3000,
+            "host": "172.20.0.4",  // get right IP-address from "docker inspect <container-id>" command
+                                   // see: NetworkSettings/Networks/IPAddress 
+            "django": true,
+            "pathMappings": [
+                {
+                    //"localRoot": "${workspaceFolder}/..",   // does not work
+                    "localRoot": "/home/fugger/repos3/Stemweb/",
+                    "remoteRoot": "/home/stemweb"
+                }
+            ]
+            
+        }
+    ]
+}

@@ -1,3 +1,5 @@
+#define PY_SSIZE_T_CLEAN
+#include <Python.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -8,17 +10,29 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <zlib.h>
-#include <Python.h>
+
+//#define TEST_MODE
 
 //#define COPY_AND_REPLACE
 
-//#define REPLACE_AMP_BY_ET
+#define REPLACE_AMP_BY_ET
+//#define REPLACE_HASH_BY_EMPTY
+//#define REPLACE_DASH_BY_EMPTY
 #define IGNORE_CASE
-//#define IGNORE_V_VS_U
+#define IGNORE_V_VS_U
 #define EXACT_COPY_IS_FREE
 #define EMPTY_IS_MISSING
 
 #define QUADRATIC_TEMP
+
+//#define TIMING
+
+#ifdef TIMING
+struct timeval timer;
+FILE *ftime;
+void start_timer(void);
+int get_timer(void);
+#endif
 
 struct node_st {
   int id, *fill;
@@ -31,10 +45,11 @@ struct node_st {
   int rightcost;
 };
 
-char *outfolder = "output-directory";
-char *filename = "input_file_name";
 char gfilepath[512];
+char *outfolder = "output-directory";
+char *outfilename = "output_file_name";
 int imax;
+
 FILE *fout;
 struct node_st *tree;
 char **names;
@@ -47,7 +62,7 @@ int alternate = 0;
 
 void usage(char *cmd)
 {
-  fprintf(stderr, "usage: %s <input-directory> <output-directory> <iterations> <bootstrap>\n\tinput-directory -- texts (remember to align)\n\toutput-directory -- trees (Newick)\n\titerations -- simulated annealing iterations\n\tbootstrap -- how many bootstrap repetitions? 1 -> no bootstrap\nOutput goes to '%s/rhm_i.tre for i=0,...,<bootstrap-1>.\n", cmd, outfolder);
+  fprintf(stderr, "usage: %s <directory> <iterations> <bootstrap>\n\tdirectory -- texts (remember to align)\n\titerations -- simulated annealing iterations\n\tbootstrap -- how many bootstrap repetitions? 1 -> no bootstrap\nOutput goes to 'sankoff-tree_i.dot for i=0,...,<bootstrap-1>.\n", cmd);
   exit(-1);
 }
 
@@ -55,12 +70,13 @@ void usage(char *cmd)
 
 unsigned int set_random_seed(void)
 {
-  struct timeval tv;
+  struct timeval time;
   unsigned int seed;
 
-  gettimeofday(&tv, NULL);
-  seed = (unsigned int) tv.tv_usec +
-        (unsigned int) tv.tv_sec;
+  gettimeofday(&time, NULL);
+
+  seed = (unsigned int) time.tv_usec +
+        (unsigned int) time.tv_sec;
 
   srand(seed);
 
@@ -72,7 +88,7 @@ char *fullname(const char *dirname, const char *fname)
   static char pathfname[256];
 
   sprintf(pathfname, "%s/%s", dirname, fname);
-  if (strlen(pathfname) > 256)
+  if (strlen(pathfname) > 255)
     fprintf(stderr, "OUTCH!\n");
 
   return pathfname;
@@ -82,46 +98,22 @@ int count_lines(const char *fname)
 {
   FILE *f;
   int line;
-  char tmp[2048];
+  char tmp[4096];
 
   f = fopen(fname, "r");
   assert(f != NULL);
 
   line = 0;
-  fgets(tmp, 2048, f);
+  fgets(tmp, 4096, f);
   while (!feof(f))
   {
     line++;
-    fgets(tmp, 2048, f);
+    fgets(tmp, 4096, f);
   }
 
   fclose(f);
 
   return line;
-}
-
-int count_columns(const char *fname)
-{
-  FILE *f;
-  int col;
-  char tmp[2048], *ptr;
-
-  f = fopen(fname, "r");
-  assert(f);
-
-  col = 0;
-  fgets(tmp, 2048, f);
-  ptr = tmp;
-  while (*ptr)
-  {
-    while (*ptr != '\t' && *ptr) ptr++;
-    col++;
-    if (*ptr) ptr++;
-  }
-
-  fclose(f);
-
-  return col;
 }
 
 int isempty(char *str)
@@ -236,138 +228,52 @@ char *str_vtou(char *str)
   return str;
 }
 
-long *get_rowoffsets(const char *fname, int lines)
-{
-  FILE *f;
-  int line;
-  char buf[2048];
-  long *offset;
-
-  assert(f = fopen(fname, "r"));
-
-  offset = (long *) malloc(sizeof *offset * lines);
-
-  for (line = -1; line < lines; line++)
-  {
-    if (line >= 0) offset[line] = ftell(f);
-    fgets(buf, 2048, f);
-  }
-
-  fclose(f);
-  return offset;
-}
-  
-char **get_names(const char *fname, int leafs)
-{
-  FILE *f;
-  char **names;
-  char buf[2048], *ptr0, *ptr;
-  int i;
-
-  f = fopen(fname, "r");
-
-  fgets(buf, 2048, f);
-  names = (char **) malloc(sizeof (char *) * 256);
-
-  ptr0 = buf;
-  for (i = 0; i < leafs; i++)
-  {
-    ptr = ptr0;
-    while (*ptr && *ptr != '\t' && *ptr != '\n') ptr++;
-    names[i] = (char *) malloc(sizeof(char) * (ptr-ptr0+1));
-    strncpy(names[i], ptr0, ptr-ptr0+1);
-    strcpy((char *)((long)names[i]+(long)(ptr-ptr0)),"");
-    ptr0 = ptr;
-    if (*ptr0) ptr0++;
-  }
-
-  fclose(f);
-
-  return names;
-}
-
-void fetch_word(char *buf, int w, FILE *f)
-{
-  int i;
-  char str[2048], *ptr;
- 
-  //  printf("reading:%d", ferror(f));
-  fgets(str, 2048, f);
-  if (ferror(f)) printf("'%s'\n", str);
-  //  printf("*%d\n", ferror(f));
-  ptr = str;
-  for (i = 0; i < w && *ptr; i++)
-  {
-    while(*ptr && *ptr != '\t' && *ptr != '\n') ptr++;
-    if (*ptr) ptr++;
-  }
-  i = 0;
-  while (*ptr && *ptr != '\t' && *ptr != '\n')
-  {
-    buf[i] = *ptr;
-    i++; ptr++;
-  }
-  buf[i] = '\0';
-  return;
-}
-
-int read_file(const char *target_path)
+int read_file(const char *dirname)
 {
   DIR *dir;
   FILE *f1, *f2;
   gzFile gfile;
-  char buf[4096];
+#define BUFMAX 8192
+  char buf[BUFMAX];
   struct dirent *de;
   int bufpos1, bufpos2, lines, f1i, f2i, ch, line;
-  long f1offset, *rowoffset;
+  long f1offset;
 
   leafs = 0;
-
-  // check whether the target is a directory with files
-  // or a single CSV formatted file
-  dir = (DIR *) opendir(target_path);
-
-  if (dir) // directory
+  names = (char **) malloc(sizeof(void *) * 1000);
+  dir = (DIR *) opendir(dirname);
+  while ((de = readdir(dir)))
   {
-    names = (char **) malloc(sizeof(void *) * 256);
-    while ((de = readdir(dir)))
+    if (de->d_name[0] != '.')
     {
-      if (de->d_name[0] != '.')
-      {
-	names[leafs] = (char *) malloc(sizeof(char) * (strlen(de->d_name)+1));
-	strcpy(names[leafs], de->d_name);
-	printf("%s ", names[leafs]);
-	leafs++;
-      }
+      names[leafs] = (char *) malloc(sizeof(char) * (strlen(de->d_name)+1));
+      strcpy(names[leafs], de->d_name);
+      printf("%s ", names[leafs]);
+      leafs++;
     }
-    printf("\n");
-    closedir(dir);
-    lines = count_lines(fullname(target_path, names[0]));
   }
-  else
-  {
-    leafs = count_columns(target_path);
-    lines = count_lines(target_path)-1;
-    names = get_names(target_path, leafs);
-    rowoffset = get_rowoffsets(target_path, lines);
-    assert(f1 = (FILE *) fopen(target_path, "r"));
-  }
+  printf("\n");
+  closedir(dir);
+
+  lines = count_lines(fullname(dirname, names[0]));
+
+#ifdef TEST_MODE
+  if (lines > 100) lines = 100;
+#endif
 
   chunks = (lines-1)/chunksize+1;
-  printf("%d taxa, %d lines, %d chunks of size %d each.\n",
+  printf("%d files, %d lines, %d chunks of size %d each.\n",
 	 leafs, lines, chunks, chunksize);
 
-  Kyx = (int *) malloc(sizeof(int) * leafs * leafs * chunks);
-  Kx = (int *) malloc(sizeof(int) * leafs * chunks);
-  empty = (int *) malloc(sizeof(int) * leafs * chunks);
-  unique = (int *) malloc(sizeof(int) * leafs * chunks);
-
+  Kyx = (int *) malloc(sizeof(int) * leafs * leafs * chunks);   assert(Kyx);
+  Kx = (int *) malloc(sizeof(int) * leafs * chunks);            assert(Kx);
+  empty = (int *) malloc(sizeof(int) * leafs * chunks);         assert(empty);
+  unique = (int *) malloc(sizeof(int) * leafs * chunks);        assert(unique);
+  
   for (f1i = 0; f1i < leafs; f1i++)
   {
-    if (dir) {
-      f1 = fopen(fullname(target_path, names[f1i]), "r");
-      assert(f1);
-    }
+    f1 = fopen(fullname(dirname, names[f1i]), "r");
+    assert(f1);
 
     for (ch = 0; ch < chunks; ch++)
     {
@@ -378,56 +284,42 @@ int read_file(const char *target_path)
 
     for (f2i = 0; f2i < leafs; f2i++)
     {
-      if (dir)
-      {
-	fseek(f1, 0, SEEK_SET);
-	if (f2i != f1i)
-	  f2 = fopen(fullname(target_path, names[f2i]), "r");
-	else
-	  f2 = f1;
-      }
+      fseek(f1, 0, SEEK_SET);
+
+      if (f2i != f1i)
+	f2 = fopen(fullname(dirname, names[f2i]), "r");
       else
 	f2 = f1;
-
       assert(f2);
       
       for (ch = 0; ch < chunks; ch++)
       {
-	//	printf("::%d:", ferror(f1));
-	if (!dir) // move to the correct position
-	  fseek(f1, rowoffset[chunksize*ch], SEEK_SET);
-	//	printf("seek %ld\n", rowoffset[chunksize*ch]);
-	//	printf("%d::\n", ferror(f1));
-	// record where started in case need to read twice
 	f1offset = ftell(f1);
-
 	bufpos1 = 0;
-	// open temporary gzip file for writing compressed data
-	sprintf(gfilepath, "%s/tmp.gz", outfolder);
-	gfile = gzopen(gfilepath, "wb");
-	for (line = 0; !ferror(f1) && !feof(f1) && line < chunksize; line++)
+	gfile = gzopen("tmp.gz", "wb");
+	for (line = 0; !feof(f1) && line < chunksize; line++)
 	{
 	  if (bufpos1 > 0 && buf[bufpos1-1] == '\n')
 	    buf[bufpos1-1] = ' ';
-	  if (dir)
-	    fgets(buf+bufpos1, 2048-bufpos1, f1);
-	  else // extract f1i'th word from the current row in CSV file
-	  {
-	    //	    printf("_%d", ferror(f1));
-	    fetch_word(buf+bufpos1, f1i, f1);
-	    //	    printf("_%d_\n", ferror(f1));
-	  }
+	  fgets(buf+bufpos1, 2048-bufpos1, f1);
 #ifdef REPLACE_AMP_BY_ET
 	  if (!strcmp(buf+bufpos1, "&\n"))
 	    strcpy(buf+bufpos1, "et\n");
 #endif
 	  if (buf[bufpos1] && buf[bufpos1] != '\n')
 	    empty[f1i*chunks+ch] = 0;
+#ifdef REPLACE_HASH_BY_EMPTY
+	  if (!strcmp(buf+bufpos1, "#\n"))
+	    strcpy(buf+bufpos1, "\n");
+#endif
+#ifdef REPLACE_DASH_BY_EMPTY
+	  if (!strcmp(buf+bufpos1, "-\n"))
+	    strcpy(buf+bufpos1, "\n");
+#endif
 	  bufpos1 += strlen(buf+bufpos1);
 	}
 	buf[bufpos1] = '\0';
 
-	//sort_string(buf);
 	bufpos1 = strlen(buf);
 
 	if (!bufpos1 || buf[bufpos1-1] != '\n')
@@ -440,42 +332,35 @@ int read_file(const char *target_path)
 	str_vtou(buf);
 #endif
 
-	//	printf("###1st### chunk %d %d %d\n%s###\n", ch, feof(f1), ferror(f1), buf);
-
 	if (Kx[f1i*chunks+ch] == -1)
 	{
 	  gzputs(gfile, buf);
-	  gzflush(gfile, Z_PARTIAL_FLUSH);
+	  gzflush(gfile, Z_SYNC_FLUSH);
 	
 	  Kx[f1i*chunks+ch] = 
-	    (int) ((struct z_stream_s *) gfile) -> total_out - GZIP_HEADER;
+	    (int) gzoffset(gfile) - GZIP_HEADER;
 	  //fprintf(stderr, "%sKx=%d\n", buf,Kx[f1i * chunks + ch]);
 	  gzclose(gfile);
-    	  sprintf(gfilepath, "%s/tmp.gz", outfolder);
-	  gfile = gzopen(gfilepath, "wb");
+	  gfile = gzopen("tmp.gz", "wb");
 	}
 
-	if (dir && f2 == f1)
+	if (f2 == f1)
 	  fseek(f1, f1offset, SEEK_SET);
-
-	if (!dir) // move to the correct position
-	  fseek(f2, rowoffset[chunksize*ch], SEEK_SET);
-
 	bufpos2 = bufpos1;
-	for (line = 0; !ferror(f2) && !feof(f2) && line < chunksize; line++)
+	for (line = 0; !feof(f2) && line < chunksize; line++)
 	{
 	  if (bufpos2 > bufpos1 && buf[bufpos2-1] == '\n')
 	    buf[bufpos2-1] = ' ';
-	  if (dir)
-	    fgets(buf+bufpos2, 4096-bufpos2, f2);
-	  else
-	    fetch_word(buf+bufpos2, f2i, f2);
+	  fgets(buf+bufpos2, BUFMAX-bufpos2, f2);
 #ifdef REPLACE_AMP_BY_ET
 	  if (!strcmp(buf+bufpos2, "&\n"))
 	    strcpy(buf+bufpos2, "et\n");
 #endif
+#ifdef REPLACE_HASH_BY_EMPTY
+	  if (!strcmp(buf+bufpos2, "#\n"))
+	    strcpy(buf+bufpos2, "\n");
+#endif	  
 	  bufpos2 += strlen(buf+bufpos2);
-	  //buf[bufpos2++] = '\n';
 	}
 	if (bufpos2==bufpos1 || buf[bufpos2-1] != '\n')
 	  buf[bufpos2++]='\n';
@@ -489,73 +374,52 @@ int read_file(const char *target_path)
 
 	bufpos2 = bufpos1+strlen(buf+bufpos1);
 
-	//	printf("###2nd### (%s->%s)\n%s###\n", names[f1i], names[f2i], buf);
-
-	if (strncmp(buf, buf+bufpos1, bufpos2/2))
+	if (
+#ifdef EXACT_COPY_IS_FREE
+	    strncmp(buf, buf+bufpos1, bufpos2/2)
+#else
+	    1
+#endif
+	    )
 	{
 	  gzputs(gfile, buf);
-	  gzflush(gfile, Z_PARTIAL_FLUSH);
+	  gzflush(gfile, Z_SYNC_FLUSH);
 
 	  Kyx[f1i*leafs*chunks + f2i*chunks + ch] = 
-	    //(int) gzoffset(gfile) -
-	    (int) ((struct z_stream_s *)gfile)->total_out -
+	    (int) gzoffset(gfile) -
 	    Kx[f1i * chunks + ch] - GZIP_HEADER;
 	}
 	else
 	{
-#ifdef EXACT_COPY_IS_FREE
 	  Kyx[f1i*leafs*chunks + f2i*chunks + ch] = 0;
-#else
-	  gzputs(gfile, buf);
-	  gzflush(gfile, Z_PARTIAL_FLUSH);
-
-	  Kyx[f1i*leafs*chunks + f2i*chunks + ch] = 
-	    (int) ((struct z_stream_s *)gfile)->total_out -
-	    Kx[f1i * chunks + ch] - GZIP_HEADER;
-#endif
-	  if (f2i<f1i)
-	    unique[f2i*chunks+ch] = 0;
 	}
 
-	//printf("%d\n", Kyx[f1i * leafs*chunks + f2i * chunks + ch]);
+	if (!strncmp(buf, buf+bufpos1, bufpos2/2) && f2i<f1i)
+	  unique[f2i*chunks+ch] = 0;  // this isnt't a new value in locus (chunk) ch
+	else
+	  if (0 && ch == 9) 
+	    printf("%s vs %s: %d\n", names[f1i], names[f2i], Kyx[f1i*leafs*chunks + f2i*chunks + ch]);
+
 
 	gzclose(gfile);      
-      }
-      if (dir && f2i != f1i)
+      } 
+
+      if (f2i != f1i)
 	fclose(f2);
     }
     fprintf(stderr, ".");
-    if (dir) fclose(f1);
+    fclose(f1);
   }
   fprintf(stderr, "\n");
-
-  if (!dir) fclose(f1);
 
   f2i = 0;
   for (ch = 0; ch < chunks; ch++)
     for (f1i = 0; f1i < leafs; f1i++)
       if (unique[f1i*chunks+ch])
 	f2i++;
+
   printf("%d/%d unique.\n", f2i, ch*leafs);
-
-  printf("%dx%dx%d information array ready.\n", leafs, leafs, chunks);
-
-  printf("'%s'(%d)->'%s'(%d)= %d\n", 
-	 names[1], empty[1*chunks],
-	 names[1], empty[1*chunks],
-	 Kyx[1*leafs*chunks+1*chunks]);
-  printf("'%s'(%d)->'%s'(%d) = %d\n", 
-	 names[2], empty[2*chunks],
-	 names[1], empty[1*chunks],
-	 Kyx[2*leafs*chunks+1*chunks]);
-  printf("'%s'->'%s' = %d\n", names[1], names[2], 
-	 Kyx[1*leafs*chunks+2*chunks]);
-  printf("'%s'->'%s' = %d\n", names[2], names[2],
-	 Kyx[2*leafs*chunks+2*chunks]);
-
-  printf("non-symmetric: %d %d\n", 
-	 Kyx[1*leafs*chunks + 2*chunks],
-	 Kyx[2*leafs*chunks + 1*chunks]);
+  printf("%dx%dx%d information array ready (#%p).\n", leafs, leafs, chunks, Kyx);
 
   /*
   for (f1i = 0; f1i < leafs; f1i++)
@@ -570,14 +434,30 @@ int read_file(const char *target_path)
 	  Kyx[f2i*leafs*chunks + f1i*chunks + ch];
       }
   }
-
+  */
   printf("symmetric: %d %d\n", 
 	 Kyx[3*leafs*chunks + 4*chunks],
 	 Kyx[4*leafs*chunks + 3*chunks]);
-  */
+  /**/
 
   return leafs;
 }
+
+#ifdef TIMING
+void start_timer(void)
+{
+  gettimeofday(&timer, NULL);
+}
+
+int get_timer(void)
+{
+  struct timeval end;
+
+  gettimeofday(&end, NULL);
+
+  return (int)((end.tv_sec-timer.tv_sec)*1000 + (end.tv_usec-timer.tv_usec)/1000);
+}
+#endif
 
 struct node_st *new_node(int i)
 {
@@ -667,12 +547,19 @@ void init_bootstrap()
     }
     bootw[i]++;
   }
+
+  if (strap > 1)
+    fprintf(stderr, "bootstrap (%d repetitions) initialized.\n", strap);
+  else
+    fprintf(stderr, "no bootstrap.\n");
 }
 
 void init_tree()
 {
   struct node_st *new, **array;
   int i, *permut, pi;
+
+  fprintf(stderr, "initializing tree...\n");
 
   tree = NULL;
   array = (struct node_st **) malloc(sizeof(void *) * (2*leafs-1));
@@ -734,6 +621,10 @@ void init_tree()
   tree->cost = NULL;
   free(permut);
   fprintf(stderr, "tree with %d nodes initialized.\n", n);
+
+#ifdef TIMING
+  fprintf(ftime, "tree initialized: %.1f ms\n", 1.0*get_timer());
+#endif
 }
 
 int edge_label(struct node_st *a, struct node_st *b)
@@ -759,14 +650,15 @@ double edge_length(struct node_st *a, struct node_st *b)
 {
   int leafpenalty = 0;
 
-  return 0.7;
+  //  return 0.7;
 
   if (!b->left && !b->right)
     leafpenalty = 0;
+  leafpenalty = -1;
   return ((double)(edge_label(a, b)+leafpenalty+1))/60.0;
 }
 
-void print_subtree_dot(struct node_st *node)
+void print_subtree(struct node_st *node)
 {
   char *look, *color, *name;
   int ch;
@@ -774,8 +666,8 @@ void print_subtree_dot(struct node_st *node)
   if (!node)
     return;
 
-  print_subtree_dot(node->left);
-  print_subtree_dot(node->right);
+  print_subtree(node->left);
+  print_subtree(node->right);
 
   if (node->id < leafs)
     name = names[node->id];
@@ -845,41 +737,20 @@ void print_subtree_dot(struct node_st *node)
 	    edge_length(node, node->right));
 }
 
-void print_subtree(struct node_st *node)
-{
-  char *name;
-
-  if (!node)
-    return;
-
-  if (node->left)
-  {
-    fprintf(fout, "(");
-    print_subtree(node->left);
-    fprintf(fout, ",");
-    print_subtree(node->right);
-    fprintf(fout, ")");
-  }
-  else 
-  {
-    if (node->id < leafs)
-      fprintf(fout, "%s", names[node->id]);
-    else
-      fprintf(fout, "i%d", node->id - leafs + 1);
-  }
-
-  if (node->id < leafs)
-    name = names[node->id];
-  else
-    name = NULL;
-  
-}
-
 void open_output()
 {
   char fname[256];
-  sprintf(fname, "%s/%s_rhm.tre", outfolder, filename);
+  //sprintf(fname, "sankoff-tree_%d.dot", boot);
+  //sprintf(fname, outfolder, "/", outfilename, "_rhm.tre");
+  strcpy (fname, outfolder);
+  strcat (fname, "/");
+  strcat (fname, outfilename);
+  strcat (fname, "_rhm.dot");
+  //fprintf(stderr, "\n ##################################### openING RESULT-file:\n");
+  //fprintf(stderr, fname);
   fout = fopen(fname, "w+");
+  //fprintf(stderr, "\n ##################################### openED RESULT-file\n\n");
+
 }
 
 void close_output()
@@ -919,12 +790,24 @@ void make_look_nice(struct node_st *node)
   make_look_nice(node->right);
 }
 
-void print_tree()
+void print_tree(struct node_st *tree)
 {
+  int ch;
+  //fprintf(stderr, ".");
   make_look_nice(tree);
   open_output();
+  fprintf(fout, "graph \"sankoff-tree\" {\nlabel=\"sankoff-score %d ", 
+	  bestval);
+  fprintf(fout, "bootstrap ");
+  if (strap == 1)
+    fprintf(fout, "off");
+  else
+    for (ch = 0; ch < chunks; ch++)
+      fprintf(fout, "%s%d", ch?",":"", bootw[ch]);
+  fprintf(fout, "\";\n");
+  fprintf(fout, "edge [style=bold];\nnode[shape=plaintext fontsize=20];\n");
   print_subtree(tree);
-  fprintf(fout, ";\n");
+  fprintf(fout, "}\n");
   close_output();
 }
 
@@ -987,7 +870,7 @@ int eval_subtree(int *cost, struct node_st *node, int ch)
       cost[node->id*leafs*chunks+i*chunks+ch] = 
 	min_cost(cost+node->left->id*leafs*chunks, node->left->id, i, ch) +
 	min_cost(cost+node->right->id*leafs*chunks, node->right->id, i, ch);
-      if (i == 0 || isinf(minval) || 
+      if (i == 0 || isinf((float) minval) || 
 	  cost[node->id*leafs*chunks+i*chunks+ch] < minval)
 	minval = cost[node->id*leafs*chunks+i*chunks+ch];
     }
@@ -1022,7 +905,7 @@ int eval_uptree(struct node_st *tree, struct node_st *node,
       cost[node->id*leafs*chunks+i*chunks+ch] = 
 	min_cost(cost+node->left->id*leafs*chunks, node->left->id, i, ch) +
 	min_cost(cost+node->right->id*leafs*chunks, node->right->id, i, ch);
-      if (i == 0 || isinf(minval) || 
+      if (i == 0 || isinf((float) minval) || 
 	  cost[node->id*leafs*chunks+i*chunks+ch] < minval)
 	minval = cost[node->id*leafs*chunks+i*chunks+ch];
     }
@@ -1096,7 +979,7 @@ void fill_subtree(int *cost, struct node_st *node)
 	  printf("for %d at %d, %d('%s%s') takes %d bytes.\n",
 	  node->id, ch, i, names[i], empty[i*chunks+ch]?"/-":"", val);
 	*/
-	if (i == 0 || isinf(minval) || val < minval)
+	if (i == 0 || isinf((float) minval) || val < minval)
 	{
 	  minval = val;
 	  node->fill[ch] = i;
@@ -1344,7 +1227,7 @@ int optimize_tree(int iters)
   fprintf(stderr, "alpha %f.\n", alpha);
 #endif
 
-  fprintf(stderr, "running %d iterations (tree at #%ld)\n\n", iters, (long int)tree);
+  fprintf(stderr, "running %d iterations\n\n", iters);
 
   T = 10.0;
 
@@ -1386,7 +1269,13 @@ int optimize_tree(int iters)
       if (newval < bestval)
       {
 	bestval = newval;
+#ifdef TIMING
+	int local_timer = get_timer();
+#endif
 	fill_subtree(tree->cost, tree);
+#ifdef TIMING
+	fprintf(ftime, "inference time %d ms\n", get_timer()-local_timer);
+#endif
 	print_tree(tree);
 	postpone = 0;
       }
@@ -1405,13 +1294,22 @@ int optimize_tree(int iters)
     }
 
     if (!postpone)
+    {
       fprintf(stderr, 
 	      "\033[1A\033[80Dbest score %d now %d (iter %d/%d temp %.2f).\n", 
 	      bestval, minval, iter, iters, T);
+#ifdef TIMING
+      fprintf(ftime, "%d iterations: %.1f s\n", iter, get_timer()/1000.0);
+#endif
+    }
     if (--postpone < 0)
       postpone = 250;
   }
 
+#ifdef TIMING
+  fprintf(ftime, "optimization finished: %.1f s\n", get_timer()/1000.0);
+#endif
+  
   return bestval;
 }
 
@@ -1419,81 +1317,126 @@ int main(int argc, char *argv[])
 {
   set_random_seed();
   
-  if (argc < 5)
+  if (argc < 4)
     usage(argv[0]);
 
+#ifdef TIMING
+  ftime = fopen("timing.txt", "w");
+  start_timer();
+#endif
+  fprintf(stderr, "check 1\n");
+
   read_file(argv[1]);
-  outfolder = argv[2];
-  imax = atoi(argv[3]);
-  strap = atoi(argv[4]);
+  fprintf(stderr, "check 2\n");
+  strap = atoi(argv[3]);
+
+  fprintf(stderr, "check 3\n");
   for (boot = 0; boot < strap; boot++)
   {
     init_bootstrap();
     init_tree();
-    optimize_tree(imax);
+    optimize_tree(atoi(argv[2]));
     free_tree(tree);
   }
   free_mem();
+
+#ifdef TIMING
+  fclose(ftime);
+#endif
+
   return 0;
 }
 
-/*
- *	Simple wrapper for using this module from python.
- */
-PyObject* py_main(PyObject* self, PyObject* args)
-{
-	PyObject* run_args = NULL;
-	PyObject* p_outfolder = PyString_FromString("outfolder");
-	PyObject* p_infolder = PyString_FromString("infolder");
-	PyObject* p_imax = PyString_FromString("imax");
-	PyObject* p_strap = PyString_FromString("strap");
-	PyObject* p_filename = PyString_FromString("file_name");
-	
-	PyArg_UnpackTuple(args, "ref", 1, 1, &run_args);
-	
-	// Make real copy so that these objects can be deleted here.
-	run_args = PyDict_Copy(run_args);
-	
-	set_random_seed();
-	
-	filename = PyString_AsString(PyDict_GetItem(run_args, p_filename));
-	outfolder = PyString_AsString(PyDict_GetItem(run_args, p_outfolder));
-	strap = (int)PyInt_AsLong(PyDict_GetItem(run_args, p_strap));
-	imax = (int)PyInt_AsLong(PyDict_GetItem(run_args, p_imax));	
-	read_file(PyString_AsString(PyDict_GetItem(run_args, p_infolder)));
-	
-	sprintf(gfilepath, "%s/tmp.gz", outfolder);
 
+/*
+ *	 wrapper for using this module from python.
+ */
+
+static PyObject* method_binsankoff(PyObject* self, PyObject* args)
+{
+  char numstr[10];
+  char *infolder = NULL; /* input path, optionally including input-filename */
+
+  if(!PyArg_ParseTuple(args, "isssi", &strap, &infolder, &outfolder, &outfilename, &imax)) {
+  
+        fprintf(stderr, "py_main +++++++++++++++  PyArg_ParseTuple() failed ++++++++++++++++++\n");
+        return PyLong_FromLong(-1);
+  }
+
+	set_random_seed();  
+  read_file(infolder);
+	sprintf(gfilepath, "%s/tmp.gz", outfolder);
+  
 	for (boot = 0; boot < strap; boot++)
-  	{
+  {
     	init_bootstrap();
     	init_tree();
+      //fprintf(stderr, "py_main =========== after init_tree() ============= \n");
    		optimize_tree(imax);
-    	free_tree(tree);
-  	}
-  	//free_mem();
+    	//printf(stderr, "py_main =========== after optimize_tree(imax) ============= \n");
+      free_tree(tree);
+  }
+  
+  //free_mem();  // ?!
+  
 
-  	// Remove temp-file after the run.
-  	if (remove(gfilepath) != 0)
-  		return PyInt_FromLong(-1);
-
-  	return PyInt_FromLong(0);	
+  // Remove temp-file after the run.
+  if (remove(gfilepath) != 0)
+  	return PyLong_FromLong(-1);
+  
+  return PyLong_FromLong(0);	
 }
 
-/*
- *	Give C-functions names in python.
- */
+
+
+// Method definition for this extension
 static PyMethodDef binarysankoff_methods[] = {
-	{"main", py_main, METH_VARARGS},
-	{NULL, NULL}
+  {"py_main", method_binsankoff, METH_VARARGS, "execute the RHM algorithm"},
+  {NULL, NULL, 0, NULL}   /* Sentinel */
+  /* https://stackoverflow.com/questions/30359255/python-sentinel-in-c-extension
+     https://stackoverflow.com/questions/43371780/why-does-pymethoddef-arrays-require-a-sentinel-element-containing-multiple-nulls   */
 };
 
-/*
- *	Python needs this to init module.
- */
-void initbinarysankoff()
+// Module definition
+// The arguments of this structure tell Python the name of the extension-module,
+// what it's methods are and where to look for it's method definitions
+static struct PyModuleDef binarysankoff =
 {
-	(void) Py_InitModule("binarysankoff", binarysankoff_methods);
+    PyModuleDef_HEAD_INIT,
+    "binarysankoff", /* name of module */
+    "a Python module that calculates RHM algorithm from C code extension.", /* module documentation, may be NULL */
+    -1,   /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
+    binarysankoff_methods
+};
+
+//static PyObject *binarysankoffError;
+
+// Module initialization function:
+// Python calls this function when importing the extension. It is important
+// that this function is named PyInit_<your_module_name> exactly, and matches
+// the name keyword argument in setup.py's setup() call.
+PyMODINIT_FUNC PyInit_binarysankoff(void)
+{
+    
+    PyObject *m;
+
+    m = PyModule_Create(&binarysankoff);
+    if (m == NULL)
+        return NULL;
+    
+    /*
+    binarysankoffError = PyErr_NewException("binarysankoff.error", NULL, NULL);
+    Py_XINCREF(binarysankoffError);
+    if (PyModule_AddObject(m, "error", binarysankoffError) < 0) {
+        Py_XDECREF(binarysankoffError);
+        Py_CLEAR(binarysankoffError);
+        Py_DECREF(m);
+        return NULL;
+    }
+     
+    return m;
+
+    
+    return PyModule_Create(&binarysankoff);
+    */
 }
-
-

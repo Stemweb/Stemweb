@@ -1,8 +1,8 @@
 BEGIN {root=-1;}
-/sankoff-score/ {score=strtonum($2);}
+/sankoff-score/ {score=($2);}
 /\[label/ && !/\[label=\"f:/ {i=$1+1; split($2,fld,"\""); label[i]=fld[2]; if (i>ns) ns=i; if (OUTGROUP==label[i]) root=i; split($3,fld,"="); split(fld[2],fld,"]"); color[i]=fld[1];}
 /\[label=\"f:/ {i=$1+1; label[i]="i" (i-1); if (i>ns) ns=i;}
-/--/ || /->/ {n1=$1+1; n2=strtonum($3)+1; split($4,fld,"="); len=fld[2]; e[n1,++es[n1]]=n2; le[n1,es[n1]]=len; e[n2,++es[n2]]=n1; le[n2,es[n2]]=len;}
+/--/ || /->/ {n1=$1+1; n2=($3)+1; split($4,fld,"="); len=fld[2]; e[n1,++es[n1]]=n2; le[n1,es[n1]]=len; e[n2,++es[n2]]=n1; le[n2,es[n2]]=len;}
 END {
   extra=-1;
   for (ni=1;ni<=ns;ni++)

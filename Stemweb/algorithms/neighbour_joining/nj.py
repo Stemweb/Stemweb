@@ -62,7 +62,7 @@ def _printtree(node):
 # tree output
 def printtree(node):
     _printtree(node)
-    print
+    print ()
 
 tax=[]  # list of taxon labels
 data={} # sequences

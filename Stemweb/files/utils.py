@@ -13,15 +13,10 @@ def upload_path(instance, filename):
 	''' Returns upload path where InputFile -instance with filename should be 
 	    uploaded.
 	'''
-	if instance.user is None:
-		uppath = 'external'
-	else:
-		uppath = os.path.join('users', instance.user.username)
-	uppath = os.path.join(uppath, 'files')
-	uppath = os.path.join(uppath, filename.rsplit('.', 1)[1]) # extension
+	uppath = os.path.join('files', filename.rsplit('.', 1)[1]) # extension
 	uppath = os.path.join(uppath, filename)
 	instance.path = os.path.join(settings.MEDIA_ROOT, uppath)
-	return uppath
+	return uppath			### why return uppath and not instance.path ? ; file is actually saved at instance.path
 
 def id_generator(size=8, chars=string.ascii_uppercase + string.digits):
 	''' Semiunique ID generator.

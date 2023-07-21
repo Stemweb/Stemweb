@@ -12,7 +12,8 @@ import django.forms
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
+#from django.core.urlresolvers import reverse
+from django.urls import reverse
 #from django.template.defaultfilters import slugify
 
 from . import utils
@@ -38,7 +39,7 @@ class UtilsTestCase(TestCase):
 		common_prefix = os.path.commonprefix([test_folder, compare_folder])
 		test_id = os.path.basename(test_folder)
 		test_re = re.compile(r"\w{8}")
-		self.assertEquals(compare_folder, common_prefix, \
+		self.assertEqual(compare_folder, common_prefix, \
 			"build_run_folder does not create proper prefix (without generated id)")
 		self.assertTrue(len(test_id) > 0, \
 			"last folder of the path has zero length")
@@ -83,22 +84,22 @@ class ViewsTestCase(TestCase):
 	
 	def testBase(self):
 		resp = self.client.get(reverse('algorithms_base_url'))
-		self.assertEquals(resp.status_code, 200)
+		self.assertEqual(resp.status_code, 200)
 		self.assertTrue('algorithms_base.html' \
 			in [t.name for t in resp.templates])
 		self.assertTrue('all_algorithms' in resp.context)
-		self.assertEquals([algo.pk for algo \
+		self.assertEqual([algo.pk for algo \
 			in resp.context['all_algorithms']], [2,1])
 		
 	def testDetails(self):
 		# Unauthenticated user
 		resp = self.client.get(reverse('algorithms_details_url', \
 			args=[self.test_algo.pk]))
-		self.assertEquals(resp.status_code, 200)
+		self.assertEqual(resp.status_code, 200)
 		self.assertTrue('all_algorithms' in resp.context)
 		self.assertTrue('algorithms_details.html' \
 			in [t.name for t in resp.templates])
-		self.assertEquals([algo.pk for algo \
+		self.assertEqual([algo.pk for algo \
 			in resp.context['all_algorithms']], [2,1])
 		self.assertIsNone(resp.context['algorithm_runs'], \
 			'Algorithm runs is not None when user is not logged in.')
@@ -112,11 +113,11 @@ class ViewsTestCase(TestCase):
 		self.client.login(username="test_user", password = "test_password")
 		resp = self.client.get(reverse('algorithms_details_url', \
 			args=[self.test_algo.pk]))
-		self.assertEquals(resp.status_code, 200)
+		self.assertEqual(resp.status_code, 200)
 		self.assertTrue('algorithms_details.html' \
 			in [t.name for t in resp.templates])
 		self.assertTrue('all_algorithms' in resp.context)
-		self.assertEquals([algo.pk for algo \
+		self.assertEqual([algo.pk for algo \
 			in resp.context['all_algorithms']], [2,1])
 		
 		# Previous runs for auth user
@@ -124,16 +125,16 @@ class ViewsTestCase(TestCase):
 		self.assertIsNotNone(algo_runs, \
 			'Algorithm runs is None when user is logged in and has previous runs.')
 		# Only logged user's runs for this particular algorithm should be shown.
-		self.assertEquals([run.pk for run in algo_runs], [1], \
+		self.assertEqual([run.pk for run in algo_runs], [1], \
 			r"algorithm_runs contains other user's and/or other algorithms' runs than current viewed algorithm.") 
 		test_run = algo_runs[0]
-		self.assertEquals(test_run.algorithm, \
+		self.assertEqual(test_run.algorithm, \
 			models.Algorithm.objects.get(id__exact = 1), \
 			'Algorithms detail view does not show correct algorithm in previous runs.')
-		self.assertEquals(test_run.input_file, \
+		self.assertEqual(test_run.input_file, \
 			files.models.InputFile.objects.get(id__exact = 1), \
 			'Algorithms detail view does not show correct input file for previous run.')
-		self.assertEquals(test_run.folder, os.path.join(__file__, 'test'), \
+		self.assertEqual(test_run.folder, os.path.join(__file__, 'test'), \
 			r"Algorithms detail view does not have correct path for previous runs' input files.")
 		
 	def testDeleteRunsUnauth(self):
@@ -143,8 +144,8 @@ class ViewsTestCase(TestCase):
 		login_url = reverse('auth_login')
 		redirect_url = "http://testserver" + login_url +"?next=" + del_url
 		resp = self.client.get(del_url)
-		self.assertEquals(resp.status_code, 302)
-		self.assertEquals(resp['Location'], redirect_url)
+		self.assertEqual(resp.status_code, 302)
+		self.assertEqual(resp['Location'], redirect_url)
 		
 	def testDeleteRunsBadPk(self):
 		''' User cannot delete other users' runs. If even one run pk in post is 
@@ -152,8 +153,8 @@ class ViewsTestCase(TestCase):
 		deleted. '''
 		self.client.login(username="test_user", password = "test_password")
 		resp = self.client.post(reverse('algorithms_delete_runs_url'), \
-			{'runs': u"1 2"})
-		self.assertEquals(resp.status_code, 400)
+			{'runs': "1 2"})
+		self.assertEqual(resp.status_code, 400)
 		self.assertIsNotNone(models.AlgorithmRun.objects.get_or_none(pk = 1))
 		self.assertIsNotNone(models.AlgorithmRun.objects.get_or_none(pk = 2))
 		
@@ -162,8 +163,8 @@ class ViewsTestCase(TestCase):
 		deletes runs that exist in database. '''
 		self.client.login(username="test_user", password = "test_password")
 		resp = self.client.post(reverse('algorithms_delete_runs_url'), \
-			{'runs': u"1 99999"})
-		self.assertEquals(resp.status_code, 200)
+			{'runs': "1 99999"})
+		self.assertEqual(resp.status_code, 200)
 		self.assertIsNone(models.AlgorithmRun.objects.get_or_none(pk = 1))
 		#self.assertIsNotNone(models.AlgorithmRun.objects.get_or_none(pk = 2))
 		
@@ -172,8 +173,8 @@ class ViewsTestCase(TestCase):
 		from same algorithm. '''
 		self.client.login(username="test_user", password = "test_password")
 		resp = self.client.post(reverse('algorithms_delete_runs_url'), \
-			{'runs': u"1 3"})
-		self.assertEquals(resp.status_code, 200)
+			{'runs': "1 3"})
+		self.assertEqual(resp.status_code, 200)
 		self.assertIsNone(models.AlgorithmRun.objects.get_or_none(pk = 1))
 		self.assertIsNone(models.AlgorithmRun.objects.get_or_none(pk = 3))
 		
@@ -184,15 +185,15 @@ class ViewsTestCase(TestCase):
 		login_url = reverse('auth_login')
 		redirect_url = "http://testserver" + login_url +"?next=" + run_url
 		resp = self.client.post(run_url)
-		self.assertEquals(resp.status_code, 302)
-		self.assertEquals(resp['Location'], redirect_url)
+		self.assertEqual(resp.status_code, 302)
+		self.assertEqual(resp['Location'], redirect_url)
 		
 	def testRunNonexistantPk(self):
 		''' Non-existant Algorithm pk throws 404. '''
 		self.client.login(username="test_user", password = "test_password")
 		resp = self.client.post(reverse('algorithms_run_algorithm_url', \
 			kwargs = {'algo_id' : 99999}))
-		self.assertEquals(resp.status_code, 404)
+		self.assertEqual(resp.status_code, 404)
 		
 	def testRunNoForm(self):
 		''' Authenticated user without POST data should get redirected to 
@@ -200,10 +201,10 @@ class ViewsTestCase(TestCase):
 		self.client.login(username="test_user", password = "test_password")
 		resp = self.client.post(reverse('algorithms_run_algorithm_url', \
 			kwargs = {'algo_id' : 1}))
-		self.assertEquals(resp.status_code, 302)
+		self.assertEqual(resp.status_code, 302)
 		redir_url = "http://testserver" + reverse('algorithms_details_url', \
 			args = { 1 })
-		self.assertEquals(resp['Location'], redir_url, \
+		self.assertEqual(resp['Location'], redir_url, \
 			"User was not redirected to details page.")
 
 	def testRunBadForm(self):
@@ -212,10 +213,10 @@ class ViewsTestCase(TestCase):
 		self.client.login(username="test_user", password = "test_password")
 		resp = self.client.post(reverse('algorithms_run_algorithm_url', \
 			kwargs = {'algo_id' : 1}), {'foo': 'bar'})
-		self.assertEquals(resp.status_code, 302)
+		self.assertEqual(resp.status_code, 302)
 		redir_url = "http://testserver" + reverse('algorithms_details_url', \
 			args = { 1 })
-		self.assertEquals(resp['Location'], redir_url, \
+		self.assertEqual(resp['Location'], redir_url, \
 			"User was not redirected to details page.")
 		
 	def testRunBadInputFile(self):
@@ -224,10 +225,10 @@ class ViewsTestCase(TestCase):
 		self.client.login(username="test_user", password = "test_password")
 		resp = self.client.post(reverse('algorithms_run_algorithm_url', \
 			kwargs = {'algo_id' : 1}), {'itermaxin': 100, 'infile' : 400})
-		self.assertEquals(resp.status_code, 302)
+		self.assertEqual(resp.status_code, 302)
 		redir_url = "http://testserver" + reverse('algorithms_details_url', \
 			args = { 1 })
-		self.assertEquals(resp['Location'], redir_url, \
+		self.assertEqual(resp['Location'], redir_url, \
 			"User was not redirected to details page.")
 	
 	def testRunNoPost(self):
@@ -235,7 +236,7 @@ class ViewsTestCase(TestCase):
 		self.client.login(username="test_user", password = "test_password")
 		resp = self.client.get(reverse('algorithms_run_algorithm_url', \
 			kwargs = {'algo_id' : 1}))
-		self.assertEquals(resp.status_code, 404)
+		self.assertEqual(resp.status_code, 404)
 		self.assertTrue('404.html' in [t.name for t in resp.templates])
 		
 	def testResults(self):
@@ -243,11 +244,11 @@ class ViewsTestCase(TestCase):
 		test_run2 = models.AlgorithmRun.objects.get(pk = 2)
 		
 		# Sanity check
-		self.assertEquals(test_run.user, self.test_user, \
+		self.assertEqual(test_run.user, self.test_user, \
 			'Something must have changed in loaded test data.')
-		self.assertEquals(test_run2.user, self.test_user2, \
+		self.assertEqual(test_run2.user, self.test_user2, \
 			'Something must have changed in loaded test data.')
-		self.assertEquals(test_run.algorithm, self.test_algo, \
+		self.assertEqual(test_run.algorithm, self.test_algo, \
 			'Something must have changed in loaded test data.')
 			
 		# Unauthenticated user is redirected to login page
@@ -255,14 +256,14 @@ class ViewsTestCase(TestCase):
 		login_url = reverse('auth_login')
 		redirect_url = "http://testserver" + login_url +"?next=" + results_url
 		resp = self.client.get(results_url)
-		self.assertEquals(resp.status_code, 302)
-		self.assertEquals(resp['Location'], redirect_url)
+		self.assertEqual(resp.status_code, 302)
+		self.assertEqual(resp['Location'], redirect_url)
 		
 		# Authenticated user can see runs made by him/herself and has a valid
 		# AlgorithmRun instance in response
 		self.client.login(username="test_user", password = "test_password")
 		resp = self.client.get(results_url)
-		self.assertEquals(resp.status_code, 200)
+		self.assertEqual(resp.status_code, 200)
 		self.assertTrue('algorithm_running_results.html' \
 			in [t.name for t in resp.templates])
 		self.assertTrue('algorithm_run' in resp.context, \
@@ -274,12 +275,12 @@ class ViewsTestCase(TestCase):
 		# Authenticated user can only view runs made by him/herself.
 		results_url2 = reverse('algorithms_run_results_url', args=[test_run2.pk])
 		resp = self.client.get(results_url2)
-		self.assertEquals(resp.status_code, 404)
+		self.assertEqual(resp.status_code, 404)
 		
 		# Unexistant AlgorithmRun pk should give 404
 		results_url2 = reverse('algorithms_run_results_url', args=[999999])
 		resp = self.client.get(results_url2)
-		self.assertEquals(resp.status_code, 404)
+		self.assertEqual(resp.status_code, 404)
 
 class SettingsTestCase(TestCase):
 	fixtures = ['bootstrap.json']
@@ -304,7 +305,7 @@ class SettingsTestCase(TestCase):
 		and vice versa. '''
 		algorithms = models.Algorithm.objects.all()
 		algodb_pks = [algo.pk for algo in algorithms]
-		call_dict_pks = [int(key) for key in settings.ALGORITHMS_CALLING_DICT.keys()]
+		call_dict_pks = [int(key) for key in list(settings.ALGORITHMS_CALLING_DICT.keys())]
 		for pk in call_dict_pks:
 			self.assertTrue(pk in algodb_pks , \
 				"pk=%s found from calling dict but not in database for Algorithm-model." % pk)

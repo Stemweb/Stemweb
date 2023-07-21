@@ -792,7 +792,7 @@ class Semstem(AlgorithmTask):
 		
 		
 		qscore, bestiteration = semuniform(self.run_args['infile'], self.run_args['itermaxin'])
-		print "best iteration was: %d" % bestiteration
+		print ("best iteration was: %d" % bestiteration)
 		self._put_in_results_({'qscore': qscore})
 		self._stop.value = 1
 		
